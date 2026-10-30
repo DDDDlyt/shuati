@@ -1,179 +1,196 @@
-# 用 Gitee Pages 托管「刷题总台」· 零基础教程（码云版）
+# 用 GitHub Pages 托管「刷题总台」· 零基础教程
 
-这份教程带你从零把本仓库里的 `index.html`（刷题总台网页）变成一个**谁都能打开、不用登录**的公开网址，比如 `https://你的用户名.gitee.io/shuati/`。
-用的是 **Gitee（码云，gitee.com）**——国内版 GitHub，**不用挂 VPN 就能上**，特别适合咱们在境内的情况。顺带把 Git 基本功练会，以后换 GitHub 也零成本。
+把本仓库里的 `index.html`（刷题总台网页）变成一个**谁都能打开、不用登录**的公开网址，形如：
 
-> 划重点：**Git 的命令（init / add / commit / push / remote）在 Gitee 和 GitHub 上完全一样**。这套教程练熟，你以后有条件挂 VPN 了，原封不动平移到 GitHub，一行都不用改。
-
----
-
-## 先搞懂三个词（别被绕晕）
-
-| 词 | 是什么 | 打个比方 |
-|---|---|---|
-| **Git** | 装在你电脑上的版本控制工具 | 你文件夹的「时光机 + 改动记录本」 |
-| **Gitee** | 国内代码托管网站（gitee.com，人称「码云」） | 国内版 GitHub，不用 VPN |
-| **Gitee Pages** | Gitee 附带的免费网页托管 | 把你的网页变成一个公开网址 |
-
-一句话流程：**本地用 Git 管理文件 → 推到 Gitee → 开启 Gitee Pages → 拿到网址。**
+```
+https://你的用户名.github.io/shuati/
+```
 
 ---
 
-## 第一步：注册 Gitee 账号
+## 先看清一件事（很重要，别白忙）
 
-1. 打开 https://gitee.com ，点 **注册**（可以用手机号或邮箱）。
-2. 填用户名（**想清楚，它会变成你网址的一部分**：`用户名.gitee.io`）、密码。
-3. 按提示**绑定手机**（国内平台的常规要求，绑定后才能顺畅建仓库）。
+| 事实 | 说明 |
+|---|---|
+| GitHub Pages **功能还在**，能出真网址 | 这点比 Gitee 强——Gitee Pages 2024 年已下线 |
+| 但 `*.github.io` 的网址**在国内访问不稳定** | 有时秒开、有时转圈、有时打不开，跟时段和网络有关 |
+| 你自己的 Gitee 仓库已经跑通了 | `gitee.com/lin-yuan-t/shuati`，Git 全流程你练过了 |
 
-> 提示：用户名建议用英文/数字，别用中文或空格，后面省事。
-
----
-
-## 第二步：在电脑上安装 Git
-
-**去哪下载（认准正版，别点广告）：**
-
-| 渠道 | 网址 | 说明 |
-|---|---|---|
-| Windows 官方站 | https://gitforwindows.org | 正版，但服务器在境外，可能慢 |
-| **阿里镜像（国内推荐）** | https://registry.npmmirror.com/binary.html?path=git-for-windows/ | 进去 Ctrl+F 搜版本号，下 `Git-版本号-64-bit.exe`，几秒下完 |
-
-> ⚠️ 百度搜"Git for Windows"，前面带「高速下载 / 一键安装 / 立即体验」彩色大按钮的**全是竞价广告下载站，会捆绑装一堆垃圾软件**，别点。正版只有一个：gitforwindows.org（或 Git 官网 git-scm.com）。
-
-**安装：**
-- 下载 `Git-x.x.x-64-bit.exe` 双击安装，**一路默认下一步**即可（想省事就全默认）。
-- 有一步「选择默认分支名」，选 **Override... 设为 main**，跟后面教程对上（不选也没事，教程命令里带了 `-b main`）。
-- **Mac**：打开「终端」，输入 `git --version`，没装会提示你装「Command Line Tools」，点安装即可。
-- 验证：终端/Git Bash 里输入 `git --version`，能看到版本号就成功了。
+**所以这条路的真实定位**：练手 + 攒一个「我做过网站」的作品，申请研究生时可以对导师说「我自己写了个刷题工具，托管在 GitHub 上」。**日常刷题还是用资料库那个链接**（我更新、你刷新，最省事）。
 
 ---
 
-## 第三步：配置 Git 身份（只做一次）
+## 你现在已经有的东西（省一大截功夫）
 
-在终端/Git Bash 里敲（把引号里换成你自己的）：
+你电脑上的 `D:\shuati` **已经是一个 Git 仓库了**，而且已经提交过、已经推到了 Gitee。
+
+**所以这次不用 `git init`，不用重新 `add` 一遍。** 只需要：
+
+1. 换掉里面旧的 `index.html`（换成最新版，890 张卡）
+2. 加一个 GitHub 的远程地址（叫 `github`，跟 `origin` 并存）
+3. 推上去
+
+这样你一个本地仓库同时推两个平台，这是真实工作里的常见做法，比重新建仓库更值得学。
+
+---
+
+## 第一步：注册 GitHub（这步只能你自己做）
+
+1. 浏览器打开 **https://github.com** → 右上 **Sign up**
+2. 填邮箱 → 设密码 → 起用户名
+3. **用户名要想清楚**，它会变成你网址的前缀，而且**基本改不了**：
+   - 只能英文、数字、短横线
+   - 建议 `linyuantong`、`yuantong-lin`、`lyt-bio` 这种，别用 `abc123`
+4. 收验证邮件（**翻一下垃圾邮件箱**），点激活
+
+> 打不开 github.com 就先放着，等你网络顺的时候再试。注册这步没有任何技巧，纯看网络。
+
+---
+
+## 第二步：建仓库
+
+1. 登录后右上角 **`+`** → **New repository**
+2. **Repository name** 填 `shuati`
+3. 选 **Public**（Pages 免费版只支持公开仓库）
+4. 下面三个初始化选项（Add a README / .gitignore / license）**全部不勾**
+5. **Create repository**
+
+---
+
+## 第三步：生成 Personal Access Token（推送的密码）
+
+GitHub 从 2021 年起就不允许用账号密码推代码了，必须用令牌。
+
+1. 右上角头像 → **Settings**
+2. 左侧拉到最底 **Developer settings**
+3. **Personal access tokens** → **Tokens (classic)** → **Generate new token (classic)**
+4. Note 随便写 `push`；Expiration 选 90 days
+5. 权限勾 **`repo`**（这一项就够）
+6. **Generate token** → 页面显示 `ghp_xxxxxxxx` 一串 → **立刻复制**，关掉页面就再也看不到
+
+> ⚠️ 令牌 = 你账号的钥匙。别发截图、别提交进仓库。**泄露了就去同一个页面 Revoke 掉重新生成。**
+
+---
+
+## 第四步：更新本地的 index.html（关键一步，别跳）
+
+你 `D:\shuati` 里的 `index.html` 是**旧版（556 张卡）**，现在题库已经涨到 **890 张（9 个题库）**。
+
+1. 下载本目录下的 `index.html`
+2. 覆盖 `D:\shuati\index.html`（同名的直接替换）
+3. 在 `D:\shuati` 空白处右键 → **Git Bash Here**
+
+---
+
+## 第五步：加一个 GitHub 远程，推上去
+
+在 Git Bash 里，**逐条敲**（把用户名换成你 GitHub 的）：
 
 ```bash
-git config --global user.name "你的Gitee用户名"
-git config --global user.email "你的注册邮箱"
+git status
 ```
 
-这步是告诉 Git「谁在改文件」，不配置后面提交会报错。
-
----
-
-## 第四步：在 Gitee 网页新建仓库
-
-1. 登录后，右上角 `+` → **新建仓库**。
-2. 仓库名称填 `shuati`（或你喜欢的英文名，这就是网址后缀）。
-3. 选 **公开**（Gitee Pages 必须公开仓库）。
-4. 下方「初始化仓库」的几个勾选项（README / 模板 / 许可证）**全部留空**，保持空仓库，避免和本地冲突。
-5. 点 **创建**。
-
----
-
-## 第五步：在自己电脑上建仓库并推送到 Gitee（核心操作）
-
-> 这一步在你的**笔记本电脑**上做。先把本仓库里的 `index.html` 和 `README.md` 两个文件下载到你电脑上一个空文件夹里（比如 `D:\shuati` 或 `~/shuati`）。
-
-打开终端 / Git Bash，**进入那个文件夹**后依次敲（把 `你的用户名` 和 `shuati` 换成你自己的）：
-
-```bash
-# 0) 把这个文件夹变成 Git 仓库（只做一次）
-git init -b main
-
-# 1) 把两个文件加进来并提交
-git add .
-git commit -m "首次提交：刷题总台网页"
-
-# 2) 关联远程仓库（只做一次）
-git remote add origin https://gitee.com/你的用户名/shuati.git
-
-# 3) 推送（第一次要加 -u 绑定分支）
-git push -u origin main
-```
-
-敲 `git push` 时会提示要你登录：
-- 用户名：你的 Gitee 用户名
-- 密码：**用下面第六步生成的「私人令牌」**，不是账号密码！
-
----
-
-## 第六步：生成私人令牌（替代密码）—— 最容易卡的地方
-
-Gitee 不允许用账号密码推代码，必须用**私人令牌**代替密码。
-
-1. 登录 Gitee → 右上角头像 → **设置**。
-2. 左侧 **私人令牌**（在安全设置里）。
-3. 点 **生成新令牌**。
-4. 令牌描述随便写（如 `my-pc`），**勾选 `projects`**（仓库读写权限）。
-5. 点 **提交**，会显示一串令牌（如 `xxxxxxxxxxxxxxxx`）。
-6. **令牌只显示这一次！立刻复制保存好。**
-
-回到第五步的密码框，粘贴这个令牌即可。推送成功后，以后这台电脑再 `git push` 一般会自动记住。
-
----
-
-## 第七步：开启 Gitee Pages
-
-1. 回到你的仓库页面 → 上方菜单 **服务** → **Gitee Pages**。
-2. 部署分支选 **main**，部署目录选 **root**。
-3. 勾选「强制使用 HTTPS」（建议）。
-4. 点 **启动**（首次会让你阅读并同意服务条款，点确定）。
-5. 等一会儿，页面会给出一个网址，形如：
-
-```
-https://你的用户名.gitee.io/shuati/
-```
-
-点开能看到刷题总台就成功了！手机、平板、发给同学都能直接打开。
-
----
-
-## 以后怎么更新（日常三连）
-
-题库要加新题、或改了网页，流程永远是这三句：
+应该看到 `modified: index.html`（说明替换生效了）。接着：
 
 ```bash
 git add .
-git commit -m "更新：加了生化简考点"
-git push
+git commit -m "题库更新到 890 张（9 个题库）"
 ```
 
-> ⚠️ **Gitee Pages 和 GitHub Pages 一个关键区别**：免费版推完代码后，网页**不会自动更新**，要去 **服务 → Gitee Pages** 点一下 **重新部署 / 更新**，等一两分钟刷新才是新版。（如果页面没变，先去点这一下）
+然后加远程（**两个远程并存，`origin` 还是 Gitee，`github` 是新加的**）：
+
+```bash
+git remote add github https://github.com/你的用户名/shuati.git
+```
+
+最后推（令牌我留了占位，**换成你那串 `ghp_...`**）：
+
+```bash
+git remote set-url github https://你的用户名:ghp_你的令牌@github.com/你的用户名/shuati.git
+git push -u github main
+```
+
+成功的样子：
+
+```
+To https://github.com/你的用户名/shuati.git
+ * [new branch]      main -> main
+```
+
+> 为什么直接把令牌写进地址？因为 Git 凭据管理器的弹窗经常不听话（你上次在 Gitee 就踩过这个坑），写进 URL 最省事。**代价是令牌明文存在 `.git/config` 里**，这台电脑是你自己的，问题不大；哪天不想留了，执行 `git remote set-url github https://github.com/你的用户名/shuati.git` 就清掉了。
 
 ---
 
-## 常见坑（排雷）
+## 第六步：开 Pages
+
+1. 浏览器打开 `https://github.com/你的用户名/shuati/settings/pages`
+2. **Source** 选 **Deploy from a branch**
+3. **Branch** 选 **`main`**，目录选 **`/ (root)`**
+4. 点 **Save**
+5. 等 1～3 分钟（首次构建要排队），刷新页面，顶部会出现：
+
+```
+Your site is live at https://你的用户名.github.io/shuati/
+```
+
+点开就是你的刷题总台。
+
+> 手机打不开先别急，多半是 `github.io` 在国内不通。换 WiFi / 换时段再试，或者在电脑上打开确认页面本身是好的。
+
+---
+
+## 以后更新（日常三连）
+
+```bash
+git add .
+git commit -m "更新：加了新题"
+git push github main
+```
+
+**GitHub Pages 会自动重新构建**，等一分钟刷新就是新版——这点比 Gitee 省事（Gitee 要手动点「重新部署」）。
+
+如果还想同步推 Gitee：
+
+```bash
+git push origin main
+```
+
+一个仓库，两个平台，两条命令。
+
+---
+
+## 常见坑
 
 | 现象 | 原因 / 解决 |
 |---|---|
-| `push` 提示要密码，输账号密码报错 | 必须用 **私人令牌**当密码，见第六步 |
-| 推送报 `src refspec main does not match` | 本地分支名和远程不一致。确认本地是 `main`：`git branch -M main` 后再推 |
-| 网页打开是空白 | 仓库根目录必须有 `index.html`；确认文件名拼写正确、已 `git push` 成功 |
-| 网址 404 | Pages 还没生成，等一两分钟；或分支选错（应是 main / root） |
-| 推完网页没变 | Gitee Pages 要手动**重新部署**，见上一步⚠️ |
-| 新建仓库被拦 | 按提示**绑定手机**即可 |
+| `remote: Permission denied` / `403` | 令牌没勾 `repo`，或用户名写错。重新生成令牌 |
+| `remote github already exists` | 已经加过了，改用 `git remote set-url github ...` |
+| `src refspec main does not match any` | 本地没这个分支，`git branch -M main` 后再推 |
+| Pages 一直 404 | 等 3～5 分钟；确认 Branch 是 main、目录是 root；确认 `index.html` 在仓库根目录 |
+| 网页空白 | 仓库根目录没有 `index.html`，或文件名大小写不对 |
+| `github.io` 打不开 | 国内网络问题，不是你的错。换网络/时段，或直接用资料库链接 |
+| 想删掉存进 `.git/config` 的令牌 | `git remote set-url github https://github.com/你的用户名/shuati.git` |
 
 ---
 
-## Git 常用命令速查（Gitee / GitHub 通用）
+## Git 命令速查（GitHub / Gitee / 公司 GitLab 全通用）
 
 | 命令 | 作用 |
 |---|---|
-| `git status` | 看当前改了哪些文件 |
+| `git status` | 看改了哪些文件 |
 | `git add .` | 把改动加入暂存区 |
-| `git commit -m "说明"` | 提交一次（写好说明，以后回看清楚） |
-| `git push` | 推到 Gitee |
-| `git pull` | 从 Gitee 拉最新（换设备改过时用） |
-| `git log` | 看提交历史（你的「时光机」记录） |
-| `git remote -v` | 看远程仓库地址对不对 |
+| `git commit -m "说明"` | 提交一次 |
+| `git push github main` | 推到 GitHub |
+| `git push origin main` | 推到 Gitee |
+| `git remote -v` | 看有几个远程、地址对不对 |
+| `git log --oneline` | 看提交历史 |
+| `git pull` | 拉远程最新（换设备改过时用） |
 
 ---
 
-## 你现在已经有的东西
+## 文件说明
 
-- `index.html` —— 刷题总台网页（已清理，零外部依赖，可直接托管）
-- `README.md` —— 就是本教程（码云版）
-- 沙箱里这份已 `git init` 并提交到 `main`；你下载上面两个文件到自己的电脑后，按第五步重新 `git init -b main` 即可
-
-按上面第五步到第七步走完，你就拥有了自己的第一个公开网站 + 第一个 Git 仓库（在码云上）。以后无论是放简历、项目还是笔记，套路都一样；等以后有 VPN，整套 Git 命令原样搬到 GitHub 即可。
+| 文件 | 内容 |
+|---|---|
+| `index.html` | 刷题总台网页本体，**零外部依赖**，9 个题库 890 张卡 |
+| `README.md` | 就是本教程 |
