@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1a1d24">
+<title>刷题总台</title>
+<style>
+:root{
+  --bg:#0f1115; --panel:#1a1d24; --panel2:#22262e; --line:#2c313a;
+  --txt:#e8eaed; --sub:#9aa0a6; --dim:#6b7280;
+  --ok:#34c759; --bad:#ff453a; --warn:#ff9f0a; --blue:#0a84ff; --purple:#bf5af2; --teal:#64d2ff;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{margin:0; padding:0; background:var(--bg); color:var(--txt);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  font-size:16px; line-height:1.55; min-height:100%;}
+button{font-family:inherit; cursor:pointer; border:none; outline:none;}
+.view{display:none; max-width:640px; margin:0 auto; padding:16px 16px 90px;}
+.view.active{display:block;}
+/* ===== 顶栏 ===== */
+.top{position:sticky; top:0; z-index:20; background:rgba(15,17,21,.92);
+  backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+  padding:12px 4px 10px; margin:-16px -16px 12px; border-bottom:1px solid var(--line);}
+.top h1{margin:0; font-size:20px; font-weight:700; display:flex; align-items:center; gap:8px;}
+.top .sub{color:var(--sub); font-size:12px; margin-top:2px;}
+.icon-btn{width:36px; height:36px; border-radius:10px; background:var(--panel2);
+  color:var(--txt); font-size:18px; display:flex; align-items:center; justify-content:center;}
+/* ===== 首页仪表盘 ===== */
+.hero{display:flex; gap:12px; margin-bottom:14px;}
+.ring-card{flex:1; background:var(--panel); border-radius:18px; padding:16px; text-align:center;}
+.ring-wrap{position:relative; width:104px; height:104px; margin:0 auto 8px;}
+.ring-wrap svg{transform:rotate(-90deg);}
+.ring-val{position:absolute; inset:0; display:flex; flex-direction:column;
+  align-items:center; justify-content:center;}
+.ring-val b{font-size:24px; font-weight:800; line-height:1;}
+.ring-val span{font-size:10px; color:var(--sub); margin-top:3px;}
+.ring-card .lbl{font-size:12px; color:var(--sub);}
+.streak-card{width:104px; background:var(--panel); border-radius:18px; padding:16px 8px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;}
+.streak-card .fire{font-size:30px;}
+.streak-card b{font-size:22px; font-weight:800;}
+.streak-card span{font-size:11px; color:var(--sub); text-align:center;}
+/* 今日任务 */
+.task-card{background:var(--panel); border-radius:18px; padding:16px; margin-bottom:14px;}
+.task-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;}
+.task-head h2{margin:0; font-size:16px; font-weight:700;}
+.task-head .date{font-size:11px; color:var(--sub);}
+.task-row{display:flex; gap:10px; margin-bottom:12px;}
+.task-item{flex:1; background:var(--panel2); border-radius:12px; padding:10px 12px;}
+.task-item .t-lbl{font-size:11px; color:var(--sub); margin-bottom:4px;}
+.task-item .t-num{font-size:15px; font-weight:700;}
+.task-item .t-num i{font-style:normal; color:var(--dim); font-size:11px;}
+.bar{height:6px; background:#2c313a; border-radius:99px; overflow:hidden; margin-top:6px;}
+.bar i{display:block; height:100%; border-radius:99px; transition:width .3s;}
+.bar i.ok{background:linear-gradient(90deg,#34c759,#30d158);}
+.bar i.blue{background:linear-gradient(90deg,#0a84ff,#64d2ff);}
+.bar i.warn{background:linear-gradient(90deg,#ff9f0a,#ffd60a);}
+.big-btn{width:100%; padding:15px; border-radius:14px; font-size:16px; font-weight:700;
+  background:linear-gradient(135deg,#0a84ff,#0066d6); color:#fff; margin-top:4px;}
+.big-btn:active{opacity:.85;}
+.big-btn.ghost{background:var(--panel2); color:var(--txt);}
+.big-btn.ok{background:linear-gradient(135deg,#34c759,#28a745);}
+.btn-row{display:flex; gap:10px; margin-top:10px;}
+.btn-row .big-btn{margin-top:0;}
+/* 题库列表 */
+.sec-title{font-size:13px; color:var(--sub); margin:18px 2px 10px; font-weight:600;}
+.deck-item{display:flex; align-items:center; gap:12px; background:var(--panel);
+  border-radius:14px; padding:13px 14px; margin-bottom:10px;}
+.deck-icon{width:42px; height:42px; border-radius:12px; display:flex; align-items:center;
+  justify-content:center; font-size:19px; flex-shrink:0;}
+.deck-info{flex:1; min-width:0;}
+.deck-info .d-name{font-size:14px; font-weight:600; white-space:nowrap; overflow:hidden;
+  text-overflow:ellipsis;}
+.deck-info .d-meta{font-size:11px; color:var(--sub); margin-top:2px;}
+.deck-pct{font-size:15px; font-weight:800; color:var(--teal); margin-right:2px;}
+.deck-go{width:38px; height:38px; border-radius:11px; background:var(--panel2);
+  color:var(--txt); font-size:16px; display:flex; align-items:center; justify-content:center;}
+/* ===== 刷题页 ===== */
+.study-top{display:flex; align-items:center; gap:10px; margin-bottom:12px;}
+.study-top .st-title{flex:1; min-width:0;}
+.study-top .st-title b{display:block; font-size:15px; white-space:nowrap; overflow:hidden;
+  text-overflow:ellipsis;}
+.study-top .st-title span{font-size:11px; color:var(--sub);}
+.chip{padding:5px 11px; border-radius:99px; font-size:11px; font-weight:600; background:var(--panel2); color:var(--sub);}
+.chip.blue{background:rgba(10,132,255,.18); color:var(--teal);}
+/* 卡片 */
+.flashcard{background:var(--panel); border-radius:20px; padding:22px 20px; margin-bottom:14px;
+  min-height:220px; display:flex; flex-direction:column; position:relative;}
+.card-tag{display:inline-block; padding:3px 9px; border-radius:7px; font-size:10px; font-weight:700;
+  background:rgba(10,132,255,.16); color:var(--teal); margin-bottom:12px; align-self:flex-start;}
+.card-tag.exam{background:rgba(191,90,242,.18); color:#d68cff;}
+.card-q{font-size:17px; font-weight:600; line-height:1.65; flex:1;}
+.card-q .blank{border-bottom:2px dashed var(--dim); padding:0 24px;}
+.card-a{margin-top:14px; padding-top:14px; border-top:1px dashed var(--line);
+  animation:fadeUp .25s ease;}
+.card-a .ans-label{font-size:11px; color:var(--sub); margin-bottom:6px;}
+.card-a .ans-main{font-size:16px; font-weight:700; color:var(--ok); line-height:1.6;}
+.card-a .ans-note{margin-top:10px; padding:11px 12px; background:var(--panel2);
+  border-radius:11px; font-size:13px; color:var(--sub); line-height:1.65;}
+.card-a .ans-steps{margin-top:10px; padding:11px 12px; background:var(--panel2);
+  border-radius:11px; font-size:13px; color:var(--sub); line-height:1.8;}
+.card-a .ans-steps b{color:var(--teal);}
+.card-a ul{margin:6px 0 0; padding-left:18px;}
+.card-a ul li{margin:4px 0; line-height:1.6;}
+@keyframes fadeUp{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:none;}}
+/* 选项 */
+.opts{display:flex; flex-direction:column; gap:9px; margin:14px 0 4px;}
+.opt{padding:13px 15px; border-radius:12px; background:var(--panel2); color:var(--txt);
+  font-size:14px; text-align:left; border:2px solid transparent; line-height:1.5;}
+.opt:active{transform:scale(.985);}
+.opt.sel-right{background:rgba(52,199,89,.18); border-color:var(--ok); color:var(--ok);}
+.opt.sel-wrong{background:rgba(255,69,58,.16); border-color:var(--bad); color:var(--bad);}
+.opt.show-right{background:rgba(52,199,89,.12); border-color:var(--ok);}
+.opt .letter{display:inline-flex; width:22px; height:22px; border-radius:7px; background:#2c313a;
+  color:var(--sub); align-items:center; justify-content:center; font-size:11px; font-weight:700; margin-right:9px;}
+/* 输入题 */
+.subs-box{margin:12px 0;}
+.sub-row{display:flex; align-items:center; gap:9px; margin-bottom:9px;}
+.sub-row label{flex:1; font-size:13px; color:var(--sub);}
+.sub-row input{width:120px; padding:9px 11px; border-radius:10px; border:1.5px solid var(--line);
+  background:var(--panel2); color:var(--txt); font-size:15px; text-align:center;}
+.sub-row input.right{border-color:var(--ok); color:var(--ok);}
+.sub-row input.wrong{border-color:var(--bad); color:var(--bad);}
+/* 进度条 */
+.study-bar{display:flex; gap:3px; margin-bottom:12px;}
+.study-bar i{flex:1; height:4px; border-radius:99px; background:var(--line);}
+.study-bar i.done{background:var(--ok);}
+.study-bar i.cur{background:var(--blue);}
+/* 底部操作 */
+.act-row{display:flex; gap:10px; margin-top:6px;}
+.act-btn{flex:1; padding:15px 8px; border-radius:14px; font-size:15px; font-weight:700;
+  background:var(--panel2); color:var(--txt);}
+.act-btn.known{background:rgba(52,199,89,.16); color:var(--ok);}
+.act-btn.unknown{background:rgba(255,69,58,.16); color:var(--bad);}
+.act-btn.fuzzy{background:rgba(255,159,10,.16); color:var(--warn);}
+.act-btn.next{background:var(--blue); color:#fff;}
+/* 完成页 */
+.done-box{text-align:center; padding:40px 20px;}
+.done-box .big{font-size:52px; margin-bottom:10px;}
+.done-box h2{margin:0 0 8px; font-size:22px;}
+.done-box p{color:var(--sub); font-size:14px; margin:0 0 22px;}
+/* ===== 设置 ===== */
+.set-item{background:var(--panel); border-radius:14px; padding:15px 16px; margin-bottom:10px;}
+.set-item h3{margin:0 0 6px; font-size:14px;}
+.set-item p{margin:0 0 10px; font-size:12px; color:var(--sub); line-height:1.6;}
+.set-row{display:flex; align-items:center; gap:10px;}
+.set-row label{flex:1; font-size:13px;}
+.set-row input[type=number]{width:80px; padding:8px 10px; border-radius:10px;
+  border:1.5px solid var(--line); background:var(--panel2); color:var(--txt); font-size:15px; text-align:center;}
+textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px;
+  border:1.5px solid var(--line); background:var(--panel2); color:var(--txt);
+  font-size:11px; font-family:ui-monospace,Menlo,monospace; resize:vertical; margin-bottom:9px;}
+.mini-btn{padding:9px 16px; border-radius:10px; font-size:13px; font-weight:600;
+  background:var(--panel2); color:var(--txt); margin-right:8px;}
+.mini-btn.blue{background:var(--blue); color:#fff;}
+.mini-btn.red{background:rgba(255,69,58,.16); color:var(--bad);}
+/* ===== 底部导航 ===== */
+.nav{position:fixed; bottom:0; left:0; right:0; z-index:30;
+  background:rgba(20,22,27,.94); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
+  border-top:1px solid var(--line); display:flex; padding:8px 0 max(10px,env(safe-area-inset-bottom));}
+.nav button{flex:1; background:none; color:var(--dim); font-size:10px; font-weight:600;
+  display:flex; flex-direction:column; align-items:center; gap:3px; padding:5px 0;}
+.nav button .ic{font-size:21px;}
+.nav button.on{color:var(--blue);}
+/* toast */
+#toast{position:fixed; left:50%; bottom:96px; transform:translateX(-50%) translateY(20px);
+  background:rgba(40,44,52,.97); color:#fff; padding:11px 20px; border-radius:12px;
+  font-size:13px; opacity:0; pointer-events:none; transition:.25s; z-index:99; max-width:82%;
+  text-align:center; line-height:1.5;}
+#toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+/* streak anim */
+.fire-pop{animation:pop .4s ease;}
+@keyframes pop{0%{transform:scale(1);} 50%{transform:scale(1.28);} 100%{transform:scale(1);}}
+</style>
+</head>
+<body>
+
+<!-- ============ 首页 ============ -->
+<div id="view-home" class="view active">
+  <div class="top">
+    <h1>📚 刷题总台</h1>
+    <div class="sub" id="homeSub">—</div>
+  </div>
+
+  <div class="hero">
+    <div class="ring-card">
+      <div class="ring-wrap">
+        <svg width="104" height="104" viewBox="0 0 104 104">
+          <circle cx="52" cy="52" r="45" fill="none" stroke="#2c313a" stroke-width="10"/>
+          <circle id="ringProg" cx="52" cy="52" r="45" fill="none" stroke="url(#g1)"
+            stroke-width="10" stroke-linecap="round" stroke-dasharray="283" stroke-dashoffset="283"/>
+          <defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#0a84ff"/><stop offset="100%" stop-color="#64d2ff"/>
+          </linearGradient></defs>
+        </svg>
+        <div class="ring-val"><b id="ringPct">0%</b><span>总掌握</span></div>
+      </div>
+      <div class="lbl" id="ringLbl">0 / 0 张</div>
+    </div>
+    <div class="streak-card">
+      <div class="fire" id="fireIcon">🔥</div>
+      <b id="streakNum">0</b>
+      <span>连续打卡<br>天数</span>
+    </div>
+  </div>
+
+  <div class="task-card">
+    <div class="task-head">
+      <h2>🎯 今日任务</h2>
+      <div class="date" id="todayDate"></div>
+    </div>
+    <div class="task-row">
+      <div class="task-item">
+        <div class="t-lbl">📖 新题</div>
+        <div class="t-num"><span id="newDone">0</span> <i>/ <span id="newGoal">10</span> 张</i></div>
+        <div class="bar"><i class="blue" id="newBar" style="width:0%"></i></div>
+      </div>
+      <div class="task-item">
+        <div class="t-lbl">🔁 复习</div>
+        <div class="t-num"><span id="revDone">0</span> <i>/ <span id="revGoal">20</span> 张</i></div>
+        <div class="bar"><i class="warn" id="revBar" style="width:0%"></i></div>
+      </div>
+    </div>
+    <button class="big-btn" onclick="startDaily()">开始今日任务</button>
+    <div class="btn-row">
+      <button class="big-btn ghost" onclick="startWrong()">错题重刷</button>
+      <button class="big-btn ghost" onclick="startRandom()">随机 20 题</button>
+    </div>
+  </div>
+
+  <div class="sec-title">📖 题库</div>
+  <div id="deckList"></div>
+
+  <div class="sec-title">📊 学科掌握</div>
+  <div id="subjList"></div>
+</div>
+
+<!-- ============ 刷题页 ============ -->
+<div id="view-study" class="view">
+  <div class="study-top">
+    <button class="icon-btn" onclick="exitStudy()">←</button>
+    <div class="st-title"><b id="studyTitle">—</b><span id="studySub"></span></div>
+    <div class="chip blue" id="studyMode">卡片</div>
+    <div class="chip" id="studyPos">0/0</div>
+  </div>
+  <div class="study-bar" id="studyBar"></div>
+  <div class="flashcard" id="flashcard"></div>
+  <div class="act-row" id="actRow"></div>
+</div>
+
+<!-- ============ 设置 ============ -->
+<div id="view-set" class="view">
+  <div class="top"><h1>⚙️ 设置</h1><div class="sub">目标、进度同步、关于</div></div>
+
+  <div class="set-item">
+    <h3>每日目标</h3>
+    <p>调整「今日任务」的新题与复习数量。改完自动保存。</p>
+    <div class="set-row"><label>每天新题（张）</label>
+      <input type="number" id="goalNew" min="1" max="100" value="10"></div>
+    <div class="set-row" style="margin-top:9px"><label>每天复习（张）</label>
+      <input type="number" id="goalRev" min="1" max="200" value="20"></div>
+  </div>
+
+  <div class="set-item">
+    <h3>同步进度（平板 ⇄ 手机）</h3>
+    <p>进度存在本设备浏览器里。换设备时：<b>旧设备「导出」→ 把这串码发到新设备 → 新设备「粘贴导入」</b>，进度自动合并。</p>
+    <textarea class="code-area" id="codeArea" placeholder="导出的进度码会出现在这里；导入时把码粘贴到这里"></textarea>
+    <button class="mini-btn blue" onclick="exportProg()">导出进度</button>
+    <button class="mini-btn" onclick="importProg()">导入合并</button>
+    <button class="mini-btn" onclick="copyCode()">复制</button>
+  </div>
+
+  <div class="set-item">
+    <h3>危险操作</h3>
+    <p>清空本设备全部学习记录（认识/不认识/打卡历史），不可恢复。</p>
+    <button class="mini-btn red" onclick="resetProg()">清空全部进度</button>
+  </div>
+
+  <div class="set-item">
+    <h3>关于</h3>
+    <p id="aboutText">—</p>
+    <p>📌 隐私：不含任何姓名信息，数据只存在你的设备本地。<br>
+       🔄 更新：我会更新题库并重新发布，你<b>刷新这个页面</b>就是新版，进度不会丢。</p>
+  </div>
+</div>
+
+<!-- ============ 底部导航 ============ -->
+<div class="nav">
+  <button id="navHome" class="on" onclick="go('home')"><div class="ic">🏠</div>首页</button>
+  <button id="navStudy" onclick="go('study')"><div class="ic">📝</div>刷题</button>
+  <button id="navSet" onclick="go('set')"><div class="ic">⚙️</div>设置</button>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ==================== 题库数据 ==================== */
+const HUB = {"version":1,"decks":[{"id":"biochem-midterm","name":"生化半期·到糖原代谢","subject":"生化","count":280},{"id":"biochem-betaox","name":"脂肪酸β氧化专项","subject":"生化","count":41},{"id":"genetics-hw","name":"遗传学课后习题(刘祖洞)","subject":"遗传","count":86},{"id":"genetics-midterm","name":"遗传学期中选择题","subject":"遗传","count":88},{"id":"genetics-calc","name":"遗传学计算专项(重组率)","subject":"遗传","count":6},{"id":"genetics-flash","name":"遗传学考点速刷","subject":"遗传","count":55}],"cards":[{"t":"term","c":"珠蛋白","q":"肌红蛋白 (Myoglobin, Mb)","a":"肌肉中的单体携氧蛋白，153个氨基酸，折叠成8段α螺旋(A–H)，含1个血红素辅基，结合1分子O₂；氧合曲线呈双曲线，无协同效应。","n":"","deck":"biochem-midterm","id":"biochem-midterm_0"},{"t":"term","c":"珠蛋白","q":"血红蛋白 (Hemoglobin, Hb)","a":"红细胞中的四聚体(α₂β₂)，每条肽链各含1个血红素，共结合4分子O₂；氧合曲线呈S形(正协同)，受别构效应调节。","n":"","deck":"biochem-midterm","id":"biochem-midterm_1"},{"t":"term","c":"珠蛋白","q":"血红素 (Heme)","a":"由原卟啉IX(4个吡咯环) + 中心Fe²⁺(亚铁)组成；Fe²⁺与4个吡咯N、近端组氨酸(F8)及1分子O₂配位；Fe²⁺若被氧化为Fe³⁺则失活、丧失携氧能力。","n":"","deck":"biochem-midterm","id":"biochem-midterm_2"},{"t":"term","c":"珠蛋白","q":"T态与R态","a":"血红蛋白两种构象：T态(tense,紧张态)对O₂亲和力低，R态(relaxed,松弛态)亲和力高；O₂结合促使T→R转变，实现正协同。","n":"","deck":"biochem-midterm","id":"biochem-midterm_3"},{"t":"term","c":"珠蛋白","q":"别构效应 (Allosteric effect)","a":"效应物(2,3-BPG、H⁺、CO₂)结合蛋白质别构位点，引起构象变化，改变对配体(如O₂)亲和力的现象。","n":"","deck":"biochem-midterm","id":"biochem-midterm_4"},{"t":"term","c":"珠蛋白","q":"Bohr效应","a":"pH降低(或CO₂升高)使血红蛋白对O₂亲和力下降、氧合曲线右移，利于代谢活跃组织释放O₂。","n":"","deck":"biochem-midterm","id":"biochem-midterm_5"},{"t":"term","c":"珠蛋白","q":"2,3-BPG","a":"红细胞内高浓度负电分子，结合Hb四聚体中央空穴(尤T态)，稳定T态、降低O₂亲和力(右移)；高原/贫血时升高以促进释氧。","n":"","deck":"biochem-midterm","id":"biochem-midterm_6"},{"t":"term","c":"珠蛋白","q":"协同效应 (正协同)","a":"一个亚基结合配体后促进其余亚基结合同种配体的现象；Hb的O₂结合即正协同，表现为S形曲线。","n":"","deck":"biochem-midterm","id":"biochem-midterm_7"},{"t":"term","c":"珠蛋白","q":"Hill系数 (n)","a":"量化协同性的参数；n=1无协同(Mb)，n>1正协同(Hb≈2.8–3)，n<1负协同。n=1时Hill方程退化为双曲线。","n":"","deck":"biochem-midterm","id":"biochem-midterm_8"},{"t":"term","c":"珠蛋白","q":"镰刀型细胞贫血 (Sickle cell anemia)","a":"β链第6位亲水Glu→疏水Val的错义突变；脱氧HbS聚合使红细胞镰变、易溶血；杂合子对疟疾有抗性(共显性)。","n":"","deck":"biochem-midterm","id":"biochem-midterm_9"},{"t":"mc","c":"珠蛋白","q":"肌红蛋白(Mb)的亚基组成与携氧数是？","a":0,"n":"Mb单体携1氧，Hb四聚体携4氧。","deck":"biochem-midterm","o":["单体，结合1个O₂","四聚体α₂β₂，结合4个O₂","二聚体，结合2个O₂","单体，结合4个O₂"],"id":"biochem-midterm_10"},{"t":"mc","c":"珠蛋白","q":"Mb与Hb的氧合曲线分别是？","a":2,"n":"Mb无协同=双曲线；Hb正协同=S形。","deck":"biochem-midterm","o":["均为双曲线","均为S形","Mb双曲线、Hb S形","Mb S形、Hb双曲线"],"id":"biochem-midterm_11"},{"t":"mc","c":"珠蛋白","q":"血红蛋白氧合曲线的S形(正协同)主要来自？","a":1,"n":"O₂进来推T→R，后面更易进。","deck":"biochem-midterm","o":["亚基间二硫键","O₂结合引起T→R构象转变","血红素Fe被氧化","肽键断裂"],"id":"biochem-midterm_12"},{"t":"mc","c":"珠蛋白","q":"2,3-BPG对血红蛋白的作用是？","a":1,"n":"2,3-BPG稳定T态→右移释氧。","deck":"biochem-midterm","o":["升高O₂亲和力(左移)","降低O₂亲和力(右移)","无影响","使Hb解离为单体"],"id":"biochem-midterm_13"},{"t":"mc","c":"珠蛋白","q":"Bohr效应是指？","a":1,"n":"组织酸/CO₂多→右移放氧。","deck":"biochem-midterm","o":["pH↑使Hb亲和力↓","pH↓/CO₂↑使Hb对O₂亲和力↓(右移)","温度升高使亲和力↑","O₂促进CO₂释放"],"id":"biochem-midterm_14"},{"t":"mc","c":"珠蛋白","q":"CO与血红蛋白结合的特点是？","a":1,"n":"CO亲和力≈250×，占位还锁死别人。","deck":"biochem-midterm","o":["亲和力≈O₂，可轻易被O₂替换","亲和力约为O₂的250倍且难解离","不结合血红素","只结合Mb不结合Hb"],"id":"biochem-midterm_15"},{"t":"mc","c":"珠蛋白","q":"镰刀型细胞贫血的分子基础是？","a":1,"n":"β6 Glu→Val，脱氧聚合镰变。","deck":"biochem-midterm","o":["α链第6位Glu→Val","β链第6位Glu→Val","γ链突变","血红素Fe²⁺→Fe³⁺"],"id":"biochem-midterm_16"},{"t":"mc","c":"珠蛋白","q":"关于Hill系数n，正确的是？","a":2,"n":"Mb n=1；Hb n>1正协同。","deck":"biochem-midterm","o":["Mb的n≈2.8–3","Hb的n=1(无协同)","n>1表示正协同","n<1表示正协同"],"id":"biochem-midterm_17"},{"t":"fill","c":"珠蛋白","q":"血红蛋白是由__条肽链组成的四聚体，其组成为__。","a":"4；α₂β₂","n":"Hb=α₂β₂四聚体。","deck":"biochem-midterm","id":"biochem-midterm_18"},{"t":"fill","c":"珠蛋白","q":"血红素辅基中心的金属离子是__；若被氧化为Fe³⁺则__。","a":"Fe²⁺(亚铁)；失去携氧能力","n":"铁必须二价才携氧。","deck":"biochem-midterm","id":"biochem-midterm_19"},{"t":"fill","c":"珠蛋白","q":"肌红蛋白的氧合曲线呈__形，血红蛋白呈__形。","a":"双曲线；S形(sigmoid)","n":"Mb双曲、Hb S形。","deck":"biochem-midterm","id":"biochem-midterm_20"},{"t":"fill","c":"珠蛋白","q":"Hill系数n=1表示__(Mb)；n>1表示__(Hb)。","a":"无协同；正协同","n":"n>1正协同。","deck":"biochem-midterm","id":"biochem-midterm_21"},{"t":"fill","c":"珠蛋白","q":"2,3-BPG结合血红蛋白的__，稳定__态，使氧合曲线__移。","a":"中央空穴；T；右","n":"2,3-BPG压T态→右移。","deck":"biochem-midterm","id":"biochem-midterm_22"},{"t":"fill","c":"珠蛋白","q":"Bohr效应：组织代谢产生H⁺/CO₂使pH__，血红蛋白对O₂亲和力__，曲线__移。","a":"降低(↓)；下降(↓)；右","n":"酸多→右移放氧。","deck":"biochem-midterm","id":"biochem-midterm_23"},{"t":"saq","c":"珠蛋白","q":"比较肌红蛋白与血红蛋白的氧合特征及生理意义。","a":["Mb：单体、1个血红素、双曲线、无协同；在肌肉中高亲和力储/运氧(需要时快速释放)","Hb：α₂β₂四聚体、4个血红素、S形曲线、正协同","生理意义：Hb的S形使在肺部(高pO₂)几乎饱和、在组织中(低pO₂)大幅释放O₂，实现高效运载；Mb在肌肉持续结合O₂供急需","别构效应物(BPG/H⁺/CO₂)进一步微调Hb的释氧"],"n":"Mb储氧、Hb运氧，曲线形状决定功能。","deck":"biochem-midterm","id":"biochem-midterm_24"},{"t":"calc","c":"珠蛋白","q":"某蛋白的Hill作图：以log[Y/(1−Y)]对log[pO₂]作图得直线斜率为2.9。判断其协同性并给出依据。","a":"正协同(Hb类)","n":"","deck":"biochem-midterm","steps":["Hill方程：log[Y/(1−Y)] = n·log[pO₂] − log P₅₀","直线斜率即Hill系数 n","n=2.9 > 1 → 正协同(典型血红蛋白)","若n=1则为无协同(肌红蛋白)"],"id":"biochem-midterm_25"},{"t":"term","c":"结构","q":"蛋白质一级结构 (Primary structure)","a":"多肽链中氨基酸的线性排列顺序，由肽键连接；由基因编码，决定蛋白质高级结构与功能。","n":"","deck":"biochem-midterm","id":"biochem-midterm_26"},{"t":"term","c":"结构","q":"蛋白质二级结构 (Secondary structure)","a":"主链局部规则折叠构象(α螺旋、β折叠、β转角、无规卷曲)，主要由主链C=O与N–H间的氢键稳定。","n":"","deck":"biochem-midterm","id":"biochem-midterm_27"},{"t":"term","c":"结构","q":"α螺旋 (α-helix)","a":"右手螺旋，每圈约3.6个氨基酸、螺距0.54 nm；链内氢键封闭，侧链朝外；Pro、大侧链或连续带电残基易破坏。","n":"","deck":"biochem-midterm","id":"biochem-midterm_28"},{"t":"term","c":"结构","q":"β折叠 (β-sheet)","a":"多肽链伸展成带状，链间以氢键相连成片层；分平行(走向同)与反平行(走向反)；氢键方向与链垂直。","n":"","deck":"biochem-midterm","id":"biochem-midterm_29"},{"t":"term","c":"结构","q":"蛋白质三级结构 (Tertiary structure)","a":"整条多肽链在二级结构基础上进一步折叠形成的三维构象；主要靠疏水作用，辅以氢键、离子键、范德华力、二硫键稳定。","n":"","deck":"biochem-midterm","id":"biochem-midterm_30"},{"t":"term","c":"结构","q":"蛋白质四级结构 (Quaternary structure)","a":"两条或以上独立肽链(亚基)通过非共价作用组装成的聚合体结构；例：Hb的α₂β₂。并非所有蛋白都有。","n":"","deck":"biochem-midterm","id":"biochem-midterm_31"},{"t":"term","c":"结构","q":"疏水作用 (Hydrophobic interaction)","a":"非极性侧链为避开水而聚集于蛋白质内部的趋势；是驱动三级结构折叠、维持其稳定的最主要作用力。","n":"","deck":"biochem-midterm","id":"biochem-midterm_32"},{"t":"term","c":"结构","q":"二硫键 (Disulfide bond)","a":"两个半胱氨酸(Cys)巯基氧化形成的共价–S–S–键；主要稳定胞外/分泌蛋白；还原剂(β-巯基乙醇、DTT)可断裂。","n":"","deck":"biochem-midterm","id":"biochem-midterm_33"},{"t":"term","c":"结构","q":"蛋白质变性 (Denaturation)","a":"高温、酸碱、有机溶剂等破坏维持高级结构的非共价作用(及二硫键)，使空间构象解体、生物活性丧失，但一级结构(肽键)不断裂。","n":"","deck":"biochem-midterm","id":"biochem-midterm_34"},{"t":"term","c":"结构","q":"Anfinsen实验","a":"用牛胰RNase：变性剂+还原剂使其去折叠失活，去除后自发复性恢复活性 → 证明一级结构决定天然高级结构。","n":"","deck":"biochem-midterm","id":"biochem-midterm_35"},{"t":"mc","c":"结构","q":"维持蛋白质一级结构的主要化学键是？","a":1,"n":"一级=肽键串氨基酸。","deck":"biochem-midterm","o":["氢键","肽键","二硫键","疏水作用"],"id":"biochem-midterm_36"},{"t":"mc","c":"结构","q":"稳定α螺旋、β折叠等二级结构的主要作用力是？","a":1,"n":"二级靠主链氢键。","deck":"biochem-midterm","o":["侧链疏水作用","主链C=O…H–N氢键","二硫键","离子键"],"id":"biochem-midterm_37"},{"t":"mc","c":"结构","q":"稳定蛋白质三级结构最主要的作用力是？","a":0,"n":"三级靠疏水塌内部。","deck":"biochem-midterm","o":["疏水作用","二硫键","离子键","范德华力"],"id":"biochem-midterm_38"},{"t":"mc","c":"结构","q":"蛋白质四级结构是指？","a":1,"n":"四级=多条亚基拼装。","deck":"biochem-midterm","o":["一条肽链内的折叠","多条肽链(亚基)的组装","氨基酸序列","β转角"],"id":"biochem-midterm_39"},{"t":"mc","c":"结构","q":"下列哪种氨基酸因其环状结构最易破坏α螺旋？","a":1,"n":"Pro的环卡住螺旋。","deck":"biochem-midterm","o":["Gly","Pro","Ala","Leu"],"id":"biochem-midterm_40"},{"t":"mc","c":"结构","q":"α螺旋每圈约含多少个氨基酸残基？","a":1,"n":"3.6 aa/圈，0.54 nm螺距。","deck":"biochem-midterm","o":["2.0","3.6","5.4","10"],"id":"biochem-midterm_41"},{"t":"mc","c":"结构","q":"二硫键是由哪种氨基酸形成的？","a":1,"n":"Cys巯基氧化成二硫键。","deck":"biochem-midterm","o":["Ser","Cys","Lys","His"],"id":"biochem-midterm_42"},{"t":"mc","c":"结构","q":"Anfinsen用牛胰RNase实验证明？","a":0,"n":"去折叠后复性→一级定高级。","deck":"biochem-midterm","o":["一级结构决定高级结构","二级结构决定一级结构","四级结构决定三级结构","变性不可逆"],"id":"biochem-midterm_43"},{"t":"mc","c":"结构","q":"蛋白质变性时通常不被破坏的是？","a":2,"n":"变性只散高级，肽键不断。","deck":"biochem-midterm","o":["二级结构氢键","三级结构疏水堆积","(若未还原)二硫键与一级结构","别构位点"],"id":"biochem-midterm_44"},{"t":"mc","c":"结构","q":"维持蛋白质天然构象的作用力主要是？","a":1,"n":"弱相互作用撑起构象。","deck":"biochem-midterm","o":["共价键","多种弱的非共价相互作用","仅有二硫键","金属配位"],"id":"biochem-midterm_45"},{"t":"fill","c":"结构","q":"稳定蛋白质三级结构的最主要作用力是__。","a":"疏水作用","n":"疏水塌内部是主驱动。","deck":"biochem-midterm","id":"biochem-midterm_46"},{"t":"fill","c":"结构","q":"α螺旋每圈约含__个氨基酸残基，螺距约__nm。","a":"3.6；0.54","n":"3.6/圈，0.54 nm。","deck":"biochem-midterm","id":"biochem-midterm_47"},{"t":"fill","c":"结构","q":"二硫键由__的巯基氧化形成，可被__等还原剂断裂。","a":"半胱氨酸(Cys)；β-巯基乙醇/DTT","n":"Cys→二硫键，还原剂打开。","deck":"biochem-midterm","id":"biochem-midterm_48"},{"t":"fill","c":"结构","q":"蛋白质变性破坏的是__结构，而__结构(肽键序列)通常保持不变。","a":"空间/高级；一级","n":"变性散高级，肽键不断。","deck":"biochem-midterm","id":"biochem-midterm_49"},{"t":"fill","c":"结构","q":"Anfinsen实验(RNase)表明：__决定蛋白质的天然构象。","a":"一级结构","n":"一级定高级。","deck":"biochem-midterm","id":"biochem-midterm_50"},{"t":"saq","c":"结构","q":"简述蛋白质四个结构层次及其主要稳定作用力。","a":["一级：氨基酸序列，肽键连接","二级：α螺旋/β折叠等局部构象，主链氢键稳定","三级：整链三维折叠，疏水作用(主)+氢键+离子键+范德华力+二硫键","四级：亚基组装，亚基间非共价(疏水/离子/氢键)；并非所有蛋白都有"],"n":"一级肽键，二级主链氢键，三级疏水为王。","deck":"biochem-midterm","id":"biochem-midterm_51"},{"t":"term","c":"过渡态","q":"过渡态 (Transition state, ‡)","a":"化学反应中能量最高、最不稳定的瞬间构型；不同于反应物与产物，无法分离；是反应的能垒顶点。","n":"","deck":"biochem-midterm","id":"biochem-midterm_52"},{"t":"term","c":"过渡态","q":"活化能 (Activation energy, Ea / ΔG‡)","a":"反应物达到过渡态所需跨越的能量壁垒；酶通过降低活化能加速反应，但不改变反应的标准自由能变化ΔG°'。","n":"","deck":"biochem-midterm","id":"biochem-midterm_53"},{"t":"term","c":"过渡态","q":"广义酸碱催化 (General acid-base catalysis)","a":"酶活性中心氨基酸(常His的咪唑基)作为质子供体/受体，通过可逆质子转移稳定过渡态、加速反应。","n":"","deck":"biochem-midterm","id":"biochem-midterm_54"},{"t":"term","c":"过渡态","q":"共价催化 (Covalent catalysis)","a":"酶活性中心亲核基团(Ser-OH、Cys-SH、His)与底物形成短暂共价中间体，改变反应路径、降低活化能。","n":"","deck":"biochem-midterm","id":"biochem-midterm_55"},{"t":"term","c":"过渡态","q":"过渡态类似物 (Transition state analog)","a":"结构与过渡态相似、但因极稳定而不可反应的分子；可作强效竞争性抑制剂，或免疫动物制备'抗体酶'(abzyme)。","n":"","deck":"biochem-midterm","id":"biochem-midterm_56"},{"t":"mc","c":"过渡态","q":"酶加速化学反应的根本方式是？","a":1,"n":"酶降能垒不供能。","deck":"biochem-midterm","o":["提供反应所需能量","降低活化能(ΔG‡)","改变反应的ΔG°'","推动热力学不利反应"],"id":"biochem-midterm_57"},{"t":"mc","c":"过渡态","q":"过渡态(transition state)的特点是？","a":1,"n":"过渡态是能垒顶点，抓不住。","deck":"biochem-midterm","o":["可稳定分离","能量最高、极不稳定、不可分离","与底物能量相同","是反应的终产物"],"id":"biochem-midterm_58"},{"t":"mc","c":"过渡态","q":"关于催化剂(酶)的作用，错误的是？","a":3,"n":"酶不改ΔG°，不推不利反应。","deck":"biochem-midterm","o":["降低活化能","加快正逆反应速率","不改变平衡常数/ΔG°'","可使ΔG°'变负以驱动反应"],"id":"biochem-midterm_59"},{"t":"mc","c":"过渡态","q":"酶活性中心常作为广义酸碱催化基团的氨基酸是？","a":1,"n":"His易授/受质子。","deck":"biochem-midterm","o":["Pro","His(咪唑基)","Gly","Val"],"id":"biochem-midterm_60"},{"t":"mc","c":"过渡态","q":"过渡态类似物(transition state analog)可用于？","a":1,"n":"类过渡态→强抑制剂/抗体酶。","deck":"biochem-midterm","o":["作为酶的最适底物","制备强效抑制剂或抗体酶","提高反应温度","替代辅基"],"id":"biochem-midterm_61"},{"t":"fill","c":"过渡态","q":"酶通过降低__加速反应，但不改变反应的__和平衡常数。","a":"活化能(ΔG‡)；标准自由能变化(ΔG°')","n":"降能垒不改ΔG°'。","deck":"biochem-midterm","id":"biochem-midterm_62"},{"t":"saq","c":"过渡态","q":"列举酶降低活化能的主要催化机制(至少5种)。","a":["邻近与定向效应：提高底物有效浓度并正确取向","广义酸碱催化：His等可逆转移质子","共价催化：Ser/Cys等与底物成共价中间体","金属离子催化：Zn²⁺/Mg²⁺作路易斯酸或电稳定","静电/微环境催化：活性中心电荷与疏水环境稳定电荷","底物形变/张力：使底物趋近过渡态"],"n":"六机制：邻近定向/酸碱/共价/金属/静电/张力。","deck":"biochem-midterm","id":"biochem-midterm_63"},{"t":"saq","c":"过渡态","q":"为什么酶不能改变反应的平衡常数(ΔG°')？","a":["酶与化学催化剂一样，同等降低正、逆反应的活化能，故不改变ΔG°'与平衡位置","酶只加快达到平衡的速度，不改变平衡时产物/底物的比例","若反应本身ΔG°'>0(热力学不利)，酶也无法使其向产物进行，需耦合放能反应"],"n":"酶改速率不改平衡。","deck":"biochem-midterm","id":"biochem-midterm_64"},{"t":"saq","c":"过渡态","q":"什么是过渡态类似物？有何应用？","a":["结构与反应过渡态相似、但因极稳定而不可反应的分子","应用：作为强效、高选择性竞争性抑制剂(设计药物)","免疫动物可获得'抗体酶'(abzyme)，催化相应反应","用于解析酶催化机理"],"n":"类过渡态→抑制剂/抗体酶。","deck":"biochem-midterm","id":"biochem-midterm_65"},{"t":"term","c":"抑制剂","q":"竞争性抑制 (Competitive inhibition)","a":"抑制剂与底物结构相似、竞争同一活性中心；表现Km↑、Vmax不变；增大[S]可克服。","n":"","deck":"biochem-midterm","id":"biochem-midterm_66"},{"t":"term","c":"抑制剂","q":"非竞争性抑制 (Noncompetitive inhibition)","a":"抑制剂结合酶或ES的别构位点(不争中心)；Vmax↓、Km不变；增大[S]不能克服。","n":"","deck":"biochem-midterm","id":"biochem-midterm_67"},{"t":"term","c":"抑制剂","q":"反竞争性抑制 (Uncompetitive inhibition)","a":"抑制剂只与ES结合；Vmax↓且Km↓(同比例)；双倒数图为一组平行线。","n":"","deck":"biochem-midterm","id":"biochem-midterm_68"},{"t":"term","c":"抑制剂","q":"混合型抑制 (Mixed inhibition)","a":"抑制剂结合E与ES但亲和力不同；Vmax↓、Km可升可降；双倒数图交于第二象限。","n":"","deck":"biochem-midterm","id":"biochem-midterm_69"},{"t":"term","c":"抑制剂","q":"Lineweaver–Burk作图","a":"米氏方程的双倒数形式：1/v = (Km/Vmax)(1/[S]) + 1/Vmax；据斜率与截距求Km、Vmax，并判别抑制类型。","n":"","deck":"biochem-midterm","id":"biochem-midterm_70"},{"t":"term","c":"抑制剂","q":"不可逆抑制 (Irreversible inhibition)","a":"抑制剂以共价或近共价方式永久失活酶(如有机磷抑制乙酰胆碱酯酶、青霉素抑制转肽酶)；不能通过加底物解除。","n":"","deck":"biochem-midterm","id":"biochem-midterm_71"},{"t":"mc","c":"抑制剂","q":"竞争性抑制的特点是？","a":0,"n":"争中心→Km↑Vmax不变。","deck":"biochem-midterm","o":["Km↑，Vmax不变","Km不变，Vmax↓","Km↓，Vmax↓","Km↓，Vmax不变"],"id":"biochem-midterm_72"},{"t":"mc","c":"抑制剂","q":"非竞争性抑制的特点是？","a":1,"n":"非竞→Vmax↓Km不变。","deck":"biochem-midterm","o":["Km↑，Vmax不变","Km不变，Vmax↓","Km↓，Vmax↓","Km↑，Vmax↑"],"id":"biochem-midterm_73"},{"t":"mc","c":"抑制剂","q":"反竞争性抑制的特点是？","a":2,"n":"反竞只咬ES→双降。","deck":"biochem-midterm","o":["Km↑，Vmax不变","Km不变，Vmax↓","Km↓，Vmax↓(同比例)","Vmax↑，Km↑"],"id":"biochem-midterm_74"},{"t":"mc","c":"抑制剂","q":"Lineweaver–Burk双倒数图上，竞争性抑制的几条直线？","a":1,"n":"竞交于y轴。","deck":"biochem-midterm","o":["相互平行","交于y轴(1/Vmax相同)","交于x轴(-1/Km相同)","交于原点"],"id":"biochem-midterm_75"},{"t":"mc","c":"抑制剂","q":"反竞争性抑制的双倒数图表现为？","a":1,"n":"反竞→平行线。","deck":"biochem-midterm","o":["交于y轴","一组平行线","交于x轴","单条直线"],"id":"biochem-midterm_76"},{"t":"mc","c":"抑制剂","q":"增大底物浓度[S]可以克服哪种抑制？","a":0,"n":"只有竞争性能被[S]压住。","deck":"biochem-midterm","o":["竞争性","非竞争性","反竞争性","不可逆抑制"],"id":"biochem-midterm_77"},{"t":"mc","c":"抑制剂","q":"下列属于不可逆抑制剂的是？","a":1,"n":"有机磷共价锁死=不可逆。","deck":"biochem-midterm","o":["丙二酸(琥珀酸类似物)","有机磷化合物(抑制胆碱酯酶)","与酶可逆结合的产物","2,3-BPG"],"id":"biochem-midterm_78"},{"t":"mc","c":"抑制剂","q":"丙二酸是琥珀酸脱氢酶的抑制剂，其作用类型是？","a":0,"n":"丙二酸=琥珀酸赝品，竞争性。","deck":"biochem-midterm","o":["竞争性(结构类似琥珀酸)","非竞争性","反竞争性","不可逆"],"id":"biochem-midterm_79"},{"t":"mc","c":"抑制剂","q":"混合型抑制的双倒数图通常？","a":1,"n":"混合→第二象限相交。","deck":"biochem-midterm","o":["交于y轴","交于第二象限","平行","交于x轴"],"id":"biochem-midterm_80"},{"t":"mc","c":"抑制剂","q":"关于可逆与不可逆抑制，正确的是？","a":0,"n":"可逆→透析可恢复。","deck":"biochem-midterm","o":["可逆抑制可通过透析除去抑制剂恢复活性","不可逆抑制可被高[S]克服","竞争性一定是不可逆","非竞争性只与ES结合"],"id":"biochem-midterm_81"},{"t":"fill","c":"抑制剂","q":"竞争性抑制使表观Km__，Vmax__；增大[S]可__。","a":"增大；不变；克服(恢复Vmax)","n":"竞：Km↑Vmax不变。","deck":"biochem-midterm","id":"biochem-midterm_82"},{"t":"fill","c":"抑制剂","q":"反竞争性抑制使Km和Vmax均__(同比例)，其双倒数图为__。","a":"降低；一组平行线","n":"反竞双降+平行。","deck":"biochem-midterm","id":"biochem-midterm_83"},{"t":"fill","c":"抑制剂","q":"非竞争性抑制使Vmax__，Km__。","a":"降低；不变","n":"非竞Vmax↓Km不变。","deck":"biochem-midterm","id":"biochem-midterm_84"},{"t":"saq","c":"抑制剂","q":"比较竞争性、非竞争性、反竞争性抑制对Km与Vmax的影响及双倒数图特征。","a":["竞争性：Km↑、Vmax不变；双倒数图交于y轴(1/Vmax同)","非竞争性：Vmax↓、Km不变；交于x轴(-1/Km同)","反竞争性：Vmax↓、Km↓(同比例)；一组平行线","混合型：Vmax↓、Km可升可降；交于第二象限"],"n":"竞y轴、非x轴、反平行、混合二象限。","deck":"biochem-midterm","id":"biochem-midterm_85"},{"t":"calc","c":"抑制剂","q":"某酶无抑制剂时Km=2 mM，Vmax=100 μmol/min。加入竞争性抑制剂([I]=1 mM，Ki=1 mM)后，表观Km'与Vmax'各为多少？","a":"Km'=4 mM，Vmax'=100 μmol/min","n":"","deck":"biochem-midterm","steps":["竞争性：Vmax不变 → Vmax'=100","表观Km' = Km(1 + [I]/Ki)","代入：2 × (1 + 1/1) = 4 mM","故Km'=4 mM，Vmax'=100 μmol/min"],"id":"biochem-midterm_86"},{"t":"calc","c":"抑制剂","q":"上题若改加反竞争性抑制剂(同样[I]=1 mM，Ki'=1 mM)，Km'与Vmax'为多少？","a":"Km'=1 mM，Vmax'=50 μmol/min","n":"","deck":"biochem-midterm","steps":["反竞争性：Vmax'=Vmax/(1+[I]/Ki')，Km'=Km/(1+[I]/Ki')","分母=1+1/1=2","Vmax'=100/2=50；Km'=2/2=1 mM","故二者同比例下降一半"],"id":"biochem-midterm_87"},{"t":"calc","c":"抑制剂","q":"Lineweaver–Burk法测得两组(1/[S],1/v)为(0.5,2.0)与(1.0,3.0)(单位1/mM，1/(μmol·min⁻¹))。求该酶Km与Vmax。","a":"Vmax=1.0 μmol/min，Km=2.0 mM","n":"","deck":"biochem-midterm","steps":["双倒数方程：1/v = (Km/Vmax)(1/[S]) + 1/Vmax","斜率=(3.0−2.0)/(1.0−0.5)=2.0 = Km/Vmax","y截距=2.0−2.0×0.5=1.0 = 1/Vmax → Vmax=1.0","x截距=−1.0/2.0=−0.5 = −1/Km → Km=2.0 mM"],"id":"biochem-midterm_88"},{"t":"tf","c":"真题判断","q":"维生素K具有促进血液凝固的功能。","a":"对","n":"Vit K参与凝血因子Ⅱ、Ⅶ、Ⅸ、Ⅹ的γ-羧化活化。","deck":"biochem-midterm","id":"biochem-midterm_89"},{"t":"tf","c":"真题判断","q":"酶的最适pH值是一个常数，每一种酶只有一个确定的最适pH值。","a":"错","n":"最适pH受底物浓度、缓冲液、温度等影响，并非绝对常数。","deck":"biochem-midterm","id":"biochem-midterm_90"},{"t":"tf","c":"真题判断","q":"DNA分子在细胞内和水溶液中的主要存在形式是B型DNA。","a":"对","n":"天然DNA多为右手B型双螺旋。","deck":"biochem-midterm","id":"biochem-midterm_91"},{"t":"tf","c":"真题判断","q":"苯丙氨酸是人体的必需氨基酸。","a":"对","n":"必需氨基酸共9种：苯丙、色、赖、缬、亮、异亮、苏、甲硫(蛋)、组(儿童必需)。","deck":"biochem-midterm","id":"biochem-midterm_92"},{"t":"tf","c":"真题判断","q":"若双链DNA的一条链碱基顺序为CTGGAC，则另一条链为GACCTG。","a":"错","n":"互补且反向，5'→3'应为GTCCAG，而非GACCTG。","deck":"biochem-midterm","id":"biochem-midterm_93"},{"t":"tf","c":"真题判断","q":"蛋白质的结构域是介于三级结构和四级结构之间的一种结构层次。","a":"错","n":"结构域是三级结构内部的独立折叠单元，不是介于三/四级之间。","deck":"biochem-midterm","id":"biochem-midterm_94"},{"t":"tf","c":"真题判断","q":"蛋白质有高级结构，而DNA和RNA没有高级结构。","a":"错","n":"DNA有双螺旋(二级)、核小体(高级)；tRNA有三叶草/倒L结构。","deck":"biochem-midterm","id":"biochem-midterm_95"},{"t":"tf","c":"真题判断","q":"维系蛋白质三级结构最重要的作用力是氢键。","a":"错","n":"最重要的是疏水作用；氢键主要维系二级结构。","deck":"biochem-midterm","id":"biochem-midterm_96"},{"t":"tf","c":"真题判断","q":"溶液的pH值可以影响氨基酸的等电点pI。","a":"错","n":"pI是氨基酸固有性质不随环境变；是环境pH改变其带电状态，不是改变pI。","deck":"biochem-midterm","id":"biochem-midterm_97"},{"t":"tf","c":"真题判断","q":"Sanger对生物化学的贡献是发明了双脱氧末端终止DNA测序法。","a":"对","n":"Sanger法=链终止法。","deck":"biochem-midterm","id":"biochem-midterm_98"},{"t":"tf","c":"真题判断","q":"RNA一般以单链形式存在，局部可形成双螺旋区。","a":"对","n":"","deck":"biochem-midterm","id":"biochem-midterm_99"},{"t":"tf","c":"真题判断","q":"DNA的Tm值和A、T含量有关，A、T含量高则Tm高。","a":"错","n":"GC含量高→Tm高(GC三氢键更稳定)。","deck":"biochem-midterm","id":"biochem-midterm_100"},{"t":"tf","c":"真题判断","q":"氨基酸序列自动分析仪(Edman降解)采用的化学试剂是PITC(异硫氰酸苯酯)。","a":"对","n":"","deck":"biochem-midterm","id":"biochem-midterm_101"},{"t":"tf","c":"真题判断","q":"结合酶由酶蛋白和辅因子组成，其中辅因子决定酶的专一性。","a":"错","n":"酶蛋白决定专一性，辅因子决定反应类型/性质。","deck":"biochem-midterm","id":"biochem-midterm_102"},{"t":"tf","c":"真题判断","q":"肌红蛋白和血红蛋白都携O₂，前者是变构蛋白，后者不是。","a":"错","n":"反过来：Mb不是变构蛋白(双曲线)，Hb是变构蛋白(S形)。","deck":"biochem-midterm","id":"biochem-midterm_103"},{"t":"tf","c":"真题判断","q":"增加不可逆抑制剂的浓度，可以实现酶活性的完全抑制。","a":"对","n":"不可逆抑制与酶共价结合，浓度足够可完全失活。","deck":"biochem-midterm","id":"biochem-midterm_104"},{"t":"tf","c":"真题判断","q":"儿童缺乏维生素D，易发生佝偻病。","a":"对","n":"","deck":"biochem-midterm","id":"biochem-midterm_105"},{"t":"tf","c":"真题判断","q":"某些调节酶的V-[S]呈S形曲线，表明酶与少量底物结合增加了对后续底物的亲和力。","a":"对","n":"正协同，即别构效应。","deck":"biochem-midterm","id":"biochem-midterm_106"},{"t":"tf","c":"真题判断","q":"茚三酮与所有氨基酸反应均生成蓝紫色化合物。","a":"错","n":"Pro/羟脯氨酸生成黄色。","deck":"biochem-midterm","id":"biochem-midterm_107"},{"t":"tf","c":"真题判断","q":"天然蛋白质氨基酸多为D-构型。","a":"错","n":"均为L-α-氨基酸(除Gly无手性)。","deck":"biochem-midterm","id":"biochem-midterm_108"},{"t":"tf","c":"真题判断","q":"竞争性抑制剂存在时，加入足够量底物可使酶促反应速度达到正常Vmax。","a":"对","n":"竞争性抑制可被高[S]克服。","deck":"biochem-midterm","id":"biochem-midterm_109"},{"t":"tf","c":"真题判断","q":"DNA是遗传物质，而RNA则不是。","a":"错","n":"某些病毒以RNA为遗传物质。","deck":"biochem-midterm","id":"biochem-midterm_110"},{"t":"tf","c":"真题判断","q":"糖酵解在线粒体，三羧酸循环在细胞基质。","a":"错","n":"相反：糖酵解在胞质，TCA在线粒体基质。","deck":"biochem-midterm","id":"biochem-midterm_111"},{"t":"tf","c":"真题判断","q":"生物遗传信息的流向只能DNA→RNA→Protein。","a":"错","n":"还有反转录、RNA复制等。","deck":"biochem-midterm","id":"biochem-midterm_112"},{"t":"calc","c":"真题计算","q":"遵循米氏动力学的酶，当速度为Vmax的10%时，[S]是Km的多少倍？当速度从Vmax的10%提高到90%时，[S]需改变多少倍？","a":"10%时[S]=1/9 Km；90%时[S]=9 Km；共提高81倍","n":"","deck":"biochem-midterm","steps":["米氏方程 v = Vmax[S]/(Km+[S])","代v=0.1Vmax：0.1 = [S]/(Km+[S]) → [S]=Km/9 = 1/9 Km","代v=0.9Vmax：0.9 = [S]/(Km+[S]) → 9Km+9[S]=10[S] → [S]=9Km","比值 = 9Km / (Km/9) = 81 倍"],"id":"biochem-midterm_113"},{"t":"calc","c":"真题计算","q":"某酶[S]=Km时v=50 μmol/min，求Vmax；又当[S]=20 μmol/L时v=40 μmol/min，求Km。","a":"Vmax=100 μmol/min，Km=30 μmol/L","n":"","deck":"biochem-midterm","steps":["[S]=Km时 v=1/2 Vmax → Vmax = 2×50 = 100","代 Vmax=100、[S]=20、v=40：40 = 100×20/(Km+20)","40(Km+20)=2000 → 40Km=1200 → Km=30 μmol/L"],"id":"biochem-midterm_114"},{"t":"calc","c":"真题计算","q":"已知Km=0.05 mol/L，欲使反应速度达到Vmax的80%，底物浓度[S]应为多少？","a":"[S]=0.2 mol/L","n":"","deck":"biochem-midterm","steps":["0.8Vmax = Vmax[S]/(Km+[S])","0.8(Km+[S])=[S] → 0.8Km+0.8[S]=[S] → 0.2[S]=0.8Km","[S]=4Km = 4×0.05 = 0.2 mol/L"],"id":"biochem-midterm_115"},{"t":"calc","c":"真题计算","q":"一段全为α-螺旋的肽链含45个氨基酸残基，求该α-螺旋片段长度(nm)。","a":"6.75 nm","n":"","deck":"biochem-midterm","steps":["α-螺旋每残基沿轴上升0.15 nm","长度 = 45 × 0.15 = 6.75 nm"],"id":"biochem-midterm_116"},{"t":"saq","c":"真题简答","q":"简述DNA双螺旋结构模型的要点。","a":["两条反向平行的多聚核苷酸链绕中心轴右手螺旋","脱氧核糖-磷酸骨架在外，碱基在内；A=T(2氢键)、G≡C(3氢键)严格配对","直径2nm；相邻碱基对间距0.34nm；每圈10bp，螺距3.4nm","稳定力：碱基堆积力 + 碱基间氢键"],"n":"高频必背4点。","deck":"biochem-midterm","id":"biochem-midterm_117"},{"t":"saq","c":"真题简答","q":"酶竞争性抑制与非竞争性抑制的主要区别？对Vmax和Km的影响？","a":["竞争：抑制剂与底物结构相似，竞争活性中心；Vmax不变，Km增大","非竞争：抑制剂结合活性中心外部位，酶-底物-抑制剂三元复合物不能产生产物；Vmax减小，Km不变","竞争可被高底物浓度解除；非竞争不能"],"n":"已考多次，必背。","deck":"biochem-midterm","id":"biochem-midterm_118"},{"t":"saq","c":"真题简答","q":"原核生物与真核生物mRNA的主要区别。","a":["原核多为多顺反子，真核多为单顺反子","原核转录翻译偶联，真核需加工(5'帽、3' polyA)后翻译","原核mRNA半衰期短，真核较长","真核5'端m7G帽、3'端polyA尾；原核5'有SD序列，无帽无尾"],"n":"","deck":"biochem-midterm","id":"biochem-midterm_119"},{"t":"saq","c":"真题简答","q":"磺胺类药物抑制细菌生长的原理是什么？","a":["磺胺结构与对氨基苯甲酸(PABA)相似","是细菌二氢叶酸合成酶的竞争性抑制剂","阻断叶酸合成→核酸合成障碍→抑制细菌生长","提示：用药需足够浓度才有效"],"n":"经典竞争性抑制实例。","deck":"biochem-midterm","id":"biochem-midterm_120"},{"t":"saq","c":"真题简答","q":"有机磷农药的毒性机理是什么？","a":["有机磷与乙酰胆碱酯酶活性中心Ser残基共价结合","使酶不可逆失活","乙酰胆碱积累→神经中毒症状(过度兴奋→死亡)","属不可逆抑制作用"],"n":"","deck":"biochem-midterm","id":"biochem-midterm_121"},{"t":"saq","c":"真题简答","q":"米氏常数Km的意义是什么？","a":["Km=(K2+K3)/K1，是酶的特征常数(不同酶、同一酶不同底物Km不同)","数值上等于 v=1/2Vmax 时的底物浓度[S]","反映酶与底物亲和力：Km小→亲和力大，Km大→亲和力小","Km还可用于判断最适底物(最小Km者)"],"n":"","deck":"biochem-midterm","id":"biochem-midterm_122"},{"t":"mc","c":"真题选择","q":"一个DNA分子中G占32.8%，则A的摩尔比应为？","a":3,"n":"A=T、G=C，A=(100−2×32.8)/2=17.2%。","deck":"biochem-midterm","o":["67.2%","65.6%","32.8%","17.2%"],"id":"biochem-midterm_123"},{"t":"mc","c":"真题选择","q":"某酶有4种底物，Km分别为S1=5×10⁻⁵、S2=1×10⁻⁵、S3=10×10⁻⁵、S4=0.1×10⁻⁵ M，其最适底物是？","a":3,"n":"Km最小者亲和力最大→最适底物。","deck":"biochem-midterm","o":["S1","S2","S3","S4"],"id":"biochem-midterm_124"},{"t":"mc","c":"真题选择","q":"酶的不可逆抑制的机制是抑制剂？","a":1,"n":"不可逆抑制=与催化中心共价结合。","deck":"biochem-midterm","o":["使酶蛋白变性","与酶的催化中心以共价键结合","与酶的必需基团结合","与活性中心次级键结合"],"id":"biochem-midterm_125"},{"t":"mc","c":"真题选择","q":"组成天然蛋白质的氨基酸中，没有旋光性的是？","a":1,"n":"Gly的α-C连两个H，无手性中心。","deck":"biochem-midterm","o":["Pro","Gly","Trp","Tyr"],"id":"biochem-midterm_126"},{"t":"mc","c":"真题选择","q":"下列含巯基(-SH)、可形成二硫键的氨基酸是？","a":2,"n":"Cys含-SH。","deck":"biochem-midterm","o":["蛋氨酸","苯丙氨酸","半胱氨酸","组氨酸"],"id":"biochem-midterm_127"},{"t":"mc","c":"真题选择","q":"tRNA携带氨基酸的特异性部位是？","a":1,"n":"氨基酸接在3′-CCA末端。","deck":"biochem-midterm","o":["TψC环","3′端-CCA","DHU环","额外环"],"id":"biochem-midterm_128"},{"t":"mc","c":"真题选择","q":"核酸对紫外光的最大吸收峰在？","a":2,"n":"核酸260nm，蛋白质280nm。","deck":"biochem-midterm","o":["280nm","200nm","260nm","340nm"],"id":"biochem-midterm_129"},{"t":"mc","c":"真题选择","q":"转氨酶的辅酶是？","a":3,"n":"PLP是转氨酶辅酶。","deck":"biochem-midterm","o":["VitB1衍生物","VitB2","VitB12衍生物","VitB6的磷酸酯(磷酸吡哆醛PLP)"],"id":"biochem-midterm_130"},{"t":"term","c":"真题名解","q":"氨基酸等电点 (pI)","a":"某pH下氨基酸解离成阳离子与阴离子的趋势及数目相等，净电荷为零，此时溶液的pH即为等电点。","n":"","deck":"biochem-midterm","id":"biochem-midterm_131"},{"t":"term","c":"真题名解","q":"酶的活性中心","a":"酶分子中直接参与底物结合与催化作用的氨基酸残基侧链基团，按一定空间结构组成的区域。","n":"","deck":"biochem-midterm","id":"biochem-midterm_132"},{"t":"term","c":"真题名解","q":"分子杂交","a":"不同来源的DNA变性后(或单链DNA与RNA混合)，只要局部有碱基互补可能，即可形成局部双链的过程。","n":"","deck":"biochem-midterm","id":"biochem-midterm_133"},{"t":"term","c":"真题名解","q":"熔解温度 (Tm)","a":"核酸热变性时，A260达到最大值一半(或一半双螺旋被破坏)时的温度；GC含量越高Tm越高。","n":"","deck":"biochem-midterm","id":"biochem-midterm_134"},{"t":"term","c":"真题名解","q":"增色效应","a":"核酸变性后双螺旋松解、碱基暴露，260nm处紫外吸收值增加的现象。","n":"","deck":"biochem-midterm","id":"biochem-midterm_135"},{"t":"term","c":"真题名解","q":"酰胺平面 (肽平面)","a":"因肽键具部分双键性质不能自由旋转，围绕肽键的6个原子共处于同一平面，称为酰胺平面。","n":"","deck":"biochem-midterm","id":"biochem-midterm_136"},{"t":"term","c":"糖酵解","q":"糖酵解 (Glycolysis)","a":"在无氧条件下，葡萄糖分解产生丙酮酸的过程；共10步反应，全部在胞质中进行，分准备(耗能2ATP)与产能(产4ATP+2NADH)两阶段。","n":"","deck":"biochem-midterm","id":"biochem-midterm_137"},{"t":"term","c":"糖酵解","q":"发酵 (Fermentation)","a":"无氧条件下，葡萄糖经糖酵解最终产生酒精(酵母)或乳酸(肌肉/乳酸菌)的过程；作用是使NADH重新氧化为NAD+以延续糖酵解。","n":"","deck":"biochem-midterm","id":"biochem-midterm_138"},{"t":"term","c":"糖酵解","q":"底物水平磷酸化 (Substrate-level phosphorylation)","a":"高能磷酸化合物直接将磷酸基转移给ADP生成ATP的反应(如糖酵解中磷酸甘油酸激酶、丙酮酸激酶催化的两步)。","n":"","deck":"biochem-midterm","id":"biochem-midterm_139"},{"t":"term","c":"TCA","q":"三羧酸循环 (TCA / 柠檬酸循环 / Krebs循环)","a":"乙酰CoA彻底氧化的共同终末途径，8步反应，真核在线粒体基质；糖、脂肪、氨基酸的碳骨架最终都转变为乙酰CoA进入此循环。","n":"","deck":"biochem-midterm","id":"biochem-midterm_140"},{"t":"term","c":"TCA","q":"丙酮酸脱氢酶复合体 (PDH complex)","a":"催化丙酮酸→乙酰CoA的限速复合体，含E1(丙酮酸脱氢酶)、E2(二氢硫辛酰转乙酰基酶)、E3(二氢硫辛酰脱氢酶)；辅因子为TPP、硫辛酰胺、FAD、NAD+、CoA。","n":"","deck":"biochem-midterm","id":"biochem-midterm_141"},{"t":"term","c":"糖原","q":"糖原 (Glycogen)","a":"动物体内糖的储存形式之一，是能迅速动用的能量储备；葡萄糖以α-1,4-糖苷键成链，约每8~10个残基处经α-1,6-糖苷键分支。","n":"","deck":"biochem-midterm","id":"biochem-midterm_142"},{"t":"term","c":"糖原","q":"糖原磷酸化酶 (Glycogen phosphorylase)","a":"糖原分解的关键酶，以磷酸解方式从非还原端切下葡萄糖残基生成葡萄糖-1-磷酸(G1P)。","n":"","deck":"biochem-midterm","id":"biochem-midterm_143"},{"t":"term","c":"糖原","q":"糖原合酶 (Glycogen synthase)","a":"糖原合成的关键酶，催化UDP-葡萄糖(UDPG)的葡萄糖基以α-1,4-糖苷键连接到糖原引物非还原端；只能合成直链。","n":"","deck":"biochem-midterm","id":"biochem-midterm_144"},{"t":"term","c":"糖原","q":"UDP-葡萄糖 (UDPG)","a":"糖原合成中葡萄糖的活化形式，由葡萄糖-1-磷酸与UTP在UDPG焦磷酸化酶催化下生成(放出PPi)。","n":"","deck":"biochem-midterm","id":"biochem-midterm_145"},{"t":"term","c":"糖原","q":"糖原素 (Glycogenin)","a":"糖原合成的引物蛋白，自身酪氨酸残基结合UDP-葡萄糖并延长约8个葡萄糖单位，启动糖链合成。","n":"","deck":"biochem-midterm","id":"biochem-midterm_146"},{"t":"term","c":"TCA","q":"回补反应 (Anaplerotic reaction)","a":"补充三羧酸循环中间物(如草酰乙酸、α-酮戊二酸、琥珀酰CoA、苹果酸)的反应，维持循环中间物浓度。","n":"","deck":"biochem-midterm","id":"biochem-midterm_147"},{"t":"term","c":"TCA","q":"乙醛酸循环 (Glyoxylate cycle)","a":"植物、微生物和某些无脊椎动物中以乙酸为碳源生成糖类的途径；2分子乙酰CoA进入，无CO2产生，净生成琥珀酸；特有酶为异柠檬酸裂合酶和苹果酸合酶。","n":"","deck":"biochem-midterm","id":"biochem-midterm_148"},{"t":"mc","c":"糖酵解","q":"糖酵解的限速酶（最关键调控点）是？","a":1,"n":"PFK-1催化F6P→F1,6BP，是糖酵解最重要的限速步骤。","deck":"biochem-midterm","o":["己糖激酶","磷酸果糖激酶-1 (PFK-1)","丙酮酸激酶","甘油醛-3-磷酸脱氢酶"],"id":"biochem-midterm_149"},{"t":"mc","c":"糖酵解","q":"1分子葡萄糖经糖酵解(胞质)净生成？","a":0,"n":"准备阶段耗2ATP，产能阶段产4ATP+2NADH，净2ATP、2NADH、2丙酮酸。","deck":"biochem-midterm","o":["2 ATP + 2 NADH + 2 丙酮酸","4 ATP + 2 NADH","36 ATP","0 ATP(净)"],"id":"biochem-midterm_150"},{"t":"mc","c":"糖酵解","q":"下列哪一项是PFK-1的正别构效应物(激活剂)？","a":2,"n":"AMP、ADP、F-2,6-BP为PFK-1正调节物；ATP、H+为负调节物。","deck":"biochem-midterm","o":["ATP","H+","AMP / ADP / 果糖-2,6-二磷酸","柠檬酸"],"id":"biochem-midterm_151"},{"t":"mc","c":"糖酵解","q":"糖酵解中发生底物水平磷酸化的两步由哪两个酶催化？","a":1,"n":"PGK(1,3-BPG→3-PG)与丙酮酸激酶(PEP→丙酮酸)是两步底物水平磷酸化。","deck":"biochem-midterm","o":["己糖激酶/醛缩酶","磷酸甘油酸激酶/丙酮酸激酶","烯醇化酶/磷酸果糖激酶","GAPDH/磷酸甘油酸变位酶"],"id":"biochem-midterm_152"},{"t":"mc","c":"糖酵解","q":"甘油醛-3-磷酸脱氢酶(GAPDH)可被哪种物质抑制？","a":1,"n":"碘乙酸不可逆抑制GAPDH，导致磷酸六碳糖堆积。","deck":"biochem-midterm","o":["丙二酸","碘乙酸(碘丙酮)","草酰乙酸","氟离子"],"id":"biochem-midterm_153"},{"t":"mc","c":"糖酵解","q":"成熟红细胞主要依靠哪条途径供能？","a":0,"n":"红细胞无线粒体，只能靠糖酵解(无氧)供能。","deck":"biochem-midterm","o":["糖酵解","三羧酸循环","氧化磷酸化","磷酸戊糖途径"],"id":"biochem-midterm_154"},{"t":"mc","c":"TCA","q":"三羧酸循环中唯一与线粒体内膜结合的不溶性酶是？","a":1,"n":"琥珀酸脱氢酶是TCA中唯一镶嵌在线粒体内膜上的酶。","deck":"biochem-midterm","o":["柠檬酸合酶","琥珀酸脱氢酶","苹果酸脱氢酶","异柠檬酸脱氢酶"],"id":"biochem-midterm_155"},{"t":"mc","c":"TCA","q":"琥珀酸脱氢酶的强竞争性抑制剂是？","a":0,"n":"丙二酸结构与琥珀酸相似，是琥珀酸脱氢酶的强竞争性抑制剂。","deck":"biochem-midterm","o":["丙二酸","苹果酸","草酰乙酸","氰化物"],"id":"biochem-midterm_156"},{"t":"mc","c":"TCA","q":"三羧酸循环中唯一产生底物水平磷酸化(生成GTP)的步骤由谁催化？","a":0,"n":"琥珀酰-CoA合成酶催化琥珀酰CoA→琥珀酸，产生GTP(等价于ATP)。","deck":"biochem-midterm","o":["琥珀酰-CoA合成酶","琥珀酸脱氢酶","延胡索酸酶","苹果酸脱氢酶"],"id":"biochem-midterm_157"},{"t":"mc","c":"TCA","q":"三羧酸循环的三步不可逆/限速反应分别由哪些酶催化？","a":1,"n":"三步限速酶：柠檬酸合酶、异柠檬酸脱氢酶、α-酮戊二酸脱氢酶。","deck":"biochem-midterm","o":["己糖激酶、PFK-1、丙酮酸激酶","柠檬酸合酶、异柠檬酸脱氢酶、α-酮戊二酸脱氢酶","琥珀酸脱氢酶、延胡索酸酶、苹果酸脱氢酶","丙酮酸脱氢酶、PDH、E3"],"id":"biochem-midterm_158"},{"t":"mc","c":"TCA","q":"丙酮酸脱氢酶复合体的辅因子不包括下列哪一项？","a":3,"n":"PDH辅因子为TPP、硫辛酰胺、FAD、NAD+、CoA；不含生物素。","deck":"biochem-midterm","o":["TPP","硫辛酰胺","CoA","生物素"],"id":"biochem-midterm_159"},{"t":"mc","c":"糖原","q":"肌糖原不能直接补充血糖，其根本原因是？","a":1,"n":"葡萄糖-6-磷酸酶只存在于肝、肾；肌细胞无此酶，故G6P只能进糖酵解不能变葡萄糖出血糖。","deck":"biochem-midterm","o":["肌肉不含糖原磷酸化酶","肌细胞不表达葡萄糖-6-磷酸酶","肌细胞无糖原合酶","肌肉缺乏己糖激酶"],"id":"biochem-midterm_160"},{"t":"mc","c":"糖原","q":"肝糖原能维持血糖，是因为肝细胞含？","a":1,"n":"葡萄糖-6-磷酸酶(位于肝肾内质网腔面)可将G6P水解为葡萄糖释放入血。","deck":"biochem-midterm","o":["糖原磷酸化酶","葡萄糖-6-磷酸酶","分支酶","脱支酶"],"id":"biochem-midterm_161"},{"t":"mc","c":"糖原","q":"糖原的主链与分支点分别由哪种糖苷键连接？","a":0,"n":"主链α-1,4，分支点α-1,6。","deck":"biochem-midterm","o":["α-1,4 / α-1,6","β-1,4 / β-1,6","α-1,6 / α-1,4","α-1,4 / β-1,4"],"id":"biochem-midterm_162"},{"t":"mc","c":"糖原","q":"糖原分解最终产物中，葡萄糖-1-磷酸与游离葡萄糖的比例约为？","a":1,"n":"经磷酸化酶与脱支酶作用，约85%为G1P、15%为游离葡萄糖。","deck":"biochem-midterm","o":["50% / 50%","85% / 15%","15% / 85%","100% G1P"],"id":"biochem-midterm_163"},{"t":"mc","c":"糖原","q":"糖原合成起始所需的引物是？","a":1,"n":"糖原素先结合自身酪氨酸残基上UDP-葡萄糖(~8单位)作为引物，糖原不能无中生有合成。","deck":"biochem-midterm","o":["游离葡萄糖","糖原素(glycogenin)自身糖基化形成","UDPG","分支酶"],"id":"biochem-midterm_164"},{"t":"mc","c":"糖原","q":"胰岛素对糖原代谢的作用是？","a":1,"n":"胰岛素经PI3K-PKB-GSK3通路使糖原合酶活化、抑制分解。","deck":"biochem-midterm","o":["促进分解、抑制合成","促进合成、抑制分解","只影响脂肪","无作用"],"id":"biochem-midterm_165"},{"t":"mc","c":"糖原","q":"主要促进肝糖原分解(升血糖)的激素是？","a":1,"n":"胰高血糖素主要作用于肝(肌细胞无其受体)；肾上腺素主要促肌糖原分解。","deck":"biochem-midterm","o":["胰岛素","胰高血糖素","肾上腺素(主要作用于肌)","甲状腺激素"],"id":"biochem-midterm_166"},{"t":"mc","c":"糖原","q":"在肌肉中，Ca2+ 对糖原磷酸化酶的调节意义是？","a":1,"n":"肌肉收缩时[Ca2+]升高，Ca2+结合磷酸化酶b别构位点促其转为活性的a型。","deck":"biochem-midterm","o":["别构抑制剂","收缩信号，别构激活磷酸化酶b→a","使酶失活","与激素无关"],"id":"biochem-midterm_167"},{"t":"mc","c":"糖酵解","q":"NADH从胞质进入线粒体主要靠哪两种穿梭系统？","a":1,"n":"3-磷酸甘油穿梭(肌肉/神经，FADH2进线粒)与苹果酸-天冬氨酸穿梭(心/肝/肾，NADH进线粒)。","deck":"biochem-midterm","o":["柠檬酸-丙酮酸穿梭 / 苹果酸穿梭","3-磷酸甘油穿梭 / 苹果酸-天冬氨酸穿梭","肉碱穿梭 / 葡萄糖转运","CO2穿梭 / 丙酮酸穿梭"],"id":"biochem-midterm_168"},{"t":"fill","c":"糖酵解","q":"糖酵解10步分两阶段：准备阶段消耗___分子ATP，产能阶段产生___分子ATP和___分子NADH。","a":"2；4；2","n":"","deck":"biochem-midterm","id":"biochem-midterm_169"},{"t":"fill","c":"糖酵解","q":"糖酵解第一个产生高能中间物(1,3-二磷酸甘油酸)的反应由___催化；该酶可被___抑制。","a":"甘油醛-3-磷酸脱氢酶(GAPDH)；碘乙酸","n":"","deck":"biochem-midterm","id":"biochem-midterm_170"},{"t":"fill","c":"TCA","q":"1分子乙酰CoA经一次TCA循环：产生___分子CO2、___分子NADH、___分子FADH2、___分子GTP。","a":"2；3；1；1","n":"","deck":"biochem-midterm","id":"biochem-midterm_171"},{"t":"fill","c":"TCA","q":"按P/O比，NADH约产生___ ATP，FADH2约产生___ ATP。","a":"2.5；1.5","n":"","deck":"biochem-midterm","id":"biochem-midterm_172"},{"t":"fill","c":"糖原","q":"糖原主链以___糖苷键连接，约每___个葡萄糖残基处经___糖苷键形成分支。","a":"α-1,4；8~10；α-1,6","n":"","deck":"biochem-midterm","id":"biochem-midterm_173"},{"t":"fill","c":"糖原","q":"糖原磷酸化酶以___方式(磷酸解)从非还原端切下残基生成___，再经磷酸葡萄糖变位酶转为___。","a":"磷酸解；葡萄糖-1-磷酸(G1P)；葡萄糖-6-磷酸(G6P)","n":"","deck":"biochem-midterm","id":"biochem-midterm_174"},{"t":"fill","c":"糖原","q":"糖原合成中葡萄糖先活化为___(UDPG)，由___催化G1P+UTP生成。","a":"尿苷二磷酸葡萄糖；UDPG焦磷酸化酶","n":"","deck":"biochem-midterm","id":"biochem-midterm_175"},{"t":"fill","c":"糖原","q":"糖原合成关键酶是___(催化α-1,4)，分支需___(断开α-1,4并形成α-1,6)；分解关键酶是___。","a":"糖原合酶；分支酶；糖原磷酸化酶","n":"","deck":"biochem-midterm","id":"biochem-midterm_176"},{"t":"saq","c":"糖酵解","q":"简述糖酵解的两阶段与净产出。","a":["准备阶段(5步)：葡萄糖→果糖-1,6-二磷酸，消耗2 ATP，己糖激酶与PFK-1各耗1","产能阶段(5步)：2分子甘油醛-3-磷酸→2丙酮酸，产生4 ATP(两步底物水平磷酸化)与2 NADH","净产出：2 ATP(净)+2 NADH+2 丙酮酸；全部中间物均为磷酸化形式；反应在胞质"],"n":"注意净ATP=2而非4。","deck":"biochem-midterm","id":"biochem-midterm_177"},{"t":"saq","c":"糖酵解","q":"糖酵解的关键调控点及别构调节物有哪些？","a":["限速酶PFK-1(最重要)：负调节ATP、H+；正调节AMP、ADP、果糖-2,6-二磷酸(F-2,6-BP)","F-2,6-BP由双功能酶PFK2/FBPase2调控：胰岛素激活PFK2(升F-2,6-BP促酵解)，胰高血糖素激活FBPase2(降F-2,6-BP抑酵解)","己糖激酶受G6P反馈抑制；丙酮酸激酶受ATP、丙酮酸别构抑制，受F1,6BP激活，并可被磷酸化失活"],"n":"","deck":"biochem-midterm","id":"biochem-midterm_178"},{"t":"saq","c":"TCA","q":"列出三羧酸循环的8步及催化酶(顺序)。","a":["①柠檬酸合酶：乙酰CoA+草酰乙酸→柠檬酸","②乌头酸酶：柠檬酸→异柠檬酸","③异柠檬酸脱氢酶：异柠檬酸→α-酮戊二酸(第一次脱羧)","④α-酮戊二酸脱氢酶复合体：→琥珀酰CoA(第二次脱羧)","⑤琥珀酰-CoA合成酶：→琥珀酸(底物水平磷酸化产GTP)","⑥琥珀酸脱氢酶：→延胡索酸(膜结合，丙二酸抑制)","⑦延胡索酸酶：→苹果酸","⑧苹果酸脱氢酶：→草酰乙酸"],"n":"口诀：柠→异→α酮→琥→琥珀→延→苹→草。","deck":"biochem-midterm","id":"biochem-midterm_179"},{"t":"saq","c":"TCA","q":"三羧酸循环有哪些特点与生理功能？","a":["特点：一步底物水平磷酸化(GTP)、两步氧化脱羧(2CO2)、三步不可逆限速、四步氧化还原、消耗2H2O","氧气不直接参与，但需有氧再生NADH/FADH2","功能：糖/脂/氨基酸最终氧化共同途径；与氧化呼吸链偶联产ATP；为合成提供前体(柠檬酸、α-酮戊二酸)；某些中间物作别构效应物(柠檬酸)"],"n":"","deck":"biochem-midterm","id":"biochem-midterm_180"},{"t":"saq","c":"糖原","q":"简述糖原分解过程。","a":["①糖原磷酸化酶磷酸解非还原端→G1P(约85%)，脱支酶转移并水解α-1,6分支(约15%游离葡萄糖)","②磷酸葡萄糖变位酶：G1P→G6P","③肝/肾中葡萄糖-6-磷酸酶将G6P水解为葡萄糖补充血糖；肌肉无此酶，G6P只能进糖酵解","溶酶体中则由酸性α-糖苷酶直接水解糖原为葡萄糖(缺陷致糖原储存病)"],"n":"","deck":"biochem-midterm","id":"biochem-midterm_181"},{"t":"saq","c":"糖原","q":"简述糖原合成过程与'双向调控'。","a":["合成：葡萄糖→G6P→G1P→UDPG(活化)→糖原合酶催化α-1,4连接(需糖原素引物)→分支酶形成α-1,6分支","双向调控：合成(糖原合酶)与分解(磷酸化酶)走不同途径，合成活跃时分解被抑制","关键酶均受共价修饰(磷酸化/去磷酸化)与别构调节，且有级联放大；激素：胰岛素促合成抑分解，胰高血糖素(肝)/肾上腺素(肌)促分解","肝'利他'维持血糖，肌'利己'供能"],"n":"","deck":"biochem-midterm","id":"biochem-midterm_182"},{"t":"calc","c":"糖代谢计算","q":"1分子葡萄糖经糖酵解(胞质)净生成多少ATP和NADH？写出过程。","a":"净2 ATP、2 NADH、2 丙酮酸","n":"","deck":"biochem-midterm","steps":["准备阶段：2步磷酸化共消耗2 ATP","产能阶段：2×丙酮酸激酶 + 2×磷酸甘油酸激酶产生4 ATP，2×GAPDH产生2 NADH","净ATP = 4−2 = 2；另得2 NADH、2 丙酮酸"],"id":"biochem-midterm_183"},{"t":"calc","c":"糖代谢计算","q":"1分子乙酰CoA经一次完整TCA循环，按NADH≈2.5 ATP、FADH2≈1.5 ATP，共产生多少ATP当量？","a":"10 ATP当量 (3×2.5 + 1×1.5 + 1×1 = 10)","n":"","deck":"biochem-midterm","steps":["TCA产出：3 NADH + 1 FADH2 + 1 GTP(=1 ATP)","3 NADH × 2.5 = 7.5","1 FADH2 × 1.5 = 1.5","总计 = 7.5 + 1.5 + 1 = 10 ATP当量"],"id":"biochem-midterm_184"},{"t":"calc","c":"糖代谢计算","q":"1分子葡萄糖彻底氧化，若胞质NADH经苹果酸-天冬氨酸穿梭(2.5 ATP/个)进入线粒体，按旧P/O比计共得多少ATP？","a":"约38 ATP(旧值；若经3-磷酸甘油穿梭则为36)","n":"","deck":"biochem-midterm","steps":["糖酵解：净2 ATP + 2 NADH(胞质)","2 NADH胞质×2.5 = 5 (苹果酸穿梭)","2丙酮酸→2乙酰CoA：2 NADH×2.5 = 5","2乙酰CoA×TCA 10 = 20","总计 = 2+5+5+20 = 32(新值)；旧值按NADH=3/FADH2=2则=2+6+6+24=38"],"id":"biochem-midterm_185"},{"t":"calc","c":"糖代谢计算","q":"1分子乙酰CoA经一次TCA循环放出多少分子CO2？这些碳原子是否来自进入循环的乙酰CoA本身？","a":"2 分子CO2；不是直接来自乙酰CoA(来自草酰乙酸的羧基，经两轮脱羧放出)","n":"","deck":"biochem-midterm","steps":["第3步异柠檬酸脱氢酶放第1个CO2，第4步α-酮戊二酸脱氢酶放第2个CO2","两个CO2来自草酰乙酸的羧基碳，而非乙酰CoA的乙酰基(乙酰基以碳骨架保留并通过循环被逐步替换)"],"id":"biochem-midterm_186"},{"t":"tf","c":"考研拓展","q":"天然氨基酸都具有一个不对称的α-碳原子。","a":"错","n":"甘氨酸(Gly)的α-C连两个H，无手性中心，无旋光性。","deck":"biochem-midterm","id":"biochem-midterm_187"},{"t":"tf","c":"考研拓展","q":"成人体中必需氨基酸有8种。","a":"对","n":"成人8种(苯丙/色/赖/缬/亮/异亮/苏/蛋)；组氨酸为儿童必需。","deck":"biochem-midterm","id":"biochem-midterm_188"},{"t":"tf","c":"考研拓展","q":"赖氨酸、精氨酸、组氨酸都是碱性氨基酸，在pH=7时带正电荷。","a":"对","n":"三者侧链碱性，生理pH下质子化带正电。","deck":"biochem-midterm","id":"biochem-midterm_189"},{"t":"tf","c":"考研拓展","q":"公式 pI=(pK2+pK3)/2 适用于计算酸性或碱性氨基酸的等电点。","a":"错","n":"这是中性氨基酸公式；酸性用(pK1+pK3)/2、碱性用(pK1+pKR)/2。","deck":"biochem-midterm","id":"biochem-midterm_190"},{"t":"tf","c":"考研拓展","q":"组成蛋白质的20种标准氨基酸都有不对称α碳，所以都具有旋光性。","a":"错","n":"Gly无手性α-C，无旋光性。","deck":"biochem-midterm","id":"biochem-midterm_191"},{"t":"tf","c":"考研拓展","q":"各种天然氨基酸都有280nm光吸收，可作紫外法定量检测蛋白质的依据。","a":"错","n":"仅芳香族氨基酸(Trp最强、Tyr次之)在280nm有吸收。","deck":"biochem-midterm","id":"biochem-midterm_192"},{"t":"tf","c":"考研拓展","q":"茚三酮与脯氨酸反应生成特征性黄色化合物。","a":"对","n":"Pro/Hyp生成黄色；其他氨基酸生成蓝紫色(Ruhemann紫)。","deck":"biochem-midterm","id":"biochem-midterm_193"},{"t":"tf","c":"考研拓展","q":"肽键具有部分双键性质，不能自由旋转。","a":"对","n":"肽键部分双键性→酰胺平面(肽平面)。","deck":"biochem-midterm","id":"biochem-midterm_194"},{"t":"tf","c":"考研拓展","q":"体内合成肽链方向N→C；体外固相化学合成多肽通常从C端到N端。","a":"对","n":"","deck":"biochem-midterm","id":"biochem-midterm_195"},{"t":"tf","c":"考研拓展","q":"因一级结构决定空间结构，基因工程表达的肽链一定能自然形成天然构象。","a":"错","n":"还需正确折叠/分子伴侣，错误折叠会失活或聚集。","deck":"biochem-midterm","id":"biochem-midterm_196"},{"t":"tf","c":"考研拓展","q":"蛋白质氨基酸序列自动分析仪(Edman降解)采用PITC(异硫氰酸苯酯)。","a":"对","n":"","deck":"biochem-midterm","id":"biochem-midterm_197"},{"t":"tf","c":"考研拓展","q":"具有催化活性的RNA分子称为核酸酶。","a":"错","n":"是核酶(ribozyme)；核酸酶是降解核酸的酶。","deck":"biochem-midterm","id":"biochem-midterm_198"},{"t":"tf","c":"考研拓展","q":"Km是酶的特征常数，只与酶的性质有关，与酶浓度无关。","a":"对","n":"在pH、温度、离子强度固定条件下；不同底物Km不同。","deck":"biochem-midterm","id":"biochem-midterm_199"},{"t":"tf","c":"考研拓展","q":"凡有抑制剂存在都会降低酶与底物的亲和力。","a":"错","n":"非竞争抑制Km不变(亲和力不变)；反竞争Km减小(亲和力增大)。","deck":"biochem-midterm","id":"biochem-midterm_200"},{"t":"tf","c":"考研拓展","q":"对某一酶而言，过渡态类似物是比底物类似物更有效的竞争性抑制剂。","a":"对","n":"过渡态类似物与酶结合最强，是设计酶抑制剂的思路。","deck":"biochem-midterm","id":"biochem-midterm_201"},{"t":"tf","c":"考研拓展","q":"竞争性抑制的特点是Km不变、Vmax降低。","a":"错","n":"竞争性：Km增大、Vmax不变，可被高[S]克服。","deck":"biochem-midterm","id":"biochem-midterm_202"},{"t":"tf","c":"考研拓展","q":"非竞争性抑制属于不可逆抑制。","a":"错","n":"非竞争是可逆抑制的一种；Vmax↓、Km不变。","deck":"biochem-midterm","id":"biochem-midterm_203"},{"t":"tf","c":"考研拓展","q":"加入足够底物，非竞争性抑制下酶反应最大速度也能保持不变。","a":"错","n":"非竞争Vmax降低，加底物无法挽回。","deck":"biochem-midterm","id":"biochem-midterm_204"},{"t":"tf","c":"考研拓展","q":"酶的必需基团就是酶的活性中心。","a":"错","n":"必需基团含活性中心内与活性中心外(如别构部位)两类。","deck":"biochem-midterm","id":"biochem-midterm_205"},{"t":"tf","c":"考研拓展","q":"在酶催化中，组氨酸残基的咪唑基既可作碱催化也可作酸催化(广义酸碱)。","a":"对","n":"咪唑基pKa≈6，生理pH下既可质子化也可去质子化。","deck":"biochem-midterm","id":"biochem-midterm_206"},{"t":"tf","c":"考研拓展","q":"DNA变性是天然双链DNA被解开成为单链的过程。","a":"对","n":"","deck":"biochem-midterm","id":"biochem-midterm_207"},{"t":"tf","c":"考研拓展","q":"某DNA的Tm比物种B高，说明物种A的A=T碱基对含量比B高。","a":"错","n":"Tm高说明G+C含量高(三氢键更稳定)；A=T含量反而低。","deck":"biochem-midterm","id":"biochem-midterm_208"},{"t":"tf","c":"考研拓展","q":"tRNA中含有较多的稀有氨基酸。","a":"错","n":"tRNA含较多稀有碱基(如假尿苷ψ)，不是稀有氨基酸。","deck":"biochem-midterm","id":"biochem-midterm_209"},{"t":"tf","c":"考研拓展","q":"辅酶与酶的结合比辅基与酶的结合更为紧密。","a":"错","n":"辅基结合更紧密(常共价/强)；辅酶结合松散、可解离。","deck":"biochem-midterm","id":"biochem-midterm_210"},{"t":"tf","c":"考研拓展","q":"磷酸吡哆醛既是转氨酶的辅酶，也是羧化酶的辅酶。","a":"错","n":"羧化酶以生物素为辅酶；PLP是转氨/脱羧酶辅酶。","deck":"biochem-midterm","id":"biochem-midterm_211"},{"t":"tf","c":"考研拓展","q":"糖原磷酸化酶b是别构酶，AMP是其正效应物(激活剂)。","a":"对","n":"AMP、Ca2+、cAMP级联均可活化；葡萄糖-6-P为负效应。","deck":"biochem-midterm","id":"biochem-midterm_212"},{"t":"tf","c":"考研拓展","q":"共价修饰调节酶被磷酸化后活性一定增大。","a":"错","n":"糖原合酶磷酸化后反而失活；磷酸化酶磷酸化后活化——因酶而异。","deck":"biochem-midterm","id":"biochem-midterm_213"},{"t":"tf","c":"考研拓展","q":"氰化物(CN-)可抑制整个呼吸链的氧化磷酸化。","a":"对","n":"抑制细胞色素c氧化酶(Cytaa3→O2)，阻断电子传递给O2。","deck":"biochem-midterm","id":"biochem-midterm_214"},{"t":"tf","c":"考研拓展","q":"解偶联剂不仅抑制ATP合成，也抑制电子传递。","a":"错","n":"解偶联剂(如2,4-DNP)不抑制电子传递，只使质子梯度垮掉、能量以热散失。","deck":"biochem-midterm","id":"biochem-midterm_215"},{"t":"tf","c":"考研拓展","q":"磷酸戊糖途径(PPP)是细胞生成NADH的主要途径。","a":"错","n":"PPP生成的是NADPH(供还原力)；NADH主要来自TCA/糖酵解。","deck":"biochem-midterm","id":"biochem-midterm_216"},{"t":"tf","c":"考研拓展","q":"糖异生消耗的能量高于糖酵解产生的能量。","a":"对","n":"糖酵解净产2ATP；糖异生(2丙酮酸→葡萄糖)耗6ATP等价物。","deck":"biochem-midterm","id":"biochem-midterm_217"},{"t":"tf","c":"考研拓展","q":"肌肉中的葡萄糖-6-磷酸酶催化6-磷酸葡萄糖水解为葡萄糖。","a":"错","n":"肌细胞无G6P酶，故肌糖原不能直接补充血糖。","deck":"biochem-midterm","id":"biochem-midterm_218"},{"t":"tf","c":"考研拓展","q":"血红蛋白的氧合曲线呈S形，这是亚基间正协同(别构)效应的结果。","a":"对","n":"Mb为单体双曲线；Hb为四聚体S形。","deck":"biochem-midterm","id":"biochem-midterm_219"},{"t":"tf","c":"考研拓展","q":"2,3-BPG与血红蛋白结合可降低其对氧的亲和力，促进氧释放。","a":"对","n":"2,3-BPG结合Hb中央孔穴(β链间)，稳定T态。","deck":"biochem-midterm","id":"biochem-midterm_220"},{"t":"mc","c":"考研拓展","q":"下列氨基酸中哪个含有吲哚环？","a":2,"n":"Trp侧链为吲哚环。","deck":"biochem-midterm","o":["Met","Phe","Trp(色)","His"],"id":"biochem-midterm_221"},{"t":"mc","c":"考研拓展","q":"下列氨基酸中哪个含氮量(质量分数)最高？","a":0,"n":"Arg含胍基，含4个N，含氮量最高(约32%)。","deck":"biochem-midterm","o":["Arg","Gln","His","Lys"],"id":"biochem-midterm_222"},{"t":"mc","c":"考研拓展","q":"谷氨酸pK1(α-COOH)=2.19、pK2(α-NH3+)=9.67、pK3(R-COOH)=4.25，其等电点pI约为？","a":1,"n":"酸性氨基酸pI=(pK1+pK3)/2=(2.19+4.25)/2=3.22。","deck":"biochem-midterm","o":["4.25","3.22","6.96","5.93"],"id":"biochem-midterm_223"},{"t":"mc","c":"考研拓展","q":"构成肽键刚性平面(酰胺平面)的原子不包括？","a":3,"n":"酰胺平面=6原子(Cα-C-O-N-H-Cα)，不含侧链R。","deck":"biochem-midterm","o":["羰基碳原子","酰胺氮原子","相邻两个氨基酸的α-碳原子","侧链R基团的碳原子"],"id":"biochem-midterm_224"},{"t":"mc","c":"考研拓展","q":"下列检测蛋白质的方法中，取决于完整肽链的是？","a":1,"n":"双缩脲反应需肽键(≥2个)，游离氨基酸不反应。","deck":"biochem-midterm","o":["凯氏定氮法","双缩脲法","紫外吸收法","茚三酮法"],"id":"biochem-midterm_225"},{"t":"mc","c":"考研拓展","q":"测定一个六肽的氨基酸顺序，最好的方法是？","a":0,"n":"Edman从N端逐个切下鉴定，不破坏其余肽链。","deck":"biochem-midterm","o":["PITC法(Edman降解)","DNFB法","氨肽酶法","羧肽酶法"],"id":"biochem-midterm_226"},{"t":"mc","c":"考研拓展","q":"关于蛋白质α-螺旋的描述，正确的是？","a":0,"n":"标准α-螺旋：3.6残基/圈、0.54nm螺距、0.15nm/残基；Pro刚性破坏螺旋。","deck":"biochem-midterm","o":["每圈3.6残基、螺距0.54nm，Pro常破坏螺旋","每圈3.0残基、螺距0.36nm","每圈2.8残基、螺距0.50nm","每圈4.0残基、螺距0.60nm"],"id":"biochem-midterm_227"},{"t":"mc","c":"考研拓展","q":"下列容易破坏α-螺旋的氨基酸残基是？","a":2,"n":"Pro的N在环内，不能参与酰胺平面氢键，常中断螺旋。","deck":"biochem-midterm","o":["Leu","Arg","Pro","Glu"],"id":"biochem-midterm_228"},{"t":"mc","c":"考研拓展","q":"酶与一般化学催化剂相比，最突出的特点是？","a":2,"n":"高度专一性(立体/绝对专一)是酶最显著特征。","deck":"biochem-midterm","o":["加速反应","缩短达平衡时间","高度专一性","反应前后质和量不变"],"id":"biochem-midterm_229"},{"t":"mc","c":"考研拓展","q":"关于米氏常数Km与酶-底物亲和力的关系，正确的是？","a":1,"n":"Km小→亲和力大；Km大→亲和力小。","deck":"biochem-midterm","o":["Km越大亲和力越强","Km越小亲和力越强","二者无直接关联","Km=解离常数，越大越强"],"id":"biochem-midterm_230"},{"t":"mc","c":"考研拓展","q":"竞争性抑制剂的动力学效应是？","a":0,"n":"竞争：Vmax不变、Km增大；高[S]可克服。","deck":"biochem-midterm","o":["Vmax不变，Km增大","Vmax不变，Km减小","Vmax增大，Km不变","Vmax减小，Km不变"],"id":"biochem-midterm_231"},{"t":"mc","c":"考研拓展","q":"仅与酶-底物复合物ES结合、不与游离酶结合的抑制剂属于？","a":2,"n":"反竞争性只结合ES，导致Vmax与Km同比例下降。","deck":"biochem-midterm","o":["竞争性","非竞争性","反竞争性","不可逆"],"id":"biochem-midterm_232"},{"t":"mc","c":"考研拓展","q":"丝氨酸蛋白酶的催化三联体为Asp-His-Ser，正确说法是？","a":2,"n":"Ser-OH亲核进攻羰基碳；His作广义碱/酸；Asp定向His。","deck":"biochem-midterm","o":["Asp负责酸式催化进攻肽键","His负责底物专一性","Ser的-OH作亲核基团进攻肽键","Asp负责专一性"],"id":"biochem-midterm_233"},{"t":"mc","c":"考研拓展","q":"别构酶与遵循米氏方程的酶(Michaelis酶)相比，最显著的区别是？","a":2,"n":"别构酶多为寡聚、S形、有协同；米氏酶双曲线。","deck":"biochem-midterm","o":["别构酶均为单体、米氏酶均为寡聚","别构酶v-[S]双曲线、米氏酶S形","别构酶存在协同效应与别构调节，米氏酶遵循米氏方程","别构酶催化不可逆、米氏酶可逆"],"id":"biochem-midterm_234"},{"t":"mc","c":"考研拓展","q":"RNA用强碱水解，产生？","a":1,"n":"RNA因2′-OH易被碱水解，生成2′(3′)-NMP混合物。","deck":"biochem-midterm","o":["2′和5′核苷酸混合物","2′和3′核苷酸混合物","3′和5′核苷酸混合物","2′、3′和5′核苷酸混合物"],"id":"biochem-midterm_235"},{"t":"mc","c":"考研拓展","q":"下列不同碱基组成的DNA中，Tm值最高的是？","a":3,"n":"G+C含量越高Tm越高(三氢键+堆积更稳)。","deck":"biochem-midterm","o":["G+C=25%","A+T=15%","G+C=40%","G+C=80%"],"id":"biochem-midterm_236"},{"t":"mc","c":"考研拓展","q":"polyd(AT)的Tm值较polyd(GC)？","a":1,"n":"A-T仅2氢键，堆积弱，Tm低。","deck":"biochem-midterm","o":["高","低","相同","不能确定"],"id":"biochem-midterm_237"},{"t":"mc","c":"考研拓展","q":"下列哪一反应需要生物素作辅酶？","a":1,"n":"生物素是羧化酶(乙酰CoA羧化酶、丙酮酸羧化酶)辅酶。","deck":"biochem-midterm","o":["脱羧作用","羧化作用","烃化作用","脱水作用"],"id":"biochem-midterm_238"},{"t":"mc","c":"考研拓展","q":"下列哪个辅酶不是来自维生素？","a":0,"n":"CoQ为体内合成，非维生素来源；FAD←B2、TPP←B1、NAD←B3。","deck":"biochem-midterm","o":["CoQ(泛醌)","FAD","TPP","NAD+"],"id":"biochem-midterm_239"},{"t":"mc","c":"考研拓展","q":"一个葡萄糖单位经糖原(磷酸解)进入糖酵解，净生成多少分子ATP？","a":2,"n":"糖原→G1P不耗ATP，省去己糖激酶那步；净=4-1=3 ATP(另+2NADH)。","deck":"biochem-midterm","o":["1","2","3","4"],"id":"biochem-midterm_240"},{"t":"mc","c":"考研拓展","q":"下列化合物中不含高能磷酸键的是？","a":3,"n":"G6P为普通磷酸酯键，非高能。","deck":"biochem-midterm","o":["ADP","ATP","磷酸肌酸","葡萄糖-6-磷酸"],"id":"biochem-midterm_241"},{"t":"mc","c":"考研拓展","q":"丙二酸对琥珀酸脱氢酶的影响是？","a":3,"n":"丙二酸结构与琥珀酸相似，竞争活性中心。","deck":"biochem-midterm","o":["产物反馈抑制","产物阻遏","非竞争性抑制","竞争性抑制"],"id":"biochem-midterm_242"},{"t":"mc","c":"考研拓展","q":"呼吸链中细胞色素的排列顺序是？","a":1,"n":"标准顺序：b→c1→c→aa3→O2。","deck":"biochem-midterm","o":["C→C1→b→aa3","b→C1→C→aa3","C→b→C1→aa3","b→C→C1→aa3"],"id":"biochem-midterm_243"},{"t":"mc","c":"考研拓展","q":"一氧化碳(CO)抑制呼吸链的部位是？","a":3,"n":"CO、CN-、H2S都抑制Cyt aa3→O2。","deck":"biochem-midterm","o":["琥珀酸脱氢酶","NADH脱氢酶","还原CoQ-细胞色素c氧化还原酶","细胞色素c氧化酶(Cytaa3)"],"id":"biochem-midterm_244"},{"t":"mc","c":"考研拓展","q":"下列化合物中，哪一个是线粒体氧化磷酸化的解偶联剂？","a":2,"n":"DNP使质子梯度跨膜泄漏，ATP合成停止、产热增加。","deck":"biochem-midterm","o":["氯霉素","抗霉素A","2,4-二硝基苯酚(DNP)","鱼藤酮"],"id":"biochem-midterm_245"},{"t":"mc","c":"考研拓展","q":"化学渗透假说认为，电子在呼吸链传递引起线粒体内膜？","a":2,"n":"质子泵出形成ΔpH+Δψ，驱动ATP合酶。","deck":"biochem-midterm","o":["构象变化","可自由通过H+和OH-","两侧形成跨膜H+浓度差","产生高能中间化合物"],"id":"biochem-midterm_246"},{"t":"mc","c":"考研拓展","q":"不能经糖异生合成葡萄糖的是？","a":3,"n":"乙酰CoA进入TCA后碳以CO2丢失，动物无乙醛酸循环，不能净合成糖。","deck":"biochem-midterm","o":["α-磷酸甘油","丙酮酸","乳酸","乙酰CoA"],"id":"biochem-midterm_247"},{"t":"mc","c":"考研拓展","q":"催化糖原合成的关键酶组合是？","a":3,"n":"合成：UDPG焦磷酸酶+糖原合酶(α-1,4)+分支酶(α-1,6)。","deck":"biochem-midterm","o":["糖原磷酸化酶/糖原合酶/分支酶","UDPG焦磷酸酶/磷酸化酶/分支酶","UDPG焦磷酸酶/磷酸化酶/合酶","UDPG焦磷酸酶/糖原合酶/分支酶"],"id":"biochem-midterm_248"},{"t":"mc","c":"考研拓展","q":"成熟红细胞主要依靠哪条途径供能？","a":0,"n":"红细胞无线粒体，仅靠糖酵解(无氧)供能。","deck":"biochem-midterm","o":["糖酵解","三羧酸循环","氧化磷酸化","磷酸戊糖途径"],"id":"biochem-midterm_249"},{"t":"mc","c":"考研拓展","q":"血红蛋白(Hb)氧合曲线S形的结构基础是？","a":0,"n":"Hb四聚体亚基间协同；2,3-BPG使曲线右移(降亲和力)。","deck":"biochem-midterm","o":["亚基间正协同(别构)效应","单个亚基的独立结合","与Mb相同","2,3-BPG使曲线左移"],"id":"biochem-midterm_250"},{"t":"fill","c":"考研拓展","q":"大多数蛋白质中氮含量较恒定，平均约___%；若1g样品含氮1mg(即0.1%N)，则蛋白质含量≈___%。","a":"16；0.625","n":"","deck":"biochem-midterm","id":"biochem-midterm_251"},{"t":"fill","c":"考研拓展","q":"组氨酸pK1=1.82、pK(咪唑)=6.00、pK3=9.17，其等电点pI=(pK1+pK2)/2=___。","a":"3.91","n":"","deck":"biochem-midterm","id":"biochem-midterm_252"},{"t":"fill","c":"考研拓展","q":"米氏方程双倒数(Lineweaver-Burk)作图，横轴截距=___，纵轴截距=___。","a":"-1/Km；1/Vmax","n":"","deck":"biochem-midterm","id":"biochem-midterm_253"},{"t":"fill","c":"考研拓展","q":"对遵从米氏方程的酶，[S]=Km、非竞争性抑制剂[I]=Ki时，初速度为Vmax的___。","a":"1/3(约33%)","n":"","deck":"biochem-midterm","id":"biochem-midterm_254"},{"t":"fill","c":"考研拓展","q":"___抑制剂不改变Vmax，___抑制剂不改变Km。(填竞争/非竞争)","a":"竞争性；非竞争性","n":"","deck":"biochem-midterm","id":"biochem-midterm_255"},{"t":"fill","c":"考研拓展","q":"DNA双螺旋稳定的主要因素是___和___，其次___也起一定作用。","a":"碱基堆积作用(疏水堆积)；氢键；离子键(磷酸负电荷被阳离子中和)","n":"","deck":"biochem-midterm","id":"biochem-midterm_256"},{"t":"fill","c":"考研拓展","q":"DNA变性后，紫外吸收(260nm)___，溶液粘度___，生物活性___。","a":"增加(增色效应)；下降；丧失","n":"","deck":"biochem-midterm","id":"biochem-midterm_257"},{"t":"fill","c":"考研拓展","q":"体内糖原降解：切断α-1,4糖苷键用___方式(糖原磷酸化酶)，切断α-1,6糖苷键用___方式(脱支酶)。","a":"磷酸解；水解","n":"","deck":"biochem-midterm","id":"biochem-midterm_258"},{"t":"fill","c":"考研拓展","q":"磷酸戊糖途径(PPP)的关键酶是___；该途径主要产物是___和___。","a":"6-磷酸葡萄糖脱氢酶(G6PD)；NADPH；核糖-5-磷酸","n":"","deck":"biochem-midterm","id":"biochem-midterm_259"},{"t":"fill","c":"考研拓展","q":"糖酵解限速酶PFK-1的强别构激活剂有___、___和果糖-2,6-二磷酸。","a":"AMP；ADP","n":"","deck":"biochem-midterm","id":"biochem-midterm_260"},{"t":"fill","c":"考研拓展","q":"三羧酸循环第一步由柠檬酸合酶催化，其产物___对该酶有反馈抑制，这种调节称为___。","a":"柠檬酸；反馈抑制","n":"","deck":"biochem-midterm","id":"biochem-midterm_261"},{"t":"term","c":"考研拓展","q":"Chargaff规则","a":"①不同物种DNA碱基组成不同；②同一物种各组织碱基组成相同；③所有DNA中A=T、G=C，故A+G=T+C。是双螺旋结构的重要实验依据。","n":"","deck":"biochem-midterm","id":"biochem-midterm_262"},{"t":"term","c":"考研拓展","q":"别构效应 (Allosteric effect)","a":"蛋白质(酶/转运蛋白)与效应物结合后构象改变、活性/功能变化的现象。Hb氧合、调节酶调控均属此类；正协同使v-[S]呈S形。","n":"","deck":"biochem-midterm","id":"biochem-midterm_263"},{"t":"term","c":"考研拓展","q":"诱导契合 (Induced fit)","a":"底物与酶接近时，酶构象发生变化以更好结合并催化底物，而非底物硬塞进固定口袋；解释了酶专一性与催化效率。","n":"","deck":"biochem-midterm","id":"biochem-midterm_264"},{"t":"term","c":"考研拓展","q":"过渡态底物类似物 (Transition-state analog)","a":"结构与反应过渡态相似、而非与底物相似的分子；与酶活性中心结合比底物更强，是设计高效酶抑制剂的重要思路。","n":"","deck":"biochem-midterm","id":"biochem-midterm_265"},{"t":"term","c":"考研拓展","q":"同工酶 (Isozyme)","a":"催化同一反应但酶蛋白结构/理化/免疫/电泳性质不同的多种形式；如乳酸脱氢酶LDH五种，可用于组织/疾病诊断。","n":"","deck":"biochem-midterm","id":"biochem-midterm_266"},{"t":"term","c":"考研拓展","q":"增色效应 (Hyperchromic effect)","a":"核酸变性后双链解开、碱基暴露，260nm处紫外吸收值增大约30%-40%的现象。用于监测变性/复性。","n":"","deck":"biochem-midterm","id":"biochem-midterm_267"},{"t":"term","c":"考研拓展","q":"退火 (Annealing)","a":"变性DNA或DNA/RNA在缓慢冷却条件下，互补链重新形成双螺旋(或部分双链)的过程，是分子杂交与PCR的关键步骤。","n":"","deck":"biochem-midterm","id":"biochem-midterm_268"},{"t":"term","c":"考研拓展","q":"化学渗透假说 (Chemiosmotic hypothesis)","a":"呼吸链电子传递将H+泵出线粒体内膜，形成跨膜质子电化学梯度；H+经ATP合酶回流驱动ATP合成(Mitchell提出)。","n":"","deck":"biochem-midterm","id":"biochem-midterm_269"},{"t":"term","c":"考研拓展","q":"P/O比值","a":"每消耗1原子氧(或每对电子经呼吸链)所生成的ATP分子数；反映氧化磷酸化效率。新值NADH≈2.5、FADH2≈1.5。","n":"","deck":"biochem-midterm","id":"biochem-midterm_270"},{"t":"term","c":"考研拓展","q":"巴斯德效应 (Pasteur effect)","a":"有氧条件下糖酵解受抑制(有氧氧化抑制无氧酵解)的现象；因有氧时ATP/ADP升高抑制PFK-1。","n":"","deck":"biochem-midterm","id":"biochem-midterm_271"},{"t":"term","c":"考研拓展","q":"糖异生 (Gluconeogenesis)","a":"以非糖前体(乳酸、生糖氨基酸、甘油、三羧酸循环中间物)在肝/肾合成葡萄糖的过程；是维持血糖的重要途径。","n":"","deck":"biochem-midterm","id":"biochem-midterm_272"},{"t":"saq","c":"考研拓展","q":"简述α-螺旋的主要特点。","a":["右手螺旋，每圈3.6个氨基酸残基，螺距0.54nm","每个残基沿轴上升0.15nm、旋转约100°","维系靠第n个残基C=O与第n+4个残基N-H间的链内氢键(与螺旋轴大致平行)","侧链伸向外侧；Pro(刚性)、Gly(柔性)及带电荷残基集中处易破坏螺旋"],"n":"","deck":"biochem-midterm","id":"biochem-midterm_273"},{"t":"saq","c":"考研拓展","q":"论述稳定蛋白质构象的作用力有哪些？","a":["氢键：维系二级结构(α螺旋、β折叠)及β转角","疏水相互作用：三级结构最主要稳定力，疏水侧链聚集于内部","范德华力：原子近距离吸引，普遍存在","离子键(盐桥)：带相反电荷侧链间(如Asp/Glu与Lys/Arg)","二硫键：Cys间共价连接，稳定特别是分泌蛋白/胞外蛋白"],"n":"","deck":"biochem-midterm","id":"biochem-midterm_274"},{"t":"saq","c":"考研拓展","q":"青霉素、有机磷、磺胺分别属于哪类抑制？说明机理。","a":["青霉素：不可逆抑制转肽酶(共价键)，阻止细菌细胞壁肽聚糖交联","有机磷：不可逆抑制乙酰胆碱酯酶(Ser共价磷酸化)，神经中毒","磺胺：竞争性抑制二氢叶酸合成酶(结构与PABA相似)，阻断叶酸合成"],"n":"均为经典抑制实例。","deck":"biochem-midterm","id":"biochem-midterm_275"},{"t":"saq","c":"考研拓展","q":"为什么说三羧酸循环(TCA)是糖、脂、蛋白质三大代谢的枢纽？","a":["糖、脂、氨基酸的碳骨架最终都转变为乙酰CoA进入TCA氧化","TCA中间物(草酰乙酸、α-酮戊二酸、琥珀酰CoA、苹果酸)可经回补反应补给，也是合成氨基酸/糖/血红素的前体","TCA与氧化磷酸化偶联是绝大多数生物获能的主要方式","沟通糖异生、脂肪酸合成(柠檬酸出线粒体)、氨基酸代谢"],"n":"","deck":"biochem-midterm","id":"biochem-midterm_276"},{"t":"saq","c":"考研拓展","q":"说明糖异生不是糖酵解途径的简单逆转(从部位、能量、酶三方面)。","a":["部位：糖酵解在胞质；糖异生主要在肝/肾，部分在线粒体(丙酮酸羧化)","能量：糖酵解净产2ATP；糖异生消耗6个ATP等价物(2丙酮酸→葡萄糖)","酶：糖酵解3个不可逆步(己糖激酶、PFK-1、丙酮酸激酶)由糖异生4个bypass酶绕过：丙酮酸羧化酶、PEP羧激酶、果糖-1,6-二磷酸酶、葡萄糖-6-磷酸酶"],"n":"","deck":"biochem-midterm","id":"biochem-midterm_277"},{"t":"calc","c":"考研拓展","q":"某酶Km=0.005 mol/L，当反应速度达最大速度的90%时，底物浓度[S]为多少？","a":"[S]=0.045 mol/L","n":"","deck":"biochem-midterm","steps":["米氏方程 v=Vmax[S]/(Km+[S])","0.9=[S]/(Km+[S]) → 0.9Km+0.9[S]=[S]","0.1[S]=0.9Km → [S]=9Km=9×0.005=0.045 mol/L"],"id":"biochem-midterm_278"},{"t":"calc","c":"考研拓展","q":"1分子琥珀酰CoA彻底氧化为CO2和H2O，按新P/O比(NADH=2.5、FADH2=1.5、GTP=1)共产生多少ATP？写出步骤。","a":"约5 ATP(旧值6)","n":"","deck":"biochem-midterm","steps":["琥珀酰CoA→琥珀酸：底物水平磷酸化产1 GTP=1 ATP","琥珀酸→延胡索酸：生成FADH2 → 1.5 ATP","延胡索酸→苹果酸→草酰乙酸：生成NADH → 2.5 ATP","合计=1+1.5+2.5=5 ATP(旧P/O则1+2+3=6)"],"id":"biochem-midterm_279"},{"t":"term","c":"调节","q":"瘦蛋白（Leptin）","a":"由脂肪细胞合成并分泌到循环系统，作用于下丘脑受体，发出『减少进食、增加能量消耗、抑制脂肪合成』指令，使机体消瘦的蛋白质。","n":"","deck":"biochem-betaox","id":"biochem-betaox_0"},{"t":"term","c":"转运","q":"肉碱（Carnitine）","a":"化学名 β-羟基-γ-三甲氨基丁酸；作为脂酰基载体，将脂酰CoA从细胞质转运进线粒体基质，是β氧化的『摆渡船』。","n":"","deck":"biochem-betaox","id":"biochem-betaox_1"},{"t":"term","c":"酶","q":"脂酰CoA合成酶（脂肪酸硫激酶）","a":"催化脂肪酸 + CoA → 脂酰CoA 的活化反应，消耗ATP（算2个），反应在细胞质进行。","n":"","deck":"biochem-betaox","id":"biochem-betaox_2"},{"t":"term","c":"酶·限速","q":"肉碱脂酰转移酶I（CPT-I）","a":"位于线粒体外膜、活性中心朝向膜间隙的酶，催化脂酰CoA + 肉碱 → 脂酰肉碱，是β氧化的限速酶（限速步骤）。","n":"","deck":"biochem-betaox","id":"biochem-betaox_3"},{"t":"term","c":"酶","q":"脂酰CoA脱氢酶","a":"β氧化第一轮脱氢的酶，催化脂酰CoA → 反式Δ²-烯脂酰CoA，产生 FADH₂。","n":"","deck":"biochem-betaox","id":"biochem-betaox_4"},{"t":"term","c":"酶","q":"β-酮脂酰CoA硫解酶","a":"β氧化最后一步（硫解）的酶，在CoA-SH参与下将β-酮脂酰CoA裂解为一分子乙酰CoA + 少2碳的脂酰CoA。","n":"","deck":"biochem-betaox","id":"biochem-betaox_5"},{"t":"term","c":"概念","q":"β氧化（β-oxidation）","a":"脂肪酸在线粒体中逐步降解的方式：每次从羧基端切下2个碳原子（乙酰CoA），经历脱氢-水合-脱氢-硫解四步循环。","n":"","deck":"biochem-betaox","id":"biochem-betaox_6"},{"t":"term","c":"实验","q":"Knoop实验（苯基脂肪酸喂狗）","a":"1904年用带苯基的脂肪酸喂狗，据尿中苯基产物推断：奇数碳脂肪酸→苯甲酸衍生物（一碳），偶数碳→苯乙酸衍生物（二碳），证明脂肪酸每次缩短2个碳循环代谢。","n":"","deck":"biochem-betaox","id":"biochem-betaox_7"},{"t":"mc","c":"部位","q":"脂肪酸β氧化的主要发生部位是？","a":1,"n":"β氧化主要在线粒体基质进行，细胞质也有部分步骤。","deck":"biochem-betaox","o":["细胞质","线粒体基质","内质网","细胞核"],"id":"biochem-betaox_8"},{"t":"mc","c":"限速","q":"β氧化的限速酶（限速步骤）是？","a":1,"n":"肉碱穿梭的 CPT-I 是限速酶。","deck":"biochem-betaox","o":["脂酰CoA合成酶","肉碱脂酰转移酶I（CPT-I）","脂酰CoA脱氢酶","β-酮脂酰CoA硫解酶"],"id":"biochem-betaox_9"},{"t":"mc","c":"活化","q":"脂肪酸活化成脂酰CoA时，能量计算上消耗几个ATP？","a":1,"n":"ATP→AMP+PPi，PPi立刻水解，相当于2个ATP被水解。","deck":"biochem-betaox","o":["1个","2个","3个","0个"],"id":"biochem-betaox_10"},{"t":"mc","c":"产物","q":"β氧化第一轮『脱氢』（脂酰CoA脱氢酶）产生的还原当量是？","a":1,"n":"第一步脱氢给FAD→FADH₂；第三步脱氢才给NAD⁺→NADH。","deck":"biochem-betaox","o":["NADH","FADH₂","NADPH","ATP"],"id":"biochem-betaox_11"},{"t":"mc","c":"产物","q":"β氧化『③脱氢』（β-羟脂酰CoA脱氢酶）产生的还原当量是？","a":0,"n":"第三步脱氢给NAD⁺→NADH。","deck":"biochem-betaox","o":["NADH","FADH₂","GTP","CoA"],"id":"biochem-betaox_12"},{"t":"mc","c":"计算","q":"软脂酸（棕榈酸，C16，饱和）彻底β氧化产生几个乙酰CoA？","a":1,"n":"乙酰CoA数 = 碳数/2 = 16/2 = 8。","deck":"biochem-betaox","o":["7个","8个","16个","15个"],"id":"biochem-betaox_13"},{"t":"mc","c":"计算","q":"软脂酸（C16）需要经历几轮β氧化？","a":1,"n":"轮数 = 乙酰数−1 = 8−1 = 7。","deck":"biochem-betaox","o":["8轮","7轮","16轮","15轮"],"id":"biochem-betaox_14"},{"t":"mc","c":"位置","q":"肉碱脂酰转移酶I（CPT-I）位于？","a":1,"n":"CPT-I 在线粒体外膜，活性中心朝向膜间隙。","deck":"biochem-betaox","o":["线粒体内膜","线粒体外膜（活性中心朝膜间隙）","细胞质","基质"],"id":"biochem-betaox_15"},{"t":"mc","c":"来源","q":"瘦蛋白（Leptin）由哪种细胞合成分泌？","a":1,"n":"脂肪细胞合成分泌，作用于下丘脑。","deck":"biochem-betaox","o":["下丘脑","脂肪细胞","肝细胞","肌肉细胞"],"id":"biochem-betaox_16"},{"t":"mc","c":"靶点","q":"瘦蛋白作用于哪个部位的受体？","a":0,"n":"作用于下丘脑受体，发出少吃/多耗/抑合成指令。","deck":"biochem-betaox","o":["下丘脑","肝脏","肌肉","胰腺"],"id":"biochem-betaox_17"},{"t":"mc","c":"特例","q":"下列哪种组织基本不进行脂肪酸β氧化？","a":2,"n":"脑组织能量主要来源是糖类，不烧脂肪。","deck":"biochem-betaox","o":["肝脏","肌肉","大脑","心肌"],"id":"biochem-betaox_18"},{"t":"mc","c":"酶","q":"脂肪酸活化反应的酶是？","a":0,"n":"脂酰CoA合成酶（脂肪酸硫激酶）。","deck":"biochem-betaox","o":["脂酰CoA合成酶","肉碱脂酰转移酶","烯脂酰CoA水合酶","β-羟脂酰CoA脱氢酶"],"id":"biochem-betaox_19"},{"t":"mc","c":"实验","q":"Knoop实验中，偶数碳脂肪酸在尿中主要变成哪种产物？","a":1,"n":"偶数碳→苯乙酰衍生物（二碳/乙酰衍生物）。","deck":"biochem-betaox","o":["苯甲酰甘氨酸（一碳衍生物）","苯乙酰衍生物（二碳衍生物）","尿酸","尿素"],"id":"biochem-betaox_20"},{"t":"mc","c":"转运","q":"肉碱穿梭中，把脂酰肉碱从膜间隙转入基质、同时转出1个肉碱的蛋白是？","a":2,"n":"转位酶当『缆车』，双向交换。","deck":"biochem-betaox","o":["CPT-I","CPT-II","肉碱-脂酰肉碱转位酶","脂酰CoA合成酶"],"id":"biochem-betaox_21"},{"t":"mc","c":"步骤","q":"β氧化四步的正确顺序是？","a":0,"n":"氧→水→氧→硫。","deck":"biochem-betaox","o":["脱氢-水合-脱氢-硫解","水合-脱氢-硫解-脱氢","脱氢-硫解-水合-脱氢","硫解-脱氢-水合-脱氢"],"id":"biochem-betaox_22"},{"t":"fill","c":"四步","q":"β氧化每一轮四步为：①脱氢 ②____ ③脱氢 ④硫解。","a":"水合","n":"第二步是水合，生成L-β-羟脂酰CoA。","deck":"biochem-betaox","id":"biochem-betaox_23"},{"t":"fill","c":"还原当量","q":"β氧化每一轮产生两种还原当量：____ 和 NADH。","a":"FADH₂","n":"第①步给FAD→FADH₂，第③步给NAD⁺→NADH。","deck":"biochem-betaox","id":"biochem-betaox_24"},{"t":"fill","c":"转运","q":"肉碱穿梭三个蛋白：CPT-I、____、CPT-II。","a":"肉碱-脂酰肉碱转位酶","n":"转位酶负责跨内膜双向交换。","deck":"biochem-betaox","id":"biochem-betaox_25"},{"t":"fill","c":"活化","q":"脂肪酸活化中 ATP 变成 AMP + ____（焦磷酸），后者立即水解，故消耗算2个ATP。","a":"PPi（焦磷酸）","n":"PPi水解是算2ATP的关键。","deck":"biochem-betaox","id":"biochem-betaox_26"},{"t":"fill","c":"计算","q":"软脂酸（C16）彻底β氧化产生 ____ 个乙酰CoA，经历 ____ 轮循环。","a":"8；7","n":"乙酰=16/2=8，轮数=8−1=7。","deck":"biochem-betaox","id":"biochem-betaox_27"},{"t":"fill","c":"部位","q":"β氧化发生在细胞质和 ____（主要）。","a":"线粒体（基质）","n":"主战场在线粒体基质。","deck":"biochem-betaox","id":"biochem-betaox_28"},{"t":"fill","c":"实验","q":"Knoop实验：奇数碳脂肪酸尿中产物为苯甲酸衍生物（____ 碳单位），偶数碳为苯乙酸衍生物（二碳单位）。","a":"一","n":"奇→一碳，偶→二碳。","deck":"biochem-betaox","id":"biochem-betaox_29"},{"t":"fill","c":"碳原子","q":"脂肪酸中离羧基最近的碳编号为1，依次为α、β；β氧化切下的是羧基碳和 ____ 碳（即2个碳→乙酰CoA）。","a":"α","n":"老师说切下『羧基碳+α碳』生成乙酰CoA。","deck":"biochem-betaox","id":"biochem-betaox_30"},{"t":"saq","c":"转运","q":"简述肉碱穿梭的三个步骤，并指出限速酶。","a":["1) 膜间隙：脂酰CoA + 肉碱 在 CPT-I（外膜，活性中心朝膜间隙）催化下 → 脂酰肉碱","2) 内膜：脂酰肉碱经『肉碱-脂酰肉碱转位酶』转入基质，同时转出1个肉碱回膜间隙","3) 基质：CPT-II 将脂酰肉碱 → 脂酰CoA，肉碱再经转位酶返回","限速酶 = CPT-I（β氧化限速步骤）"],"n":"记住：I在外膜、II在基质，转位酶当缆车。","deck":"biochem-betaox","id":"biochem-betaox_31"},{"t":"saq","c":"四步","q":"写出β氧化每一轮的四个步骤、对应酶及主要产物。","a":["① 脱氢：脂酰CoA脱氢酶 → 反式Δ²-烯脂酰CoA，产 FADH₂","② 水合：烯脂酰CoA水合酶 → L-β-羟脂酰CoA","③ 脱氢：β-羟脂酰CoA脱氢酶 → β-酮脂酰CoA，产 NADH","④ 硫解：β-酮脂酰CoA硫解酶（CoA-SH参与）→ 乙酰CoA + 少2碳脂酰CoA"],"n":"氧→水→氧→硫。","deck":"biochem-betaox","id":"biochem-betaox_32"},{"t":"saq","c":"活化","q":"为什么脂肪酸活化在能量计算上算消耗2个ATP？","a":["活化反应：脂肪酸 + CoA + ATP → 脂酰CoA + AMP + PPi","生成的 PPi（焦磷酸）在水溶液中立即水解成2个Pi","相当于 ATP 经历了两步水解，因此按消耗2个ATP计"],"n":"ATP→AMP+PPi，PPi水解是关键。","deck":"biochem-betaox","id":"biochem-betaox_33"},{"t":"saq","c":"实验","q":"简述Knoop实验的设计思路与结论。","a":["设计：给狗喂食带苯基的脂肪酸，检测尿中带苯基的代谢物","结果：奇数碳→苯甲酰甘氨酸（苯甲酸，一碳衍生物）；偶数碳→苯乙酰衍生物（二碳/乙酰衍生物）","结论：脂肪酸只能以每次缩短2个碳（二碳单位=乙酰CoA）的方式循环分解，即β氧化"],"n":"","deck":"biochem-betaox","id":"biochem-betaox_34"},{"t":"saq","c":"计算","q":"软脂酸（C16，饱和）彻底β氧化，求：乙酰CoA数、β氧化轮数、净生成ATP（写出新旧两套系数结果）。","a":["乙酰CoA = 16/2 = 8 个","β氧化轮数 = 8−1 = 7 轮","7轮产 7 FADH₂ + 7 NADH；8乙酰CoA进TCA；活化扣2ATP","新P/O：7×1.5+7×2.5+8×10−2 = 106 ATP","旧P/O：7×2+7×3+8×12−2 = 129 ATP"],"n":"系数看教材，活化务必扣2。","deck":"biochem-betaox","id":"biochem-betaox_35"},{"t":"calc","c":"计算","q":"硬脂酸（C18，饱和）彻底β氧化：求乙酰CoA数、β氧化轮数。","a":"乙酰CoA=18/2=9个；轮数=9−1=8轮","n":"","deck":"biochem-betaox","steps":["饱和偶数碳：乙酰CoA数 = n/2","n=18 → 18/2 = 9 个乙酰CoA","轮数 = 乙酰数 − 1 = 9 − 1 = 8 轮"],"id":"biochem-betaox_36"},{"t":"calc","c":"计算","q":"某饱和脂肪酸经β氧化产生 10 个乙酰CoA，求它的碳原子数和β氧化轮数。","a":"碳数=20；轮数=9","n":"","deck":"biochem-betaox","steps":["乙酰CoA数 = n/2 = 10 → n = 20","轮数 = 乙酰数 − 1 = 10 − 1 = 9 轮"],"id":"biochem-betaox_37"},{"t":"calc","c":"计算","q":"软脂酸（C16）按旧P/O系数（NADH=3、FADH₂=2、乙酰CoA=10ATP计TCA产出为12）计算净ATP。","a":"129 ATP","n":"","deck":"biochem-betaox","steps":["7轮：7 NADH×3 = 21；7 FADH₂×2 = 14","8乙酰CoA×12 = 96","活化扣 2 ATP","总 = 21+14+96−2 = 129 ATP"],"id":"biochem-betaox_38"},{"t":"calc","c":"计算","q":"软脂酸（C16）按新P/O系数（NADH=2.5、FADH₂=1.5、乙酰CoA=10ATP）计算净ATP。","a":"106 ATP","n":"","deck":"biochem-betaox","steps":["7轮：7 NADH×2.5 = 17.5；7 FADH₂×1.5 = 10.5","8乙酰CoA×10 = 80","活化扣 2 ATP","总 = 17.5+10.5+80−2 = 106 ATP"],"id":"biochem-betaox_39"},{"t":"calc","c":"计算","q":"油酸（C18:1，含1个双键）β氧化，比硬脂酸（C18饱和）少一轮，求轮数与乙酰CoA数。","a":"乙酰CoA=9个；轮数=7轮","n":"","deck":"biochem-betaox","steps":["碳数仍为18 → 乙酰CoA = 18/2 = 9 个","1个双键跳过一次脱氢（烯脂酰CoA异构酶处理），故少1轮","轮数 = (9−1) − 1 = 7 轮"],"id":"biochem-betaox_40"},{"t":"saq","c":"2孟德尔","q":"为什么分离现象比显、隐性现象有更重要的意义？","a":["分离规律是生物界普遍存在的遗传现象；显性现象的表现是相对的、有条件的","只有遗传因子的分离和重组，才能表现出性状的显隐性","无分离现象的存在，也就无显性现象的发生"],"n":"","deck":"genetics-hw","id":"genetics-hw_0"},{"t":"calc","c":"2孟德尔","q":"番茄红果(R)对黄果(r)显性。RR×rr、Rr×rr、Rr×Rr、Rr×RR、rr×rr 五组杂交，基因型和表型比例各如何？","a":"①RR×rr→全Rr，全红；②Rr×rr→1/2Rr:1/2rr，1/2红:1/2黄；③Rr×Rr→1/4RR:2/4Rr:1/4rr，3/4红:1/4黄；④Rr×RR→1/2RR:1/2Rr，全红；⑤rr×rr→全rr，全黄","n":"","deck":"genetics-hw","steps":["先拆单基因，按分离定律逐组算","④中Rr×RR：显性基因RR或Rr都为红果，故全红","⑤双隐性×双隐性，全黄"],"id":"genetics-hw_1"},{"t":"calc","c":"2孟德尔","q":"紫茉莉花色为不完全显性：RR红、Rr粉红、rr白。Rr×RR、rr×Rr、Rr×Rr 的后代基因型和表型？","a":"①Rr×RR→1/2RR:1/2Rr，1/2红:1/2粉红；②rr×Rr→1/2Rr:1/2rr，1/2粉红:1/2白；③Rr×Rr→1/4RR:2/4Rr:1/4rr，1/4红:2/4粉红:1/4白","n":"","deck":"genetics-hw","steps":["不完全显性时杂合子表现中间型，表型比例=基因型比例"],"id":"genetics-hw_2"},{"t":"calc","c":"2孟德尔","q":"南瓜白果(W)对黄果(w)显性、盘状(D)对球状(d)显性，两对基因自由组合。Wwdd×WwDd 的后代表型比例？","a":"3/8白色盘状 : 3/8白色球状 : 1/8黄色盘状 : 1/8黄色球状","n":"","deck":"genetics-hw","steps":["拆成两对单基因：Ww×Ww → 3/4白 : 1/4黄","dd×Dd → 1/2盘状 : 1/2球状","相乘：白盘=3/4×1/2=3/8；白球=3/8；黄盘=1/4×1/2=1/8；黄球=1/8"],"id":"genetics-hw_3"},{"t":"calc","c":"2孟德尔","q":"豌豆蔓茎(T)对矮茎(t)显性、绿豆荚(G)对黄豆荚(g)显性、圆种子(R)对皱种子(r)显性。TTGgRr×ttGgrr 后代的表型及比例？","a":"3/8蔓茎绿豆荚圆种子 : 3/8蔓茎绿豆荚皱种子 : 1/8蔓茎黄豆荚圆种子 : 1/8蔓茎黄豆荚皱种子","n":"","deck":"genetics-hw","steps":["TT×tt → 全Tt，全部蔓茎","Gg×Gg → 3/4绿 : 1/4黄","Rr×rr → 1/2圆 : 1/2皱","相乘得3/8、3/8、1/8、1/8"],"id":"genetics-hw_4"},{"t":"calc","c":"2孟德尔","q":"番茄紫茎缺刻叶 F1(AaCc) 做三种交配：①与紫茎马铃薯叶亲本(AAcc)回交；②与绿茎缺刻叶亲本(aaCC)回交；③与双隐性(aacc)测交。表型比例各如何？","a":"①1/2紫茎缺刻 : 1/2紫茎马铃薯；②1/2紫茎缺刻 : 1/2绿茎缺刻；③1紫缺:1紫马:1绿缺:1绿马","n":"","deck":"genetics-hw","steps":["①AaCc×AAcc：A位全紫；Cc×cc→1/2缺:1/2马","②AaCc×aaCC：C位全缺刻；Aa×aa→1/2紫:1/2绿","③AaCc×aacc：两对均测交→1:1:1:1"],"id":"genetics-hw_5"},{"t":"calc","c":"2孟德尔","q":"紫茎番茄(AA)×绿茎(aa)的F1与绿茎回交，得紫茎482株、绿茎526株。用卡方检验是否符合1:1。","a":"χ²≈1.92，df=1，0.10<P<0.50，差异不显著，符合1:1","n":"","deck":"genetics-hw","steps":["总数=482+526=1008，理论各504","χ²=(482-504)²/504+(526-504)²/504","=484/504+484/504≈0.96+0.96=1.92","df=1，查表0.10<P<0.50，不显著→符合1:1"],"id":"genetics-hw_6"},{"t":"calc","c":"2孟德尔","q":"4对显性纯合 × 4对隐性纯合，F1自交得F2。问：(1)基因型完全像某一亲本的比例？(2)表型完全像显性亲本、隐性亲本的比例？","a":"(1)基因型同显性亲本或同隐性亲本各 (1/4)⁴=1/256；(2)表型同显性亲本 (3/4)⁴=81/256，同隐性亲本 (1/4)⁴=1/256","n":"","deck":"genetics-hw","steps":["F1为4对基因杂合(AaBbCcDd)","某一特定纯合基因型概率=(1/4)⁴=1/256","表型全显需每对至少一个显性基因=(3/4)⁴"],"id":"genetics-hw_7"},{"t":"calc","c":"2孟德尔","q":"两对基因独立分配，AaBb个体：(1)产生AB配子的概率？(2)AaBb×AaBb得AABB合子的概率？(3)得A_B_表型的概率？","a":"(1)1/4；(2)1/16；(3)9/16","n":"","deck":"genetics-hw","steps":["每对基因分离，单个基因入某配子概率1/2，AB=1/2×1/2=1/4","AABB=AB配子×AB配子=1/4×1/4=1/16","A_B_=(3/4)×(3/4)=9/16"],"id":"genetics-hw_8"},{"t":"saq","c":"2孟德尔","q":"若地球上每对夫妇在第一胎生了儿子后就停止生育，人类性比会怎样变化？","a":"性比基本不变，仍接近1:1","n":"经典陷阱题：停止规则不改变性比，只改变家庭人数分布。","deck":"genetics-hw","steps":["每次生育生男生女概率各1/2，且各次独立","停止规则只影响家庭规模(平均子女数)，不改变每次出生的性别概率"],"id":"genetics-hw_9"},{"t":"saq","c":"2孟德尔","q":"孟德尔的豌豆杂交试验能够取得成功的原因有哪些？","a":["选材恰当：豌豆严格自花授粉、易人工杂交，且具多对界限分明的相对性状","方法上由简单到复杂：先研究一对性状（单因子）再研究多对","运用统计学方法处理大量数据","采用假说—演绎法，并用测交验证"],"n":"","deck":"genetics-hw","id":"genetics-hw_10"},{"t":"saq","c":"3染色体","q":"有丝分裂和减数分裂的主要区别是什么？各自的遗传学意义？","a":["区别：有丝分裂发生在所有生长组织，无联会无交叉，姐妹染色单体分离，产生2个遗传相同的子细胞，染色体数不变；减数分裂只发生在有性繁殖组织，有联会和交叉，后期I同源染色体分离、后期II姐妹染色单体分离，产生4个遗传不同的子细胞，染色体数减半","有丝分裂意义：保证子细胞与母细胞遗传组成一致，维持个体发育的稳定性","减数分裂意义：保证亲子代染色体数恒定；非同源染色体自由组合(2ⁿ种)与交换提供变异来源"],"n":"","deck":"genetics-hw","id":"genetics-hw_11"},{"t":"calc","c":"3染色体","q":"水稻孢子体染色体数2n=24。问胚乳、花粉管管核(营养核)、胚囊中的卵细胞、叶、根端、种子的胚、颖片的染色体数各是多少？","a":"胚乳36；花粉管管核12；卵细胞12；叶24；根端24；种子的胚24；颖片24","n":"","deck":"genetics-hw","steps":["体细胞2n=24，配子n=12","胚乳为受精极核(2极核+1精子)=3n=36","花粉管管核、卵细胞均为配子体细胞n=12","叶、根、胚、颖片均为孢子体2n=24"],"id":"genetics-hw_12"},{"t":"mc","c":"3染色体","q":"蚕豆体细胞12条染色体(6对)。某学生说：减数分裂时只有1/4的配子，其6条染色体完全来自父本或母本。对吗？","a":1,"n":"每条染色体来自父/母概率各1/2；6条全来自父本=(1/2)⁶=1/64，全父或全母=2×1/64=1/32。","deck":"genetics-hw","o":["对","不对，应为1/32","不对，应为1/64","不对，应为1/16"],"id":"genetics-hw_13"},{"t":"calc","c":"3染色体","q":"玉米中：5个小孢子母细胞产生多少配子？5个大孢子母细胞产生多少配子？","a":"小孢子母细胞：5×4=20个；大孢子母细胞：5×1=5个","n":"","deck":"genetics-hw","steps":["1个小孢子母细胞经减数分裂产生4个小孢子(花粉)","1个大孢子母细胞减数分裂产生4个大孢子，但只有1个发育成胚囊(有效配子1个)"],"id":"genetics-hw_14"},{"t":"calc","c":"3染色体","q":"马2n=64，驴2n=62。(1)马和驴的杂种染色体数是多少？(2)该杂种可育还是不育？","a":"(1)63条；(2)不育（高度不育）","n":"","deck":"genetics-hw","steps":["马配子n=32，驴配子n=31，杂种=63","63条染色体无同源配对对象，减数分裂联会紊乱，不能产生正常配子"],"id":"genetics-hw_15"},{"t":"saq","c":"3染色体","q":"兔子的卵未经受精、经刺激发育成个体（孤雌生殖），其中某些个体对某些基因是杂合的。如何解释？","a":"可用极体受精解释：减数分裂产生的卵与极核(第二极体)融合恢复二倍体。若卵与极核所带等位基因不同，则融合后个体在该位点为杂合","n":"关键：极核与卵来自不同次级卵母细胞时可造成杂合。","deck":"genetics-hw","steps":["例：AaBb减数分裂可产生AB、Ab、aB、ab四种卵和极核","AB卵+AB极核→AABB(纯合)","AB卵+Ab极核→AABb(B位点杂合)","Ab卵+aB极核→AaBb(两位点均杂合)"],"id":"genetics-hw_16"},{"t":"calc","c":"4基因作用","q":"父亲B型血、母亲O型血，已有一个O型孩子。问第二个孩子是O型、B型、A型或AB型的机会各多少？","a":"O型 0.5；B型 0.5；A型或AB型 0","n":"","deck":"genetics-hw","steps":["有O型孩子→父亲必为 Iᴮi，母亲为 ii","Iᴮi × ii → 1/2 Iᴮi(B型) : 1/2 ii(O型)","各胎独立，第二胎概率同上"],"id":"genetics-hw_17"},{"t":"calc","c":"4基因作用","q":"兔子Pelger异常(白细胞核不分叶)。典型Pelger异常兔 × 纯合正常兔，后代217只异常、237只正常。Pelger异常的遗传基础？","a":"近似1:1，说明该异常个体为一对基因的杂合子，异常基因对正常基因为显性（不完全显性）","n":"","deck":"genetics-hw","steps":["217:237≈1:1，符合测交比","某类型×纯合正常得1:1，说明该类型是一对等位基因差异的杂合子"],"id":"genetics-hw_18"},{"t":"calc","c":"4基因作用","q":"上题中Pelger异常个体相互交配，得223正常、439异常、39只极度病变(骨骼畸形、生后死亡)。极度病变个体的基因型？为何只有39只？","a":"极度病变为病变基因纯合子(Pp)；因该基因为隐性致死但具显性效应，部分纯合子在胚胎期即死亡，故出生后仅39只。比例正常:异常:极度≈1:2:1","n":"","deck":"genetics-hw","steps":["223:439≈1:2，符合杂合子互交的1:2:1","极度病变占1/4，但出生后存活数偏少→部分胚胎期死亡","故病变基因为隐性致死、有显性效应"],"id":"genetics-hw_19"},{"t":"calc","c":"4基因作用","q":"小鼠复等位基因：Aʸ=黄色(纯合致死)，A=鼠色(野生型)，a=黑色，显性顺序Aʸ>A>a。AYa×AYa 的子代表型及比例？","a":"2黄 : 1黑（AʸAʸ个体胚胎期死亡，占1/4）","n":"","deck":"genetics-hw","steps":["AYa × AYa → 1/4 AʸAʸ(死) : 2/4 Aʸa(黄) : 1/4 aa(黑)","成活个体中 2黄:1黑"],"id":"genetics-hw_20"},{"t":"calc","c":"4基因作用","q":"承上题。若 AYa×Aa 平均每窝8只小鼠，则 AYa×AYa 平均每窝预期几只？","a":"6只（4黄 : 2黑）","n":"","deck":"genetics-hw","steps":["AYa×AYa 成活率=3/4（1/4致死）","8 × 3/4 = 6只","其中黄:黑=2:1，即4黄2黑"],"id":"genetics-hw_21"},{"t":"calc","c":"4基因作用","q":"燕麦杂交：白颖×黑颖，F1全黑颖；F2共560株，黑颖418、灰颖106、白颖36。(1)遗传方式？(2)F2白颖和灰颖基因型？","a":"(1)两对基因控制的显性上位，F2为12:3:1（9:3:3:1的变形）；(2)设B为黑颖上位基因、G为灰颖基因：灰颖为 bbG_，白颖为 bbgg","n":"","deck":"genetics-hw","steps":["418:106:36 ≈ 12:3:1","12黑颖 = B___（B存在即黑）","3灰颖 = bbG_；1白颖 = bbgg"],"id":"genetics-hw_22"},{"t":"calc","c":"4基因作用","q":"家蚕中黄茧(Y)对白茧(y)显性，但另有抑制基因I，I存在时Y_表现白茧。两个白茧个体杂交，子代白茧:黄茧=3:1，两亲本基因型如何？","a":"双亲就I-i而言均为杂合Ii；就Y-y而言均具黄色遗传基础。可能组合：IiYY×IiYY、IiYY×IiYy、IiYY×Iiyy、IiYy×iiyy","n":"","deck":"genetics-hw","steps":["子代3:1说明I位点杂合自交(Ii×Ii→3/4 I_ 抑制 : 1/4 ii 不抑制)","ii个体中Y_表现黄茧，占1/4×...调整后得白:黄=3:1"],"id":"genetics-hw_23"},{"t":"calc","c":"4基因作用","q":"鸡冠遗传：R_P_胡桃冠、R_pp玫瑰冠、rrP_豌豆冠、rrpp单冠。用纯种豌豆冠与纯种玫瑰冠杂交，如何获得单冠？","a":"纯种豌豆冠(rrPP)×纯种玫瑰冠(RRpp)→F1全为胡桃冠(RrPp)；F1自交得F2，其中rrpp即单冠，占1/16","n":"","deck":"genetics-hw","steps":["P: rrPP × RRpp → F1 RrPp（胡桃冠）","F1自交：9胡桃:3玫瑰:3豌豆:1单冠","单冠=rrpp=1/16"],"id":"genetics-hw_24"},{"t":"calc","c":"4基因作用","q":"小鼠黄色基因Aʸ(纯合致死)与短尾基因T(纯合致死)独立分配。两个黄色短尾个体(AʸaTt)互交：(1)子代表型比？(2)正常每窝8只时，此交配每窝预期几只？","a":"(1)4黄色短尾 : 2黄色常态尾 : 2灰色短尾 : 1灰色常态尾；(2)约4.5只","n":"","deck":"genetics-hw","steps":["A位点：1/4AʸAʸ(死) 2/4Aʸa(黄) 1/4aa(灰)","T位点：1/4TT(死) 2/4Tt(短尾) 1/4tt(常态)","成活组合：黄短4/16、黄常2/16、灰短2/16、灰常1/16，共9/16","8 × 9/16 = 4.5只"],"id":"genetics-hw_25"},{"t":"saq","c":"5伴性遗传","q":"哺乳动物雌雄比例大致接近1:1，如何解释？","a":["以人类为例：男性XY产生含X和含Y的两类精子，数目相等；女性XX只产生含X的卵","X精子与卵结合→XX(女)，Y精子与卵结合→XY(男)，两类合子比例相同","故性比近于1:1"],"n":"本质：异配性别产生两类配子且比例相等。","deck":"genetics-hw","id":"genetics-hw_26"},{"t":"saq","c":"5伴性遗传","q":"怎样区别某一性状是常染色体遗传还是伴性遗传？","a":["正反交试验：伴性遗传正反交结果往往不同，且性状分布与性别关联","伴性遗传常见交叉遗传现象（如外公→外孙）","隐性伴性性状在异配性别(如男性XY)中频率远高于同配性别","常染色体遗传正反交结果一致，男女/雌雄患病机会均等"],"n":"","deck":"genetics-hw","id":"genetics-hw_27"},{"t":"calc","c":"5伴性遗传","q":"家鸡芦花羽为Z连锁显性(B)，非芦花(b)。纯种芦花雄鸡(ZᴮZᴮ) × 非芦花母鸡(ZᵇW)，F1互交得F2，F2芦花性状与性别的关系？","a":"雄鸡全部芦花；雌鸡1/2芦花、1/2非芦花","n":"","deck":"genetics-hw","steps":["P: ZᵇW × ZᴮZᴮ → F1: ZᴮW(雌,芦花)、ZᴮZᵇ(雄,芦花)","F1互交 → F2: 1ZᴮZᴮ : 1ZᴮZᵇ : 1ZᴮW : 1ZᵇW","雄性( ZZ )均有B→全芦花；雌性中ZᴮW芦花、ZᵇW非芦花→各1/2"],"id":"genetics-hw_28"},{"t":"calc","c":"5伴性遗传","q":"视觉正常女子(其父色盲) × 视觉正常男子(其父色盲)，所生子女视觉如何？","a":"女儿全部视觉正常；儿子1/2正常、1/2色盲","n":"男子父亲色盲是干扰信息——男性的X来自母亲。","deck":"genetics-hw","steps":["女子基因型 XᴺXᶜ（父色盲必传Xᶜ）","男子基因型 XᴺY（其父色盲不影响其X）","后代：1/4XᴺXᴺ(女正常)、1/4XᴺXᶜ(女正常)、1/4XᴺY(男正常)、1/4XᶜY(男色盲)"],"id":"genetics-hw_29"},{"t":"mc","c":"5伴性遗传","q":"双亲都是色盲，他们能生出视觉正常的儿子吗？能生出视觉正常的女儿吗？","a":2,"n":"父XᶜY、母XᶜXᶜ→儿子必XᶜY(色盲)，女儿必XᶜXᶜ(色盲)。","deck":"genetics-hw","o":["能；能","能；不能","不能；不能","不能；能"],"id":"genetics-hw_30"},{"t":"mc","c":"5伴性遗传","q":"双亲色觉正常，他们能生出(1)色盲儿子吗？(2)色盲女儿吗？","a":1,"n":"父正常XᴺY，母正常但可为携带者XᴺXᶜ→儿子1/2色盲；女儿必得父的Xᴺ，故表型正常。","deck":"genetics-hw","o":["(1)能 (2)能","(1)能 (2)不能","(1)不能 (2)能","(1)不能 (2)不能"],"id":"genetics-hw_31"},{"t":"saq","c":"5伴性遗传","q":"一个无血友病男人与表型正常女人结婚，生了一个患血友病且为Klinefelter综合征(XXY)的儿子。说明该患儿的染色体组成和基因型如何形成。","a":"患儿基因型为 XʰXʰY；母亲为血友病基因携带者(XᴴXʰ)，其卵母细胞在减数第二次分裂时X染色体不分离，产生XʰXʰ卵子，与父方Y精子结合形成XʰXʰY","n":"提示点：第二次减数分裂不分离（不是第一次）。","deck":"genetics-hw","steps":["血友病为X连锁隐性；儿子的Y来自父亲，两个X均来自母亲","患儿为患者且XXY→两个X都带h","故为母方减数第二次分裂姐妹染色单体未分离所致"],"id":"genetics-hw_32"},{"t":"calc","c":"5伴性遗传","q":"火鸡品系出现遗传性白化症：3只带白化基因的雄禽与正常母禽交配，得229只幼禽，其中45只白化且全是雌的。(1)遗传方式？(2)表型正常的184只中哪些可保留？","a":"(1)性连锁(Z连锁)隐性遗传；(2)全部雌禽可放心保留；雄禽需再测交，凡子代出现白化者淘汰","n":"关键：白化全为雌→Z连锁隐性；雄禽表型正常但可能携带，必须测交筛除。","deck":"genetics-hw","steps":["白化个体全为雌→与性别连锁；雌为异配性别ZW","雄禽为杂合子ZᴬZᵃ，与正常雌ZᴬW交配→1/4ZZ、1/4ZZᵃ、1/4ZᴬW、1/4ZᵃW","ZᵃW即白化雌禽，占1/4，45/229≈1/5，卡方检验差异不显著"],"id":"genetics-hw_33"},{"t":"calc","c":"5伴性遗传","q":"果蝇截刚毛基因bb位于X和Y的同源区段，对野生型(+)隐性。截刚毛雌蝇(XᵇᵇXᵇᵇ) × 纯合正常刚毛雄蝇(X⁺Y⁺)，F1和F2的基因型、表型比例？","a":"F1：XᵇᵇX⁺(雌,野生型)、XᵇᵇY⁺(雄,野生型)；F2：1/4XᵇᵇXᵇᵇ : 1/4XᵇᵇX⁺ : 1/4XᵇᵇY⁺ : 1/4X⁺Y⁺，其中XᵇᵇXᵇᵇ为截刚毛，其余野生型（截刚毛:野生型=1:3）","n":"","deck":"genetics-hw","steps":["该基因在X、Y同源区，故Y上也带等位基因","F1雌得父的X⁺→杂合野生型；F1雄得母的Xᵇᵇ和父的Y⁺→XᵇᵇY⁺，Y⁺为显性故野生型","F2中仅XᵇᵇXᵇᵇ(1/4)表现截刚毛"],"id":"genetics-hw_34"},{"t":"calc","c":"6连锁","q":"番茄圆形(O)对长形(o)显性、单一花序(S)对复状花序(s)显性，两基因连锁。测交得：圆单(OS)23、长单(oS)83、圆复(Os)85、长复(os)19。求O-s间交换值。","a":"20%","n":"判亲本型找数目最多的两种。","deck":"genetics-hw","steps":["总数=23+83+85+19=210","亲本型为数目最多的 oS(83) 和 Os(85)","重组型=OS(23)+os(19)=42","交换值=42/210=20%"],"id":"genetics-hw_35"},{"t":"fill","c":"6连锁","q":"双杂合体测交时：独立分配时重组型比例P=___；完全连锁时P=___；有一定程度连锁(重组值r)时P=___。","a":"1/2；0；r/2","n":"测交后代中重组型总比例=重组值r，两种重组型各r/2。","deck":"genetics-hw","id":"genetics-hw_36"},{"t":"calc","c":"6连锁","q":"家鸡白色由隐性c或o纯合引起，有色需C与O同时存在。CCoo(白)×ccOO(白)→F1有色(CcOo)，F1与ccoo测交得有色68只、白色204只。问c与o间有无连锁？","a":"无连锁（独立分配）。测交比68:204=1:3，正是自由组合双杂合测交的预期比","n":"","deck":"genetics-hw","steps":["若独立：CcOo×ccoo→1/4CcOo(有色):3/4白色","68:204=1:3，完全符合→c与o不连锁（或相距极远，图距无法直接测出）"],"id":"genetics-hw_37"},{"t":"calc","c":"6连锁","q":"番茄第二染色体上三基因 p、o、s 的三点测交中，亲本型最多、双交换型最少，且双交换中只有中间基因互换，据此判定三基因顺序为 pos。若两区间重组值分别为21%和14%，写出连锁图。","a":"连锁图：p —21— o —14— s（p-o间距21cM，o-s间距14cM，p-s图距35cM）","n":"","deck":"genetics-hw","steps":["亲本型(++s 与 op+)最多，双交换型(+p+ 与 o+s)最少","比较亲型与双交换型，改变的基因即中间基因→o在中间","顺序 pos；p-o=21，o-s=14"],"id":"genetics-hw_38"},{"t":"calc","c":"6连锁","q":"果蝇三隐性纯合品系 × 野生型纯合品系，F1雌蝇与隐性纯合雄蝇回交，得：abc 211、ABC 209、aBc 212、AbC 208。(1)哪两个基因连锁？(2)重组值多少？","a":"(1)基因A与C紧密连锁；A-B间、B-C间自由组合；(2)A-C间重组值为0%（完全连锁，未观察到重组）","n":"","deck":"genetics-hw","steps":["四种类型数目几乎相等(约210)，说明只有两个亲本型","比较：A与C始终同相(ABC/abc 与 aBc/AbC 中A-C组合为AC或ac)","A-B、B-C呈现1:1:1:1自由组合→不连锁","结论：A-C连锁且r=0；三基因不在同一连锁群的全部"],"id":"genetics-hw_39"},{"t":"calc","c":"6连锁","q":"用Haldane作图函数校正：重组率r=25%时图距多少？r=5%时图距多少？何时必须校正？","a":"r=25%→约34.7 cM；r=5%→约5.3 cM。重组率较大时必须校正，因为双交换使观察到的重组率低估真实图距；重组率很小时(如<10%)双交换可忽略，校正与否差别很小","n":"","deck":"genetics-hw","steps":["Haldane: d = -50·ln(1-2r) （单位cM）","r=0.25: d=-50·ln(0.5)=50×0.693=34.7 cM","r=0.05: d=-50·ln(0.9)=50×0.105=5.27 cM","r越大，(1-2r)越小，校正幅度越大"],"id":"genetics-hw_40"},{"t":"saq","c":"6连锁","q":"如何辨别果蝇同一染色体上相距很远的基因与非同源染色体上独立分配的基因？","a":"利用雄果蝇不发生交换的特点：选F1雄果蝇与隐性纯合雌蝇测交。若测交后代只有两种亲本型→两基因连锁；若出现四种类型(1:1:1:1)→为独立分配","n":"","deck":"genetics-hw","steps":["雄果蝇无交换，连锁基因只产生亲本型配子","连锁：AB/ab 雄 → 只产生 AB、ab 两种配子→测交2种","不连锁：产生 AB、Ab、aB、ab 四种→测交4种(1:1:1:1)"],"id":"genetics-hw_41"},{"t":"calc","c":"6连锁","q":"链孢霉子囊孢子排列分析：突变基因a与着丝粒间的交换值经计算为4%。问该基因与着丝粒间的图距是多少？","a":"4个遗传单位(4 cM)","n":"","deck":"genetics-hw","steps":["基因与着丝粒间图距 = (第二次分裂分离子囊数 ÷ 2) ÷ 总子囊数 × 100","计算得交换值4%→图距4个遗传单位"],"id":"genetics-hw_42"},{"t":"saq","c":"6连锁","q":"减数分裂中染色体在第一次分裂时减数，为什么位于染色体上的基因有时却在第二次分裂时分离？","a":"因为同源染色体的非姐妹染色单体之间发生了交换，使姐妹染色单体在该位点异质化；这样该对等位基因要到第二次分裂姐妹染色单体分离时才分开","n":"","deck":"genetics-hw","steps":["交换使一条染色单体带上另一条的等位基因","姐妹染色单体不再同质","故表现为第二次分裂分离(M2)"],"id":"genetics-hw_43"},{"t":"saq","c":"7细菌噬菌体","q":"中断杂交实验中，选出e⁺型原养型后测得a⁺70%、c⁺85%、d⁺10%，b⁺未检出。问a、b、c、d与供体染色体起点(原点)的相对位置。","a":"距原点由近到远：c(85%) → a(70%) → d(10%) → b(未检出，最远，30分钟内未进入)","n":"","deck":"genetics-hw","steps":["某基因越早进入受体，在受体中出现频率越高","故频率越高→离原点越近","c 85%最近，a 70%次之，d 10%较远，b⁺未检出说明b距原点最远"],"id":"genetics-hw_44"},{"t":"mc","c":"7细菌噬菌体","q":"Hfr菌株为链霉素敏感型，为了在接合后杀死供体、只选择重组子，这个敏感性基因应位于染色体哪一端为好？","a":1,"n":"敏感基因在末端，接合时最后转移，供体自身仍保留敏感基因而被链霉素杀死，同时重组子已获得早期进入的标记。","deck":"genetics-hw","o":["起始端","末端","中间","任意位置均可"],"id":"genetics-hw_45"},{"t":"saq","c":"7细菌噬菌体","q":"T偶数噬菌体C型(需色氨酸)与C⁺型混合感染宿主，近一半色氨酸非依赖型子代在进一步实验中表现为基因型C。如何解释？","a":"这是表型混合：两种噬菌体在同一宿主内增殖，各自合成的外壳蛋白随机包装对方的染色体；C⁺蛋白可能包装C型染色体，产生的颗粒表型为C⁺(能吸附)但内含C型染色体，再次感染后子代全为C型","n":"","deck":"genetics-hw","steps":["混合感染→同一细胞内有两种染色体和两种外壳蛋白","包装随机：C⁺蛋白1/2包装C⁺染色体、1/2包装C型染色体","感染能力由外壳蛋白决定，故表现为C⁺","但其染色体为C型→子代全为C型"],"id":"genetics-hw_46"},{"t":"calc","c":"7细菌噬菌体","q":"T4噬菌体 m、r、tu 三基因杂交：亲本型 m r tu 与 + + + 最多，双交换型 m + tu 与 + r + 最少。(1)基因顺序？(2)本杂交的并发系数特点？","a":"(1)顺序为 m — r — tu（r在中间）；(2)并发系数大于1，意味着存在负干扰（双交换发生频率高于随机预期）","n":"","deck":"genetics-hw","steps":["亲本型最多：m r tu、+++ ","双交换型最少：m + tu、+ r +，与亲型比较只有r改变→r在中间","顺序 m r tu","并发系数=实测双交换率/理论双交换率>1→负干扰"],"id":"genetics-hw_47"},{"t":"fill","c":"7细菌噬菌体","q":"用基因型 ACNRX 菌株的DNA转化 acnrx 菌株，得到 AcnRx、acNrX、aCnRx、AcnrX、aCnrx 等类型。依此判定被转化基因的顺序是？","a":"N X A R C","n":"转化只涉及DNA片段，同时被转化的基因连锁较紧密，据此排列。","deck":"genetics-hw","id":"genetics-hw_48"},{"t":"calc","c":"7细菌噬菌体","q":"用P1普遍性转导：供体pur⁺nad⁺pdx⁻，受体pur⁻nad⁻pdx⁺。选pur⁺转导子100个，测得pur-nad共转导25%、pur-pdx共转导49%。(1)哪个座位最靠近pur？(2)nad和pdx在pur同侧还是两侧？(3)基因顺序？","a":"(1)pdx最靠近pur（共转导频率更高）；(2)在pur的同一边；(3)顺序为 pur — pdx — nad","n":"","deck":"genetics-hw","steps":["共转导频率越高→距离越近","pdx 49% > nad 25% → pdx更近","同侧判定：若分处两侧则不应同时共转导；综合数据得 pur-pdx-nad 同侧排列"],"id":"genetics-hw_49"},{"t":"term","c":"7细菌噬菌体","q":"共转导 (cotransduction)","a":"普遍性转导中，供体DNA片段上两个或多个基因同时被转入受体细胞的现象。两基因距离越近，共转导频率越高，可用于细菌基因的精细定位。","n":"","deck":"genetics-hw","id":"genetics-hw_50"},{"t":"calc","c":"8数量性状","q":"两对基因Aa、Bb以相加效应决定株高，AABB高50cm，aabb高30cm。(1)F1(AaBb)高度？(2)F2中哪些基因型表现40cm？(3)这些40cm植株在F2中占多少比例？","a":"(1)40cm；(2)AAbb、AaBb、aaBB；(3)3/8","n":"","deck":"genetics-hw","steps":["两纯合差20cm，共4个增效基因→每个显性基因贡献5cm","中亲值=(50+30)/2=40cm，无显性时F1=中亲值=40cm","40cm需2个显性基因：AAbb(1/16)、AaBb(4/16)、aaBB(1/16)","合计6/16=3/8"],"id":"genetics-hw_51"},{"t":"term","c":"8数量性状","q":"广义遗传率 / 狭义遗传率","a":"广义遗传率 h²B = 基因型方差/表型方差（含全部遗传效应）；狭义遗传率 h²N = 加性方差/表型方差（只含可稳定遗传的加性效应），狭义遗传率是育种选择的主要依据。","n":"","deck":"genetics-hw","id":"genetics-hw_52"},{"t":"saq","c":"8数量性状","q":"数量性状遗传有哪些主要特点？","a":["表现为连续变异，不能明确分组，需用平均数、方差等统计量描述","受多基因(微效多基因)控制，每对基因效应微小且可相加","易受环境影响，表型=基因型+环境","杂种后代常出现超亲遗传；F2变异幅度大于F1"],"n":"","deck":"genetics-hw","id":"genetics-hw_53"},{"t":"saq","c":"9染色体畸变","q":"玉米第9染色体缺失杂合体(缺失染色体带显性C，正常染色体带c)，含缺失染色体的花粉不能成活。以它为父本与cc母本杂交，后代出现10%有色籽粒，如何解释？","a":"因约20%的小孢子母细胞中，缺失染色体与正常染色体在C基因以外发生了交换，使C基因转移到正常染色体上，产生带C且可育的花粉；这类花粉占总花粉的10%，故后代10%有色","n":"这是「假显性」的经典应用：缺失使隐性等位基因表现。","deck":"genetics-hw","steps":["缺失染色体带C但该花粉败育→正常情况下后代应全无色","20%细胞发生交换(C以外区段)→产生含C的正常染色体花粉","交换产生4条染色单体中一半带C→20%×1/2=10%"],"id":"genetics-hw_54"},{"t":"mc","c":"9染色体畸变","q":"玉米中蜡质基因与淡绿色基因原本连锁，某品种中却表现为独立分配。可用哪种染色体畸变解释？","a":2,"n":"易位可将连锁群打断，使原本同链的基因分到不同染色体上而独立分配。","deck":"genetics-hw","o":["缺失","重复","易位","倒位"],"id":"genetics-hw_55"},{"t":"calc","c":"9染色体畸变","q":"同源三倍体3n=33(即n=11)。减数分裂时每个同源组都是2条去一极、1条去另一极。问产生平衡可育配子(含n或2n)的概率是多少？","a":"约1/1024（即 2×(1/2)¹¹）","n":"同源三倍体高度不育的原因正在于此。","deck":"genetics-hw","steps":["每个同源组得到2条或1条的概率各1/2","11个同源组全部得到2条 → (1/2)¹¹，形成2n配子","全部得到1条 → (1/2)¹¹，形成n配子","平衡配子合计=2×(1/2)¹¹=(1/2)¹⁰=1/1024"],"id":"genetics-hw_56"},{"t":"calc","c":"9染色体畸变","q":"同源四倍体基因型 AAAa 与 Aaaa，若A基因靠近着丝粒(不发生染色单体交换，按染色体分离)，各产生哪些双倍体配子、比例如何？","a":"AAAa → AA : Aa = 1 : 1（不产生aa）；Aaaa → Aa : aa = 1 : 1","n":"","deck":"genetics-hw","steps":["基因靠近着丝粒时表现为染色体分离（非染色单体分离）","AAAa：4条同源染色体中3条带A，减数时2:2分配→AA与Aa各半","Aaaa：同理→Aa与aa各半，不产生AA"],"id":"genetics-hw_57"},{"t":"saq","c":"10突变","q":"为什么多倍体可以阻止基因突变的显现？同源多倍体和异源多倍体在这方面有何不同？","a":"多倍体具有剂量效应和缓冲(补偿)效应：多个同源基因中只有一个发生隐性突变时，其余正常拷贝可补偿，突变不表现。同源多倍体同源拷贝多，缓冲作用最强；异源多倍体来自不同物种，拷贝间补偿能力较弱，更接近二倍体","n":"","deck":"genetics-hw","steps":["同源四倍体AAAa中一个A突变为a→AAAa，仍表现显性","异源多倍体类似二倍体，缓冲效应较小"],"id":"genetics-hw_58"},{"t":"saq","c":"10突变","q":"牛群中正常双亲产下一头矮生雄犊。如何判断它是(1)突变的直接结果、(2)隐性矮生基因携带者交配分离、还是(3)环境影响？","a":"用该矮牛与正常牛测交：(1)若为显性突变的直接结果(杂合体)，后代矮:正常=1:1；(2)若为隐性纯合分离(aa×AA)，后代全部正常(Aa)；(3)若为环境影响，则后代全正常，且改变饲养条件后该性状可改变","n":"","deck":"genetics-hw","steps":["关键：测交一代即可区分(1)与(2)","(3)需结合饲养史和条件改变实验判断"],"id":"genetics-hw_59"},{"t":"saq","c":"10突变","q":"原子弹爆炸后，最初的遗传学研究为何要调查受辐射个体的子女性比？","a":"因为辐射对性染色体影响显著：若引起X染色体上的隐性突变，会在男性(半合子)子代中直接表现出来；若Y染色体受损伤较重，则含Y的精子活力下降，会使女儿出生较多。故性比变化可作为辐射遗传效应的敏感指标","n":"","deck":"genetics-hw","steps":["X连锁隐性突变→儿子表现","Y染色体损伤→男性合子减少→性比偏向女性"],"id":"genetics-hw_60"},{"t":"term","c":"11分子基础","q":"半保留复制","a":"DNA复制时双链解开，每条母链各自作为模板合成一条互补新链，结果每个子代DNA分子保留一条母链和一条新链，故称半保留复制。","n":"","deck":"genetics-hw","id":"genetics-hw_61"},{"t":"term","c":"11分子基础","q":"顺反子 / 突变子 / 重组子","a":"顺反子：通过顺反互补测验确定的功能单位，相当于一个基因（编码一条多肽）；突变子：发生突变的最小单位，可小到单个核苷酸；重组子：发生重组的最小单位，可小到单个核苷酸对。","n":"","deck":"genetics-hw","id":"genetics-hw_62"},{"t":"term","c":"11分子基础","q":"密码子的简并 (degeneracy)","a":"多个不同的密码子编码同一种氨基酸的现象（如亮氨酸有6个密码子）。简并性可减少碱基突变造成的有害影响，多由第三位碱基的摆动造成。","n":"","deck":"genetics-hw","id":"genetics-hw_63"},{"t":"mc","c":"11分子基础","q":"一条短链碱基顺序为 A-T-C-G，它是什么？以其为模板形成的互补DNA链和互补RNA链顺序各是？","a":1,"n":"含T不含U→是DNA；互补DNA为T-A-G-C；转录出的RNA中A对应U，故为U-A-G-C。","deck":"genetics-hw","o":["RNA；互补DNA=T-A-G-C，互补RNA=U-A-G-C","DNA；互补DNA=T-A-G-C，互补RNA=U-A-G-C","DNA；互补DNA=U-A-G-C，互补RNA=T-A-G-C","无法判断"],"id":"genetics-hw_64"},{"t":"mc","c":"11分子基础","q":"双链DNA分子中，(A+T)/(G+C) 与 (A+C)/(G+T) 的比例是否相同？","a":1,"n":"因A=T、G=C，(A+C)/(G+T)=(A+C)/(C+A)=1；而(A+T)/(G+C)随物种GC含量不同而异。","deck":"genetics-hw","o":["相同，都等于1","不相同：前者具种属特异性，后者恒等于1","相同，都具种属特异性","不相同：前者恒等于1，后者具种属特异性"],"id":"genetics-hw_65"},{"t":"calc","c":"11分子基础","q":"某染色体含长度约1100 μm的DNA，已知DNA双链相邻碱基对间距为0.34 nm。问这条染色体约有多少核苷酸对？","a":"约3.2×10⁶ bp（约324万碱基对）","n":"","deck":"genetics-hw","steps":["1100 μm = 1100×10⁻⁶ m，0.34 nm = 0.34×10⁻⁹ m","核苷酸对数 = 1100×10⁻⁶ ÷ (0.34×10⁻⁹)","= (1100/0.34)×10³ ≈ 3235×10³ ≈ 3.24×10⁶ bp"],"id":"genetics-hw_66"},{"t":"saq","c":"11分子基础","q":"tRNA的四个主要环的名称和功能是什么？","a":["DHU环(二氢尿嘧啶环)：与氨酰-tRNA合成酶识别结合有关","反密码子环：含反密码子，与mRNA密码子互补配对","TψC环：与核糖体结合有关","额外环(可变环)：长度可变，是tRNA分类的依据之一","3′端CCA：氨基酸结合位点"],"n":"","deck":"genetics-hw","id":"genetics-hw_67"},{"t":"calc","c":"11分子基础","q":"链孢霉精氨酸营养突变型的生长反应：arg-8,-9 在加谷氨半醛/鸟氨酸/瓜氨酸/精氨酸时均生长；arg-4,-5,-6,-7 需鸟氨酸及以后；arg-2,-3,-12 需瓜氨酸及以后；arg-1,-10 只需精氨酸。推断精氨酸代谢途径及各组基因阻断的步骤。","a":"途径：前体 → 谷氨半醛 → 鸟氨酸 → 瓜氨酸 → 精氨酸。arg-8,-9阻断前体→谷氨半醛；arg-4,-5,-6,-7阻断谷氨半醛→鸟氨酸；arg-2,-3,-12阻断鸟氨酸→瓜氨酸；arg-1,-10阻断瓜氨酸→精氨酸","n":"","deck":"genetics-hw","steps":["能在某物质上生长，说明阻断发生在该物质之前的步骤","能利用的物质越靠后→阻断步骤越靠前","arg-1,-10只能用精氨酸→阻断最后一步"],"id":"genetics-hw_68"},{"t":"term","c":"12突变机理","q":"转换 / 颠换","a":"转换：嘌呤换嘌呤(A↔G)或嘧啶换嘧啶(C↔T)的碱基替换；颠换：嘌呤与嘧啶之间的互换。转换发生频率通常高于颠换。","n":"","deck":"genetics-hw","id":"genetics-hw_69"},{"t":"term","c":"12突变机理","q":"同义突变 / 错义突变 / 无义突变","a":"同义突变：碱基改变后密码子仍编码同一氨基酸，表型不变；错义突变：编码另一种氨基酸，可能影响蛋白质功能；无义突变：变成终止密码子，使肽链提前终止。","n":"","deck":"genetics-hw","id":"genetics-hw_70"},{"t":"term","c":"12突变机理","q":"移码突变","a":"DNA中插入或缺失1个或少数几个(非3的倍数)碱基对，使该位点之后的读码框全部改变，产生完全不同的氨基酸序列，通常导致蛋白质完全失活。","n":"","deck":"genetics-hw","id":"genetics-hw_71"},{"t":"saq","c":"12突变机理","q":"简述紫外线诱变的作用机制及其引起DNA损伤的修复途径。","a":["机制：紫外线主要使同一条DNA链上相邻的嘧啶(尤其胸腺嘧啶)形成嘧啶二聚体(T<>T)，阻碍复制和转录","修复途径：光复活(光解酶直接修复)、切除修复(切补修复)、重组修复、SOS修复(易错修复)"],"n":"","deck":"genetics-hw","id":"genetics-hw_72"},{"t":"saq","c":"12突变机理","q":"为什么就某一顺反子而言，正向突变率往往比回复突变率至少高一个数量级？","a":"正向突变只要破坏该基因功能即可，可发生在基因内成百上千个位点的任一处，也可由多种方式的改变引起；而回复突变必须精确恢复原来被改变的那一特定位点(或产生能补偿的特定抑制突变)，可发生的事件极少，故回复突变率低得多","n":"","deck":"genetics-hw","steps":["正向突变靶点多(整个基因的许多位点)","回复突变靶点极少(仅原突变位点或特定补偿位点)"],"id":"genetics-hw_73"},{"t":"saq","c":"13细胞质遗传","q":"母性影响和细胞质遗传有什么不同？","a":["相同点：正反交结果往往不同，子代表型受母方影响","母性影响：由母体核基因型决定，子代表型由母体的基因型控制，但最终仍遵循孟德尔分离（延迟一代表现），如椎实螺外壳旋向","细胞质遗传：由细胞质基因(线粒体、叶绿体DNA)控制，不遵循孟德尔规律，连续多代表现母本性状，无一定分离比"],"n":"","deck":"genetics-hw","id":"genetics-hw_74"},{"t":"calc","c":"13细胞质遗传","q":"椎实螺外壳旋向为母性影响，右旋(D)对左旋(d)显性。一个Dd个体自交，子代基因型和表型如何？子代再自交，下一代表型又如何？","a":"子代基因型 1DD:2Dd:1dd，但表型全部右旋(由母体Dd基因型决定)；子代再自交后，DD和Dd母体的后代全右旋，dd母体的后代全左旋→下代表型为 3右旋 : 1左旋","n":"核心：表型比基因型晚一代表现。","deck":"genetics-hw","steps":["母性影响：子代表型由母体基因型决定，而非自身基因型","母体Dd→子代全右旋","子代自交时，子代本身的基因型决定其后代：1/4 DD→右、2/4 Dd→右、1/4 dd→左","故再下一代 3右:1左"],"id":"genetics-hw_75"},{"t":"saq","c":"13细胞质遗传","q":"正反交F1结果不同，可能由(1)伴性遗传、(2)细胞质遗传、(3)母性影响引起。如何设计实验区分？","a":["看性状是否与性别连锁：伴性遗传中子代性状分布与性别相关(如只在雄性出现)，且正反交差异表现为交叉遗传","细胞质遗传：F1及后续世代始终表现母本性状，回交多代后仍不出现孟德尔分离，且性状不随核基因转移","母性影响：F1表现母体基因型决定的性状，但到F2或F3会出现典型的孟德尔分离比","可连续回交或自交观察是否出现孟德尔分离来判断"],"n":"","deck":"genetics-hw","id":"genetics-hw_76"},{"t":"fill","c":"13细胞质遗传","q":"细胞质雄性不育的三系配套中：不育系、保持系、恢复系的基因型(细胞质/细胞核)分别是？","a":"不育系 S(rfrf)；保持系 N(rfrf)；恢复系 N(RfRf) 或 S(RfRf)","n":"S=不育细胞质，N=正常细胞质；rf=不育核基因，Rf=育性恢复基因。","deck":"genetics-hw","id":"genetics-hw_77"},{"t":"calc","c":"14个体发育","q":"人类性染色质体(巴氏小体)数目等于X染色体数减1。问 XY、XYY、XXY、XXX 个体的体细胞间期核中各有多少个性染色质体？","a":"XY：0个；XYY：0个；XXY：1个；XXX：2个","n":"","deck":"genetics-hw","steps":["巴氏小体数 = X染色体数 − 1","XY有1条X→0；XYY有1条X→0","XXY有2条X→1；XXX有3条X→2"],"id":"genetics-hw_78"},{"t":"saq","c":"14个体发育","q":"玳瑁猫几乎都是雌的，少数雄性玳瑁猫的性染色体组成为XXY。如何从遗传和发育角度解释？","a":"控制毛色的基因位于X染色体上(黑/黄为一对等位基因)。雌猫XX的两条X中，在胚胎发育早期随机有一条失活(X染色体失活/剂量补偿)，不同细胞克隆失活不同的X，故出现黑黄相间的玳瑁斑。正常雄猫只有一条X，只表现一种颜色；XXY个体有两条X，可发生随机失活，故也可表现为玳瑁，且因有Y而发育为雄性","n":"","deck":"genetics-hw","steps":["玳瑁=两条X携带不同毛色等位基因+随机失活","XXY有两条X→可失活→可玳瑁；有Y→雄性"],"id":"genetics-hw_79"},{"t":"term","c":"14个体发育","q":"正控制 / 负控制","a":"负控制：调节基因产物(阻遏蛋白)与操纵基因结合，阻止结构基因转录；有诱导物时阻遏物失活而转录开启(如lac操纵子)。正控制：调节蛋白(激活蛋白)结合后促进转录，无激活蛋白时转录关闭(如CAP-cAMP对乳糖操纵子的正调控)。","n":"","deck":"genetics-hw","id":"genetics-hw_80"},{"t":"calc","c":"15进化","q":"白花三叶草自交不亲和。非条斑叶为隐性纯合vv，约占16%（随机交配群体）。问：(1)群体中对该隐性基因杂合的植株比例？(2)花粉中带v的比例？","a":"(1)杂合体 2pq = 48%；(2)花粉中带v的比例 = q = 0.4（40%）","n":"","deck":"genetics-hw","steps":["vv=q²=0.16 → q=0.4，p=0.6","杂合体=2pq=2×0.6×0.4=0.48","花粉中v的频率=q=0.4"],"id":"genetics-hw_81"},{"t":"calc","c":"15进化","q":"承上题(q=0.4)。若把所有非条斑叶植株淘汰(s=1)，下一代非条斑叶(vv)比例是多少？若只淘汰一半(s=0.5)呢？","a":"s=1：约8.2%；s=0.5：约12.1%","n":"","deck":"genetics-hw","steps":["s=1(完全淘汰隐性)：q₁=q₀/(1+q₀)=0.4/1.4≈0.286，vv=q₁²≈0.082","s=0.5：q₁=[q−sq²]/[1−sq²]=[0.4−0.5×0.16]/[1−0.5×0.16]=0.32/0.92≈0.348","vv=q₁²≈0.121"],"id":"genetics-hw_82"},{"t":"calc","c":"15进化","q":"人类中色盲男性占8%，色盲为X连锁隐性。预期女性色盲在总人口中的比例是多少？","a":"约0.64%（女性中约0.64%，即q²=0.08²=0.0064）","n":"","deck":"genetics-hw","steps":["男性色盲频率=q=0.08","女性患者需两条X都带致病基因=q²=0.0064","即在总人口中约0.64%"],"id":"genetics-hw_83"},{"t":"saq","c":"15进化","q":"对个体生存有害的基因中，有害的伴性基因和有害的常染色体隐性基因，哪一种更容易受到自然选择的作用而被淘汰？","a":"有害的伴性( X连锁隐性 )基因更容易被选择淘汰。因为它在异配性别(如男性)中处于半合子状态，一旦携带即表现并受到选择；而常染色体隐性有害基因在杂合子中不表现，可「隐藏」在群体中，选择效率较低","n":"","deck":"genetics-hw","steps":["X连锁隐性：男性半合子直接暴露→选择效率高","常染色体隐性：杂合子不表达→选择难以触及","故伴性有害基因频率下降更快"],"id":"genetics-hw_84"},{"t":"saq","c":"15进化","q":"家养动物和栽培植物的遗传变异通常比野生群体丰富得多，为什么？","a":["交配体系：人工条件下可强制杂交、引种和人工授粉，打破自然隔离，基因交流范围更广","自然选择：野生群体受强选择压力，不利变异被淘汰；家养/栽培条件下选择压力被人工放松或改变，许多变异得以保留","突变：人工诱变、长期人工选择积累了大量突变类型；人类有意识地保留和扩繁罕见变异"],"n":"","deck":"genetics-hw","id":"genetics-hw_85"},{"t":"mc","c":"绪论","q":"“gene（基因）”一词由谁在何年提出？","o":["孟德尔（豌豆杂交）","摩尔根（果蝇连锁）","约翰生，1909年","沃森和克里克，1953年"],"a":2,"n":"基因约翰生，连锁摩尔根。","deck":"genetics-midterm","id":"genetics-midterm_0"},{"t":"mc","c":"绪论","q":"提出分离定律与自由组合定律（豌豆杂交实验）的是？","o":["孟德尔","摩尔根","达尔文","巴斯德"],"a":0,"n":"孟德尔=豌豆两定律。","deck":"genetics-midterm","id":"genetics-midterm_1"},{"t":"mc","c":"绪论","q":"通过果蝇实验提出连锁交换定律、建立染色体遗传学说的是？","o":["孟德尔","摩尔根","约翰生","格里菲斯"],"a":1,"n":"基因约翰生，连锁摩尔根。","deck":"genetics-midterm","id":"genetics-midterm_2"},{"t":"mc","c":"绪论","q":"下列属于一对相对性状的是？","o":["豌豆高茎与矮茎","玉米粒色与粒形","番茄红果与叶片形状","狗的卷毛与猫的直毛"],"a":0,"n":"相对性状=同种生物同一性状的不同表现。","deck":"genetics-midterm","id":"genetics-midterm_3"},{"t":"mc","c":"绪论","q":"关于基因型与表现型，正确的是？","o":["基因型相同表现型必相同","表现型是基因型与环境共同作用的结果","表现型相同基因型必相同","基因型不受环境影响"],"a":1,"n":"表现型 = 基因型 + 环境。","deck":"genetics-midterm","id":"genetics-midterm_4"},{"t":"mc","c":"分子","q":"发现“转化现象”（死S型+活R型→活S型，体内实验）的是？","o":["格里菲斯","艾弗里","赫尔希和蔡斯","梅塞尔森"],"a":0,"n":"格里菲斯发现转化，艾弗里证明是DNA。","deck":"genetics-midterm","id":"genetics-midterm_5"},{"t":"mc","c":"分子","q":"直接证明“DNA是遗传物质”（体外，用DNA酶处理使转化失活）的是？","o":["格里菲斯","艾弗里","赫尔希和蔡斯","摩尔根"],"a":1,"n":"艾弗里=DNA酶实验证DNA。","deck":"genetics-midterm","id":"genetics-midterm_6"},{"t":"mc","c":"分子","q":"赫尔希和蔡斯噬菌体实验的结论是？","o":["蛋白质是遗传物质","DNA是遗传物质","DNA和蛋白质都是","RNA是遗传物质"],"a":1,"n":"P进菌、S不进→DNA是遗传物质。","deck":"genetics-midterm","id":"genetics-midterm_7"},{"t":"mc","c":"分子","q":"T2噬菌体实验中，³²P标记并进入细菌内部的是？","o":["蛋白质外壳","DNA","糖类","脂质"],"a":1,"n":"P跟DNA走，S跟蛋白走。","deck":"genetics-midterm","id":"genetics-midterm_8"},{"t":"mc","c":"分子","q":"T2噬菌体实验中，³⁵S标记并留在细菌外部的是？","o":["DNA","蛋白质外壳","RNA","糖类"],"a":1,"n":"S跟蛋白走。","deck":"genetics-midterm","id":"genetics-midterm_9"},{"t":"mc","c":"分子","q":"中心法则的基本遗传信息流向是？","o":["DNA→RNA→蛋白质","蛋白质→DNA","RNA→蛋白质→DNA","DNA→蛋白质（不经RNA）"],"a":0,"n":"中心法则无蛋白反向；逆转录是病毒专属。","deck":"genetics-midterm","id":"genetics-midterm_10"},{"t":"mc","c":"分子","q":"逆转录（RNA→DNA）存在于？","o":["所有生物","逆转录病毒","细菌","植物"],"a":1,"n":"逆转录是病毒专属。","deck":"genetics-midterm","id":"genetics-midterm_11"},{"t":"mc","c":"分子","q":"DNA半保留复制的直接证据来自？","o":["格里菲斯","梅塞尔森-斯塔尔（密度梯度离心）","赫尔希和蔡斯","艾弗里"],"a":1,"n":"轻重链密度梯度证半保留。","deck":"genetics-midterm","id":"genetics-midterm_12"},{"t":"mc","c":"分子","q":"原核生物mRNA与真核不同的是？","o":["有5′帽子","有内含子剪接","一般不戴帽、不剪接内含子","有很长的polyA尾"],"a":2,"n":"原核mRNA不戴帽不剪接。","deck":"genetics-midterm","id":"genetics-midterm_13"},{"t":"mc","c":"分子","q":"lac操纵子中，RNA聚合酶结合的部位是？","o":["操纵基因O","启动子P","调节基因I","结构基因"],"a":1,"n":"聚酶坐P。","deck":"genetics-midterm","id":"genetics-midterm_14"},{"t":"mc","c":"分子","q":"lac操纵子中被阻遏蛋白结合、实现负调控的是？","o":["启动子P","操纵基因O","结构基因lacZ","调节基因I"],"a":1,"n":"阻遏锁O。","deck":"genetics-midterm","id":"genetics-midterm_15"},{"t":"mc","c":"分子","q":"调节基因I的产物是？","o":["乳糖代谢酶","阻遏蛋白","mRNA","DNA聚合酶"],"a":1,"n":"I造锁（阻遏蛋白）。","deck":"genetics-midterm","id":"genetics-midterm_16"},{"t":"mc","c":"孟德尔","q":"红花CC×白花cc，F1自交，F2红花:白花？","o":["3:1","1:1","9:3:4","1:2:1"],"a":0,"n":"分离定律3:1。","deck":"genetics-midterm","id":"genetics-midterm_17"},{"t":"mc","c":"孟德尔","q":"上题F2红花植株中，纯合子（CC）比例是？","o":["1/4","1/3","1/2","2/3"],"a":1,"n":"显性中纯合1/3。","deck":"genetics-midterm","id":"genetics-midterm_18"},{"t":"mc","c":"孟德尔","q":"测交（F1杂合×隐性纯合）的表型比是？","o":["3:1","1:1","1:2:1","9:3:3:1"],"a":1,"n":"测交1:1验杂合。","deck":"genetics-midterm","id":"genetics-midterm_19"},{"t":"mc","c":"孟德尔","q":"两对独立基因自由组合，F2表型比？","o":["3:1","9:3:3:1","1:1:1:1","15:1"],"a":1,"n":"自由组合9:3:3:1。","deck":"genetics-midterm","id":"genetics-midterm_20"},{"t":"mc","c":"孟德尔","q":"自由组合F2中双显性纯合（AABB）占？","o":["1/16","1/4","9/16","3/16"],"a":0,"n":"双显纯合1/16。","deck":"genetics-midterm","id":"genetics-midterm_21"},{"t":"mc","c":"孟德尔","q":"F1（Cc自交所得红花群体）中红花植株随机交配，子代白花比例？","o":["1/4","1/9","1/3","1/16"],"a":1,"n":"先筛红花(1/3CC,2/3Cc)→c=1/3→白花1/9。","deck":"genetics-midterm","id":"genetics-midterm_22"},{"t":"mc","c":"互作","q":"互补作用（两显性基因互补才表现）的F2比例？","o":["9:7","9:6:1","15:1","12:3:1"],"a":0,"n":"互补=俩都要→9:7。","deck":"genetics-midterm","id":"genetics-midterm_23"},{"t":"mc","c":"互作","q":"积加作用（双显与单显表现不同）F2比例？","o":["9:7","9:6:1","15:1","13:3"],"a":1,"n":"积加9:6:1。","deck":"genetics-midterm","id":"genetics-midterm_24"},{"t":"mc","c":"互作","q":"重叠作用（任一显性即显性）F2比例？","o":["15:1","9:7","13:3","12:3:1"],"a":0,"n":"重叠=有一个就行→15:1。","deck":"genetics-midterm","id":"genetics-midterm_25"},{"t":"mc","c":"互作","q":"隐性上位（隐性基因掩盖另一基因）F2比例？","o":["9:3:4","12:3:1","9:7","15:1"],"a":0,"n":"隐上9:3:4。","deck":"genetics-midterm","id":"genetics-midterm_26"},{"t":"mc","c":"互作","q":"显性上位（显性基因掩盖其他）F2比例？","o":["12:3:1","9:3:4","9:6:1","15:1"],"a":0,"n":"显上12:3:1。","deck":"genetics-midterm","id":"genetics-midterm_27"},{"t":"mc","c":"互作","q":"抑制作用（抑制基因压制其他）F2比例？","o":["13:3","9:6:1","15:1","9:7"],"a":0,"n":"抑制13:3。","deck":"genetics-midterm","id":"genetics-midterm_28"},{"t":"mc","c":"性别","q":"人类性别决定属于？","o":["XY型","ZW型","XO型","倍数型"],"a":0,"n":"XY人果蝇。","deck":"genetics-midterm","id":"genetics-midterm_29"},{"t":"mc","c":"性别","q":"鸟类、蝴蝶的性别决定属于？","o":["XY型","ZW型","XO型","倍数型"],"a":1,"n":"ZW鸟蝶。","deck":"genetics-midterm","id":"genetics-midterm_30"},{"t":"mc","c":"性别","q":"蝗虫的性别决定（♂XO♀XX）属于？","o":["XY型","ZW型","XO型","倍数型"],"a":2,"n":"蝗虫少条X。","deck":"genetics-midterm","id":"genetics-midterm_31"},{"t":"mc","c":"性别","q":"蜜蜂性别决定（孤雌生殖产雄）属于？","o":["XY型","倍数型（单倍雄、双倍雌）","ZW型","XO型"],"a":1,"n":"蜜蜂看单双。","deck":"genetics-midterm","id":"genetics-midterm_32"},{"t":"mc","c":"性别","q":"X连锁隐性遗传的典型特点是？","o":["男性患者多于女性、交叉遗传","女性患者多于男性","男女均等","只传男不传女"],"a":0,"n":"X隐男多、交叉遗传。","deck":"genetics-midterm","id":"genetics-midterm_33"},{"t":"mc","c":"性别","q":"X连锁显性遗传中，患病父亲的女儿？","o":["全部患病","全部正常","约半数患病","全部为携带者"],"a":0,"n":"X显父传女。","deck":"genetics-midterm","id":"genetics-midterm_34"},{"t":"mc","c":"性别","q":"人类秃顶（Bb男性秃、女性不秃）属于？","o":["从性遗传","限性遗传","伴X遗传","母性影响"],"a":0,"n":"秃顶是常染上的性别翻转。","deck":"genetics-midterm","id":"genetics-midterm_35"},{"t":"mc","c":"性别","q":"红绿色盲为X连锁隐性，男性患者的色盲基因来自？","o":["父亲","母亲","祖父","外祖父经母亲传递"],"a":1,"n":"儿子的X染色体全来自母亲。","deck":"genetics-midterm","id":"genetics-midterm_36"},{"t":"mc","c":"连锁","q":"完全连锁的杂合子自交，F2表型比（仅两型）？","o":["9:3:3:1","3:1","1:2:1","15:1"],"a":1,"n":"完全连锁=3:1两型。","deck":"genetics-midterm","id":"genetics-midterm_37"},{"t":"mc","c":"连锁","q":"交换值（重组率）与图距的关系是？","o":["1cM=1%重组率","1cM=10%重组率","二者无关","1cM=100%重组"],"a":0,"n":"图距=重组率，1cM=1%。","deck":"genetics-midterm","id":"genetics-midterm_38"},{"t":"mc","c":"连锁","q":"三点测交中，双交换类型（最少见）的作用是？","o":["确定两端基因","确定中间基因","计算总图距","验证独立分配"],"a":1,"n":"最少的是双交换，谁换位谁是中间。","deck":"genetics-midterm","id":"genetics-midterm_39"},{"t":"mc","c":"连锁","q":"符合系数C=1表示？","o":["完全干扰","无干扰","负向干扰"],"a":1,"n":"C=1各干各的，无干扰。","deck":"genetics-midterm","id":"genetics-midterm_40"},{"t":"mc","c":"连锁","q":"符合系数C=0表示？","o":["无干扰","完全干扰（无双交换发生）","负干扰"],"a":1,"n":"C=0一颗不发。","deck":"genetics-midterm","id":"genetics-midterm_41"},{"t":"mc","c":"连锁","q":"干扰系数I=1-C，若I=0.3，说明？","o":["30%干扰","70%干扰","无干扰"],"a":0,"n":"I=0.3即30%干扰（别和C=0混）。","deck":"genetics-midterm","id":"genetics-midterm_42"},{"t":"mc","c":"连锁","q":"某生物连锁群的数目等于？","o":["体细胞染色体总数","单倍体染色体数n","二倍体染色体数2n","染色体总长度"],"a":1,"n":"连锁群数=n。","deck":"genetics-midterm","id":"genetics-midterm_43"},{"t":"mc","c":"细菌病毒","q":"噬菌体是？","o":["植物病毒","侵袭细菌的病毒","动物病毒","真菌"],"a":1,"n":"噬菌体=细菌病毒。","deck":"genetics-midterm","id":"genetics-midterm_44"},{"t":"mc","c":"细菌病毒","q":"T2噬菌体侵染实验（赫尔希和蔡斯）使用的标记元素是？","o":["³²P和³⁵S","¹⁴C和¹⁸O","³²P和¹⁵N","³⁵S和³²P之外的组合"],"a":0,"n":"P标DNA，S标蛋白。","deck":"genetics-midterm","id":"genetics-midterm_45"},{"t":"mc","c":"细菌病毒","q":"T2噬菌体的遗传物质是？","o":["DNA","RNA","蛋白质","脂质"],"a":0,"n":"T2是DNA病毒。","deck":"genetics-midterm","id":"genetics-midterm_46"},{"t":"mc","c":"细菌病毒","q":"烈性噬菌体与温和噬菌体的主要区别是？","o":["前者感染后立即裂解宿主，后者可整合形成溶原","前者溶原后者裂解","两者无区别","前者只感染真核细胞"],"a":0,"n":"烈性裂解，温和可溶原。","deck":"genetics-midterm","id":"genetics-midterm_47"},{"t":"mc","c":"细菌病毒","q":"普遍性转导与局限性转导的区别是？","o":["普遍可转移任意基因，局限只转特定基因","局限转任意、普遍转特定","两者完全相同"],"a":0,"n":"普遍任意，局限特定。","deck":"genetics-midterm","id":"genetics-midterm_48"},{"t":"mc","c":"细菌病毒","q":"细菌转导的媒介是？","o":["质粒","噬菌体","性菌毛","细胞直接接触"],"a":1,"n":"噬菌体介导转导。","deck":"genetics-midterm","id":"genetics-midterm_49"},{"t":"mc","c":"细菌病毒","q":"细菌接合中Hfr菌株的特点是？","o":["高频重组，染色体可转入受体","不含F因子","不能转移DNA","只转移质粒"],"a":0,"n":"Hfr=高频重组。","deck":"genetics-midterm","id":"genetics-midterm_50"},{"t":"mc","c":"细菌病毒","q":"艾弗里的细菌转化实验（体外）证明？","o":["DNA是遗传物质","蛋白质是遗传物质","RNA是遗传物质","糖类是遗传物质"],"a":0,"n":"转化证DNA。","deck":"genetics-midterm","id":"genetics-midterm_51"},{"t":"mc","c":"细菌病毒","q":"烟草花叶病毒（TMV）重建实验证明？","o":["RNA也可作为遗传物质","DNA是遗传物质","蛋白质是遗传物质","病毒没有遗传物质"],"a":0,"n":"TMV证RNA也行。","deck":"genetics-midterm","id":"genetics-midterm_52"},{"t":"mc","c":"细菌病毒","q":"逆转录病毒的遗传信息流向是？","o":["RNA→DNA","DNA→RNA","DNA→蛋白质","蛋白质→RNA"],"a":0,"n":"逆转录RNA→DNA。","deck":"genetics-midterm","id":"genetics-midterm_53"},{"t":"mc","c":"细菌病毒","q":"温和噬菌体整合到宿主基因组并形成可遗传状态，称为？","o":["溶原性","裂解周期","转化","转导"],"a":0,"n":"溶原性=整合传代。","deck":"genetics-midterm","id":"genetics-midterm_54"},{"t":"mc","c":"畸变","q":"下列“不属于”染色体结构畸变的是？","o":["缺失","重复","基因突变","倒位"],"a":2,"n":"基因突变≠染色体畸变。","deck":"genetics-midterm","id":"genetics-midterm_55"},{"t":"mc","c":"畸变","q":"缺失杂合体减数分裂联会时可见？","o":["缺失环","倒位环","十字形四价体"],"a":0,"n":"缺环。","deck":"genetics-midterm","id":"genetics-midterm_56"},{"t":"mc","c":"畸变","q":"倒位杂合体联会时可见？","o":["缺失环","倒位环","十字形四价体"],"a":1,"n":"倒环保环。","deck":"genetics-midterm","id":"genetics-midterm_57"},{"t":"mc","c":"畸变","q":"相互易位杂合体联会时呈？","o":["缺失环","倒位环","十字形四价体"],"a":2,"n":"易位十字架。","deck":"genetics-midterm","id":"genetics-midterm_58"},{"t":"mc","c":"畸变","q":"假显性现象（隐性基因因显性等位缺失而表现）由哪种畸变引起？","o":["缺失","重复","倒位","易位"],"a":0,"n":"缺失致假显性。","deck":"genetics-midterm","id":"genetics-midterm_59"},{"t":"mc","c":"畸变","q":"位置效应（基因移到新位置后表达改变）常由哪种畸变引起？","o":["缺失","易位","倒位","重复"],"a":1,"n":"易位致位置效应。","deck":"genetics-midterm","id":"genetics-midterm_60"},{"t":"mc","c":"畸变","q":"单体（2n-1）在动物中通常？","o":["正常可育","常致死或不育","与二倍体无差别","属超倍体"],"a":1,"n":"动物单体常致死。","deck":"genetics-midterm","id":"genetics-midterm_61"},{"t":"mc","c":"畸变","q":"同源四倍体AAaa自交，显:隐表型比？","o":["3:1","35:1","9:7","15:1"],"a":1,"n":"AAaa自交35:1。","deck":"genetics-midterm","id":"genetics-midterm_62"},{"t":"mc","c":"畸变","q":"同源四倍体AAaa产生的配子种类及比例？","o":["1AA:4Aa:1aa","1:2:1","1:1:1:1","1AA:2Aa:1aa"],"a":0,"n":"AAaa配子1:4:1。","deck":"genetics-midterm","id":"genetics-midterm_63"},{"t":"mc","c":"畸变","q":"秋水仙素诱发多倍体的作用是？","o":["抑制纺锤体形成使染色体加倍","诱导基因突变","促进DNA复制","阻断转录"],"a":0,"n":"秋水拦纺锤。","deck":"genetics-midterm","id":"genetics-midterm_64"},{"t":"mc","c":"畸变","q":"普通小麦的染色体组成是？","o":["同源四倍体","异源六倍体AABBDD","二倍体","单倍体"],"a":1,"n":"小麦异源六倍体。","deck":"genetics-midterm","id":"genetics-midterm_65"},{"t":"mc","c":"畸变","q":"香蕉三倍体不育的根本原因是？","o":["染色体联会紊乱不能正常减数分裂","基因突变","染色体缺失","转座子活跃"],"a":0,"n":"三倍体联会紊乱不育。","deck":"genetics-midterm","id":"genetics-midterm_66"},{"t":"mc","c":"畸变","q":"猫叫综合征（Cri-du-chat）是？","o":["5号染色体短臂缺失(5p-)","9;22易位","21三体","18三体"],"a":0,"n":"猫叫=5p-。","deck":"genetics-midterm","id":"genetics-midterm_67"},{"t":"mc","c":"畸变","q":"费城染色体（慢性粒细胞白血病标志）是？","o":["9号与22号相互易位","5p-缺失","21三体","X染色体缺失"],"a":0,"n":"9换22=费城。","deck":"genetics-midterm","id":"genetics-midterm_68"},{"t":"mc","c":"畸变","q":"罗伯逊易位是指？","o":["着丝粒融合型易位","简单倒位","末端缺失","重复"],"a":0,"n":"罗伯逊=着丝粒融合。","deck":"genetics-midterm","id":"genetics-midterm_69"},{"t":"mc","c":"畸变","q":"21三体综合征（唐氏）属于？","o":["三体（2n+1）","单体（2n-1）","缺体（2n-2）","多倍体"],"a":0,"n":"21三体=三体。","deck":"genetics-midterm","id":"genetics-midterm_70"},{"t":"mc","c":"畸变","q":"缺体是指？","o":["2n-1","2n-2（缺失一对同源染色体）","2n+1","2n+2"],"a":1,"n":"缺体2n-2。","deck":"genetics-midterm","id":"genetics-midterm_71"},{"t":"mc","c":"减数分裂","q":"女性初级卵母细胞在胎儿期进入减数分裂后，长期停滞于？","o":["减数第一次分裂前期（核网期dictyate）","减数第一次分裂中期","减数第二次分裂中期","有丝分裂中期"],"a":0,"n":"卵母睡在减I前期（核网期）。","deck":"genetics-midterm","id":"genetics-midterm_72"},{"t":"mc","c":"减数分裂","q":"初级卵母细胞停滞的“核网期（dictyate）”属于减数分裂的哪一阶段？","o":["前期I（双线期之后）","中期I","后期I","减数II"],"a":0,"n":"核网期=减I前期的休眠态。","deck":"genetics-midterm","id":"genetics-midterm_73"},{"t":"mc","c":"减数分裂","q":"排卵时，初级卵母细胞完成的是哪一次分裂？","o":["减数第一次分裂（排出第一极体）","减数第二次分裂","有丝分裂","不分裂"],"a":0,"n":"排卵=做完减I，排第一极体。","deck":"genetics-midterm","id":"genetics-midterm_74"},{"t":"mc","c":"减数分裂","q":"次级卵母细胞排出后、受精前停滞于？","o":["减数第一次分裂中期","减数第二次分裂中期（MII）","减数第二次分裂后期","有丝分裂"],"a":1,"n":"次卵停在减II中期等受精。","deck":"genetics-midterm","id":"genetics-midterm_75"},{"t":"mc","c":"减数分裂","q":"为何“到成熟之后才会继续”？关于卵子与精子发生的区别，正确的是？","o":["精子发生从青春期起连续进行，卵子长期停滞","卵子连续进行，精子停滞","两者都长期停滞","两者都连续进行"],"a":0,"n":"精子不断、卵子睡几十年。","deck":"genetics-midterm","id":"genetics-midterm_76"},{"t":"mc","c":"RNAi","q":"RNA干扰（RNAi）中将双链RNA切割成siRNA的酶是？","o":["Dicer","RISC","RNA聚合酶","反转录酶"],"a":0,"n":"Dicer切dsRNA成siRNA。","deck":"genetics-midterm","id":"genetics-midterm_77"},{"t":"mc","c":"RNAi","q":"RNA干扰导致基因沉默发生在哪个水平？","o":["转录前（改DNA）","转录水平（抑制转录）","转录后（降解同源mRNA）","翻译后（修饰蛋白）"],"a":2,"n":"RNAi是转录后mRNA降解。","deck":"genetics-midterm","id":"genetics-midterm_78"},{"t":"mc","c":"RNAi","q":"RNA干扰中执行序列特异性降解同源mRNA的核心复合体是？","o":["RISC","Dicer","核糖体","剪接体"],"a":0,"n":"RISC是执行者。","deck":"genetics-midterm","id":"genetics-midterm_79"},{"t":"mc","c":"RNAi","q":"“由双链RNA触发、序列特异性降解同源mRNA实现基因沉默”描述的是？","o":["RNA干扰（RNAi）","反义核酸技术","基因敲除","基因编辑"],"a":0,"n":"双链+同源mRNA降解=RNAi。","deck":"genetics-midterm","id":"genetics-midterm_80"},{"t":"mc","c":"技术识别","q":"“细菌直接从环境摄取游离DNA片段并整合入基因组”描述的是？","o":["转化transformation","转导transduction","转染transfection","接合conjugation"],"a":0,"n":"细菌吃游离DNA=转化。","deck":"genetics-midterm","id":"genetics-midterm_81"},{"t":"mc","c":"技术识别","q":"“以噬菌体为媒介，将供体基因带入受体细菌”描述的是？","o":["转化","转导","转染","接合"],"a":1,"n":"噬菌体当快递=转导。","deck":"genetics-midterm","id":"genetics-midterm_82"},{"t":"mc","c":"技术识别","q":"“将外源核酸导入真核细胞”描述的是？","o":["转化（原核）","转染transfection","转导","接合"],"a":1,"n":"导入真核=转染（转化是细菌）。","deck":"genetics-midterm","id":"genetics-midterm_83"},{"t":"mc","c":"技术识别","q":"“两细菌通过性菌毛直接接触、转移质粒或F因子”描述的是？","o":["转化","转导","转染","接合conjugation"],"a":3,"n":"性菌毛接线=接合。","deck":"genetics-midterm","id":"genetics-midterm_84"},{"t":"mc","c":"技术识别","q":"“定向使特定内源基因失活或删除”描述的是？","o":["基因敲除knockout","RNA干扰","转化","转染"],"a":0,"n":"定向失灵=敲除。","deck":"genetics-midterm","id":"genetics-midterm_85"},{"t":"mc","c":"技术识别","q":"“用限制性内切酶切割并用载体在体外重组DNA分子”描述的是？","o":["DNA重组技术","PCR扩增","测序","核酸杂交"],"a":0,"n":"酶切+载体拼DNA=重组技术。","deck":"genetics-midterm","id":"genetics-midterm_86"},{"t":"mc","c":"技术识别","q":"“以病毒（如逆转录病毒）为载体将外源基因导入细胞并整合”属于？","o":["转染","病毒介导的转导/转染","接合","转化"],"a":1,"n":"病毒载体导入=病毒介导转导/转染。","deck":"genetics-midterm","id":"genetics-midterm_87"},{"t":"input","c":"计算","q":"【两点·基础】测交 AaBb × aabb，子代：\n  A-B 480株、a-b 470株、A-b 30株、a-B 20株（共1000）。\n求：(1) 重组率(%)；(2) 两基因图距(cM)。","subs":[{"label":"重组率(%)","ans":5,"tol":0.4},{"label":"图距(cM)","ans":5,"tol":0.4}],"steps":"① 重组型 = A-b + a-B = 30 + 20 = 50\n② 重组率 = 50 / 1000 = 5%\n③ 图距(cM) = 重组率(%) = 5 cM\n钩子：重组率=重组型/总数；1 cM = 1% 重组率。","deck":"genetics-calc","id":"genetics-calc_0"},{"t":"input","c":"计算","q":"【两点·反向】已知两基因图距为 12 cM，则测交子代中“重组型个体”的比例约为？","subs":[{"label":"重组型比例(%)","ans":12,"tol":1}],"steps":"图距 = 重组率(%) → 测交重组型比例 = 12%。\n钩子：图距与重组率数值相等，只是单位不同。","deck":"genetics-calc","id":"genetics-calc_1"},{"t":"input","c":"计算","q":"【三点·定序】三点测交（总数1000）：\n  ABC 449、abc 449（亲本型，最多）\n  Abc 25、aBC 25（单交换1）\n  ABc 25、abC 25（单交换2）\n  AbC 1、aBc 1（双交换，最少）\n问：三个基因中，哪个在中间？填字母（A / B / C）。","subs":[{"label":"中间基因","ans":"B","tol":0,"text":true}],"steps":"① 双交换型（最少见的 AbC、aBc）与亲本型（ABC、abc）逐位比较\n② ABC vs AbC：只有第2位的 B→b 改变；abc vs aBc：第2位 b→B 改变\n③ 谁的位置变了，谁就是中间基因 → B 在中间\n④ 基因顺序：A-B-C（或 C-B-A 均可）","deck":"genetics-calc","id":"genetics-calc_2"},{"t":"input","c":"计算","q":"【三点·图距】接上题数据，求：\n(1) A-B 区间图距(cM)；(2) B-C 区间图距(cM)；(3) 总图距(cM)。\n提示：某区间重组数 = 该区间单交换 + 全部双交换（双交换被算两次）。","subs":[{"label":"A-B区间(cM)","ans":5.2,"tol":0.4},{"label":"B-C区间(cM)","ans":5.2,"tol":0.4},{"label":"总图距(cM)","ans":10.4,"tol":0.4}],"steps":"① A-B区间重组数 = 单交换(Abc+aBC)=50 + 双交换(AbC+aBc)=2 = 52 → 52/1000=5.2%\n② B-C区间重组数 = 单交换(ABc+abC)=50 + 双交换2 = 52 → 5.2%\n③ 总图距 = 5.2 + 5.2 = 10.4 cM\n钩子：双交换要算两次，因为它横跨两个区间各一次交换。","deck":"genetics-calc","id":"genetics-calc_3"},{"t":"input","c":"计算","q":"【三点·符合系数】接上题：区间重组率 5.2%、5.2%，实际双交换率 = (1+1)/1000 = 0.2%。\n求：(1) 符合系数 C；(2) 干扰系数 I（保留两位）。\n提示：期望双交换率 = 区间1重组率 × 区间2重组率；I = 1 − C。","subs":[{"label":"符合系数 C","ans":0.74,"tol":0.06},{"label":"干扰系数 I","ans":0.26,"tol":0.06}],"steps":"① 期望双交换率 = 5.2% × 5.2% = 0.2704%\n② C = 实际/期望 = 0.2% / 0.2704% ≈ 0.74\n③ I = 1 − C = 1 − 0.74 = 0.26\n钩子：C=1无干扰、C=0完全干扰、C<1正干扰(实际少于期望)、C>1负干扰(实际多于期望)。","deck":"genetics-calc","id":"genetics-calc_4"},{"t":"input","c":"计算","q":"【两点·单区间】测交结果：AB 445、ab 440、Ab 60、aB 55（共1000）。求两基因图距(cM)。","subs":[{"label":"图距(cM)","ans":11.5,"tol":0.5}],"steps":"① 重组型 = Ab + aB = 60 + 55 = 115\n② 重组率 = 115 / 1000 = 11.5%\n③ 图距 = 11.5 cM","deck":"genetics-calc","id":"genetics-calc_5"},{"t":"term","c":"名词","q":"什么是基因互作？","a":"<b>两对或以上非等位基因<\/b>相互作用共同影响同一性状","n":"关键词：非等位 + 一起干活","deck":"genetics-flash","id":"genetics-flash_0"},{"t":"term","c":"名词","q":"互补作用的比例与含义？","a":"比例 <b>9:7<\/b>；两显性基因<b>都需存在<\/b>才表现某性状","n":"互补=俩都要","deck":"genetics-flash","id":"genetics-flash_1"},{"t":"term","c":"名词","q":"积加作用的比例？","a":"<b>9:6:1<\/b>：双显大效、单显中效、双隐低效","n":"积加=加起来","deck":"genetics-flash","id":"genetics-flash_2"},{"t":"term","c":"名词","q":"重叠作用的比例？","a":"<b>15:1<\/b>：任一显性基因即表现","n":"重叠=有一个就行","deck":"genetics-flash","id":"genetics-flash_3"},{"t":"term","c":"名词","q":"隐性上位的比例？","a":"<b>9:3:4<\/b>：隐性基因掩盖另一基因","n":"隐性上位=隐性的压住显性","deck":"genetics-flash","id":"genetics-flash_4"},{"t":"term","c":"名词","q":"显性上位的比例？","a":"<b>12:3:1<\/b>：显性基因掩盖其他","n":"显性上位=显性的压住一切","deck":"genetics-flash","id":"genetics-flash_5"},{"t":"term","c":"名词","q":"抑制作用的比例？","a":"<b>13:3<\/b>：抑制基因压制另一基因","n":"抑制=专门按住你","deck":"genetics-flash","id":"genetics-flash_6"},{"t":"term","c":"名词","q":"操纵子是什么？","a":"原核功能单位 = <b>启动子P + 操纵基因O + 结构基因 + 调节基因I<\/b>","n":"一套班子管一串基因","deck":"genetics-flash","id":"genetics-flash_7"},{"t":"term","c":"名词","q":"启动子(P)是啥？","a":"<b>RNA聚合酶结合位点<\/b>，不编码蛋白","n":"P=聚酶停车位","deck":"genetics-flash","id":"genetics-flash_8"},{"t":"term","c":"名词","q":"操纵基因(O)是啥？","a":"<b>阻遏蛋白结合位点<\/b>，负调控元件，不编码蛋白","n":"O=阻遏锁孔","deck":"genetics-flash","id":"genetics-flash_9"},{"t":"term","c":"名词","q":"测交是什么？","a":"与<b>隐性纯合<\/b>杂交测基因型，比例 1:1","n":"测交=拿白花试你","deck":"genetics-flash","id":"genetics-flash_10"},{"t":"term","c":"名词","q":"连锁群数目 = ?","a":"= <b>单倍体染色体数 n<\/b>","n":"几条单倍染色体就几个群","deck":"genetics-flash","id":"genetics-flash_11"},{"t":"term","c":"名词","q":"交换值 / 图距的关系？","a":"交换值 = 重组率 = 图距(cM)；<b>1 cM = 1% 重组率<\/b>","n":"1cM=1%","deck":"genetics-flash","id":"genetics-flash_12"},{"t":"term","c":"名词","q":"完全连锁的表现？","a":"无交换，自交仅两型 <b>3:1<\/b>","n":"完全连锁=不拆伙","deck":"genetics-flash","id":"genetics-flash_13"},{"t":"term","c":"名词","q":"双交换指什么？","a":"两点间<b>同时发生两次交换<\/b>，多用于三点测交定序","n":"双交换=跳两下","deck":"genetics-flash","id":"genetics-flash_14"},{"t":"term","c":"名词","q":"符合系数(C)含义？","a":"实际双交换 / 期望双交换；<b>C=1无干扰，C=0完全干扰<\/b>","n":"C=1各干各的，C=0一颗不发","deck":"genetics-flash","id":"genetics-flash_15"},{"t":"term","c":"名词","q":"干扰系数(I)？","a":"<b>I = 1 − C<\/b>；I=0.3 即 30% 干扰","n":"I是C的补集","deck":"genetics-flash","id":"genetics-flash_16"},{"t":"term","c":"名词","q":"伴性遗传/性连锁？","a":"基因位于<b>性染色体<\/b>上，遗传与性别相关","n":"挂在性染色体上","deck":"genetics-flash","id":"genetics-flash_17"},{"t":"term","c":"名词","q":"从性遗传 vs 限性遗传？","a":"从性：常染色体基因<b>显隐性随性别翻转<\/b>(秃顶)；限性：只在一性别表达","n":"从性翻显隐，限性只一边","deck":"genetics-flash","id":"genetics-flash_18"},{"t":"term","c":"名词","q":"转化 / 接合 / 转导？","a":"转化=摄<b>游离DNA<\/b>(格里菲斯/艾弗里)；接合=菌毛转DNA(F/Hfr)；转导=噬菌体介导","n":"转自己/转邻居/转病毒带货","deck":"genetics-flash","id":"genetics-flash_19"},{"t":"term","c":"名词","q":"染色体缺失/重复/倒位/易位？","a":"缺失=丢段(缺失环)；重复=多段；倒位=颠倒(倒位环)；易位=非同源互换(十字形)","n":"缺环倒环保环，易位十字架","deck":"genetics-flash","id":"genetics-flash_20"},{"t":"term","c":"名词","q":"假显性 / 位置效应？","a":"假显性=缺失使<b>隐性暴露<\/b>；位置效应=易位改变表达","n":"假显性=隐的露脸了","deck":"genetics-flash","id":"genetics-flash_21"},{"t":"term","c":"名词","q":"单体/缺体/三体？","a":"单体 <b>2n−1<\/b>；缺体 2n−2；三体 2n+1","n":"单体少1条，三体多1条","deck":"genetics-flash","id":"genetics-flash_22"},{"t":"term","c":"名词","q":"同源 vs 异源多倍体？","a":"同源=同物种加倍(AAaa)；异源=不同物种杂交加倍(小麦AABBDD)","n":"同源自己叠，异源混血叠","deck":"genetics-flash","id":"genetics-flash_23"},{"t":"term","c":"名词","q":"秋水仙素作用？","a":"抑制<b>纺锤体<\/b>形成 → 染色体加倍","n":"秋水拦纺锤","deck":"genetics-flash","id":"genetics-flash_24"},{"t":"term","c":"名词","q":"猫叫综合征 / 费城染色体？","a":"猫叫 = <b>5p−<\/b>；费城 = <b>9;22<\/b> 易位","n":"猫叫少5p，费城9换22","deck":"genetics-flash","id":"genetics-flash_25"},{"t":"term","c":"名词","q":"母性影响是什么？","a":"子代表型由<b>母本基因型<\/b>决定(椎实螺壳旋向)","n":"看娘的","deck":"genetics-flash","id":"genetics-flash_26"},{"t":"term","c":"名词","q":"莱昂化(剂量补偿)？","a":"雌性随机<b>失活一条X<\/b>(巴氏小体)，X−1原则","n":"女生闭一只X","deck":"genetics-flash","id":"genetics-flash_27"},{"t":"term","c":"名词","q":"中心法则？","a":"<b>DNA → RNA → 蛋白<\/b>；无蛋白→核酸的反向","n":"遗传信息单向流","deck":"genetics-flash","id":"genetics-flash_28"},{"t":"term","c":"比例","q":"互补作用比例","a":"<b>9:7<\/b>","n":"俩显性都要","deck":"genetics-flash","id":"genetics-flash_29"},{"t":"term","c":"比例","q":"积加作用比例","a":"<b>9:6:1<\/b>","n":"双显/单显/双隐","deck":"genetics-flash","id":"genetics-flash_30"},{"t":"term","c":"比例","q":"重叠作用比例","a":"<b>15:1<\/b>","n":"有一个就显","deck":"genetics-flash","id":"genetics-flash_31"},{"t":"term","c":"比例","q":"隐性上位比例","a":"<b>9:3:4<\/b>","n":"隐性压显性","deck":"genetics-flash","id":"genetics-flash_32"},{"t":"term","c":"比例","q":"显性上位比例","a":"<b>12:3:1<\/b>","n":"显性压一切","deck":"genetics-flash","id":"genetics-flash_33"},{"t":"term","c":"比例","q":"抑制作用比例","a":"<b>13:3<\/b>","n":"抑制基因按住","deck":"genetics-flash","id":"genetics-flash_34"},{"t":"term","c":"比例","q":"同源四倍体 AAaa 自交显:隐？","a":"<b>35:1<\/b>","n":"四倍体隐性超难出","deck":"genetics-flash","id":"genetics-flash_35"},{"t":"term","c":"比例","q":"AAaa 配子比例？","a":"<b>1AA : 4Aa : 1aa<\/b>","n":"中配最多","deck":"genetics-flash","id":"genetics-flash_36"},{"t":"term","c":"比例","q":"1 cM = ?","a":"<b>1% 重组率<\/b>","n":"图距单位","deck":"genetics-flash","id":"genetics-flash_37"},{"t":"term","c":"比例","q":"完全连锁自交比例？","a":"仅两型 <b>3:1<\/b>","n":"不拆伙","deck":"genetics-flash","id":"genetics-flash_38"},{"t":"term","c":"比例","q":"谁在1909年提出'gene'(基因)？","a":"<b>约翰生<\/b>(非摩尔根)","n":"基因约翰生，连锁摩尔根","deck":"genetics-flash","id":"genetics-flash_39"},{"t":"term","c":"踩坑","q":"符合系数 C=1 表示？","a":"实际双交换 = 期望 → <b>无干扰<\/b>","n":"C=1各干各的，别选'干扰'！","deck":"genetics-flash","id":"genetics-flash_40"},{"t":"term","c":"踩坑","q":"干扰系数 I=0.3 表示？","a":"<b>30% 干扰<\/b>；此时 C=0.7。负向干扰是 C>1(基本不考)","n":"I=0.3就是30%干扰，不是负向","deck":"genetics-flash","id":"genetics-flash_41"},{"t":"term","c":"踩坑","q":"三点测交怎么定中间基因？","a":"<b>最少见的双交换型<\/b>中，中间基因变位(两端不动)","n":"谁换位谁是中间","deck":"genetics-flash","id":"genetics-flash_42"},{"t":"term","c":"踩坑","q":"'F₁中红花植株随机交配'白花比例？","a":"先筛掉白花(红花里1/3CC,2/3Cc)→c频率1/3→白花=<b>1/9<\/b>","n":"先筛群体，再算配子频率，频率²","deck":"genetics-flash","id":"genetics-flash_43"},{"t":"term","c":"踩坑","q":"启动子P vs 操纵基因O 谁编码蛋白？","a":"都<b>不编码<\/b>：P是聚酶停车位，O是阻遏锁孔(负调控)","n":"P坐车，O是锁，都不造车","deck":"genetics-flash","id":"genetics-flash_44"},{"t":"term","c":"踩坑","q":"'一基因一酶'是谁提出的？","a":"<b>比德尔和塔特姆<\/b>(红面包霉)；摩尔根是果蝇连锁","n":"一酶比德尔，连锁摩尔根","deck":"genetics-flash","id":"genetics-flash_45"},{"t":"term","c":"踩坑","q":"人类秃顶属于哪种遗传？","a":"<b>从性遗传<\/b>：常染色体，Bb男秃女不秃(显隐性翻转)","n":"秃顶是常染上的性别翻转","deck":"genetics-flash","id":"genetics-flash_46"},{"t":"term","c":"踩坑","q":"³²P 和 ³⁵S 分别标记什么？","a":"³²P 标 <b>DNA<\/b>(磷是核酸元素)；³⁵S 标 <b>蛋白质<\/b>","n":"P跟DNA走，S跟蛋白走","deck":"genetics-flash","id":"genetics-flash_47"},{"t":"term","c":"踩坑","q":"费城染色体是哪两条易位？","a":"<b>9号与22号<\/b>相互易位(BCR-ABL融合，慢粒标志)","n":"9换22=费城","deck":"genetics-flash","id":"genetics-flash_48"},{"t":"term","c":"填空","q":"连锁群数目 = ?","a":"= 单倍体染色体数 <b>n<\/b>","n":"数n就行","deck":"genetics-flash","id":"genetics-flash_49"},{"t":"term","c":"填空","q":"单体/缺体/三体 = ?","a":"<b>2n−1 / 2n−2 / 2n+1<\/b>","n":"少1/少2/多1","deck":"genetics-flash","id":"genetics-flash_50"},{"t":"term","c":"填空","q":"人类三类畸变速记？","a":"猫叫=<b>5p−<\/b>；费城=<b>9;22<\/b>；唐氏=<b>21三体<\/b>","n":"5p猫叫，9-22费城，21唐氏","deck":"genetics-flash","id":"genetics-flash_51"},{"t":"term","c":"填空","q":"性别决定四型？","a":"XY(人/果蝇) / ZW(鸟/蝶) / XO(蝗虫) / 倍数型(蜜蜂孤雌产雄)","n":"XY人果蝇，ZW鸟蝶，蝗虫少X，蜜蜂看单双","deck":"genetics-flash","id":"genetics-flash_52"},{"t":"term","c":"填空","q":"原核 mRNA 是否 5'戴帽、剪内含子？","a":"<b>不<\/b>戴帽、<b>不<\/b>剪内含子(真核才戴帽剪尾)","n":"原核简单粗暴","deck":"genetics-flash","id":"genetics-flash_53"},{"t":"term","c":"填空","q":"谁证明 DNA 是遗传物质(体外)？","a":"<b>艾弗里<\/b>(DNA酶处理失活)；体内转化是格里菲斯","n":"艾弗里定DNA，格里菲斯开头","deck":"genetics-flash","id":"genetics-flash_54"}]};
+
+/* ==================== 状态存储 ==================== */
+const LSKEY = 'xzt_hub_v1';
+let S = load();
+
+function load(){
+  try{
+    const d = JSON.parse(localStorage.getItem(LSKEY) || '{}');
+    return Object.assign({
+      cards:{}, daily:{}, streak:0, lastDate:null, lastCheckin:null,
+      goal:{new:10, rev:20}, todayNew:0, todayRev:0
+    }, d);
+  }catch(e){
+    return {cards:{}, daily:{}, streak:0, lastDate:null, lastCheckin:null, goal:{new:10, rev:20}, todayNew:0, todayRev:0};
+  }
+}
+function save(){ localStorage.setItem(LSKEY, JSON.stringify(S)); }
+
+function today(){
+  const d=new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+
+/* ==================== 工具 ==================== */
+function esc(s){
+  return String(s==null?'':s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\n/g,'<br>');
+}
+function toast(msg,ms){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'), ms||1800);
+}
+function shuffle(arr){
+  const a=arr.slice();
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+const TYPE_LABEL={term:'名词',mc:'选择',tf:'判断',fill:'填空',saq:'简答',calc:'计算',input:'计算'};
+
+/* 卡片状态 */
+function cst(id){ return S.cards[id] || {st:0, hit:0}; }
+function setCard(id, patch){ S.cards[id] = Object.assign(cst(id), patch); save(); }
+
+/* 统计 */
+function stats(deckId){
+  let total=0, mastered=0, seen=0, wrong=0;
+  for(const c of HUB.cards){
+    if(deckId && c.deck!==deckId) continue;
+    total++;
+    const st=cst(c.id);
+    if(st.st>0){ mastered++; seen++; }
+    else if(st.st<0){ seen++; wrong++; }
+    else if(st.st===2){ seen++; wrong++; }
+  }
+  return {total, mastered, seen, wrong};
+}
+
+/* ==================== 视图切换 ==================== */
+function go(v){
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+  document.getElementById('view-'+v).classList.add('active');
+  document.getElementById('navHome').classList.toggle('on', v==='home');
+  document.getElementById('navStudy').classList.toggle('on', v==='study');
+  document.getElementById('navSet').classList.toggle('on', v==='set');
+  if(v==='home') renderHome();
+  if(v==='set') renderSet();
+  window.scrollTo(0,0);
+}
+
+/* ==================== 首页 ==================== */
+function renderHome(){
+  const all=stats(null);
+  const pct = all.total ? Math.round(all.mastered/all.total*100) : 0;
+  document.getElementById('ringPct').textContent = pct+'%';
+  document.getElementById('ringLbl').textContent = all.mastered+' / '+all.total+' 张已掌握';
+  const C=2*Math.PI*45;
+  document.getElementById('ringProg').style.strokeDashoffset = C*(1-pct/100);
+
+  document.getElementById('streakNum').textContent = S.streak||0;
+  document.getElementById('homeSub').textContent =
+    '共 '+HUB.decks.length+' 个题库 · '+all.total+' 张卡 · 错题 '+all.wrong+' 张';
+
+  const d=new Date();
+  document.getElementById('todayDate').textContent =
+    (d.getMonth()+1)+'月'+d.getDate()+'日';
+
+  // 今日任务（新一天重置计数）
+  if(S.lastDate !== today()){
+    S.todayNew=0; S.todayRev=0; S.lastDate=today();
+    save();
+  }
+  const ng=S.goal.new, rg=S.goal.rev;
+  document.getElementById('newDone').textContent=S.todayNew||0;
+  document.getElementById('revDone').textContent=S.todayRev||0;
+  document.getElementById('newGoal').textContent=ng;
+  document.getElementById('revGoal').textContent=rg;
+  document.getElementById('newBar').style.width=Math.min(100,(S.todayNew||0)/ng*100)+'%';
+  document.getElementById('revBar').style.width=Math.min(100,(S.todayRev||0)/rg*100)+'%';
+
+  // 题库列表
+  const subjColor={生化:'#34c759', 遗传:'#bf5af2', 数学:'#ff9f0a', 英语:'#0a84ff'};
+  const iconMap={'生化':'🧬','遗传':'🧪','数学':'📐','英语':'🔤'};
+  let html='';
+  for(const dk of HUB.decks){
+    const s=stats(dk.id);
+    const p=s.total?Math.round(s.mastered/s.total*100):0;
+    const color=subjColor[dk.subject]||'#64d2ff';
+    html+=`<div class="deck-item" onclick="startDeck('${dk.id}')">
+      <div class="deck-icon" style="background:${color}22">${iconMap[dk.subject]||'📘'}</div>
+      <div class="deck-info">
+        <div class="d-name">${esc(dk.name)}</div>
+        <div class="d-meta">${s.total} 张 · 已看 ${s.seen} · 错题 ${s.wrong}</div>
+      </div>
+      <div class="deck-pct" style="color:${color}">${p}%</div>
+      <div class="deck-go">▶</div>
+    </div>`;
+  }
+  document.getElementById('deckList').innerHTML=html;
+
+  // 学科统计
+  const subj={};
+  for(const c of HUB.cards){
+    const dk=HUB.decks.find(x=>x.id===c.deck);
+    const k=dk?dk.subject:'其他';
+    if(!subj[k]) subj[k]={total:0,mastered:0};
+    subj[k].total++;
+    if(cst(c.id).st>0) subj[k].mastered++;
+  }
+  let sh='';
+  for(const k in subj){
+    const s=subj[k], p=Math.round(s.mastered/s.total*100);
+    const color=subjColor[k]||'#64d2ff';
+    sh+=`<div class="deck-item" style="cursor:default">
+      <div class="deck-icon" style="background:${color}22">${iconMap[k]||'📘'}</div>
+      <div class="deck-info"><div class="d-name">${k}</div>
+        <div class="d-meta">${s.mastered} / ${s.total} 张已掌握</div></div>
+      <div class="deck-pct" style="color:${color}">${p}%</div>
+    </div>`;
+  }
+  document.getElementById('subjList').innerHTML=sh;
+}
+
+/* ==================== 刷题引擎 ==================== */
+let Q=[];        // 当前队列（卡片对象数组）
+let qi=0;        // 当前索引
+let flipped=false;
+let mode='card'; // card | quiz
+let lastScore={right:0, wrong:0};
+let todayCounted={new:0, rev:0};
+let retrySet=new Set();
+
+function pickQueue(kind){
+  const cards=HUB.cards.slice();
+  let q=[];
+  if(kind==='daily'){
+    // 新题：st=0
+    const news=shuffle(cards.filter(c=>cst(c.id).st===0)).slice(0,S.goal.new);
+    // 复习：已见过且 st!=1 或 hit 低
+    const rev=shuffle(cards.filter(c=>{
+      const s=cst(c.id);
+      return s.st!==0 && (s.st<=0 || s.hit<2);
+    })).slice(0,S.goal.rev);
+    q=news.concat(rev);
+    todayCounted={new:0, rev:0};
+    if(!q.length) q=shuffle(cards).slice(0,20);
+  }else if(kind==='wrong'){
+    q=shuffle(cards.filter(c=>cst(c.id).st<0));
+    if(!q.length){ toast('还没有错题，先去刷一轮 💪'); return null; }
+    todayCounted=null;
+  }else if(kind==='random'){
+    q=shuffle(cards).slice(0,20);
+    todayCounted=null;
+  }else if(kind==='deck'){
+    const id=arguments[1];
+    q=cards.filter(c=>c.deck===id);
+    // 错题/没见过优先
+    q.sort((a,b)=>{
+      const sa=cst(a.id).st, sb=cst(b.id).st;
+      return (sa<=0?0:1)-(sb<=0?0:1);
+    });
+    todayCounted=null;
+  }
+  return q;
+}
+
+function startDaily(){ const q=pickQueue('daily'); if(q){ startSession(q,'今日任务', 'daily'); } }
+function startWrong(){ const q=pickQueue('wrong'); if(q){ startSession(q,'错题重刷', 'wrong'); } }
+function startRandom(){ const q=pickQueue('random'); if(q){ startSession(q,'随机练习', 'random'); } }
+function startDeck(id){
+  const q=pickQueue('deck', id);
+  const dk=HUB.decks.find(x=>x.id===id);
+  if(q && q.length) startSession(q, dk?dk.name:'刷题', 'deck');
+}
+
+function startSession(q, title, kind){
+  Q=q; qi=0; flipped=false; lastScore={right:0,wrong:0}; retrySet=new Set();
+  document.getElementById('studyTitle').textContent=title;
+  document.getElementById('studySub').textContent=q.length+' 张 · 左右滑动切换';
+  go('study');
+  renderCard();
+}
+
+function exitStudy(){ go('home'); }
+
+function renderCard(){
+  if(qi>=Q.length){ renderDone(); return; }
+  const c=Q[qi];
+  flipped=false;
+  mode = (c.t==='mc'||c.t==='tf') ? 'quiz' : 'card';
+  document.getElementById('studyMode').textContent = mode==='quiz'?'答题':'卡片';
+  document.getElementById('studyPos').textContent = (qi+1)+'/'+Q.length;
+
+  // 进度条
+  let bh='';
+  for(let i=0;i<Math.min(Q.length,40);i++){
+    bh+='<i class="'+(i<qi?'done':(i===qi?'cur':''))+'"></i>';
+  }
+  document.getElementById('studyBar').innerHTML=bh;
+
+  const isExam = c.c && c.c.indexOf('考研')>=0;
+  let h='<div class="card-tag'+(isExam?' exam':'')+'">'+
+    (TYPE_LABEL[c.t]||c.t)+(c.c?' · '+esc(c.c):'')+'</div>';
+  h+='<div class="card-q">'+esc(c.q)+'</div>';
+
+  // 填空题干显示下划线（已在 q 里包含）
+  document.getElementById('flashcard').innerHTML=h;
+
+  const act=document.getElementById('actRow');
+  if(mode==='quiz'){
+    // 选项按钮
+    if(c.t==='tf'){
+      let oh='';
+      ['对','错'].forEach((o,i)=>{
+        oh+='<button class="opt" data-i="'+i+'"><span class="letter">'+(i?'✗':'✓')+'</span>'+o+'</button>';
+      });
+      document.getElementById('flashcard').innerHTML=h+'<div class="opts">'+oh+'</div>';
+      document.getElementById('flashcard').querySelectorAll('.opt').forEach(el=>{
+        el.onclick=()=>pickOpt(parseInt(el.dataset.i));
+      });
+    }else{
+      let oh='';
+      const letters='ABCDEFGH';
+      (c.o||[]).forEach((o,i)=>{
+        oh+='<button class="opt" data-i="'+i+'"><span class="letter">'+letters[i]+'</span>'+esc(o)+'</button>';
+      });
+      document.getElementById('flashcard').innerHTML=h+'<div class="opts">'+oh+'</div>';
+      document.getElementById('flashcard').querySelectorAll('.opt').forEach(el=>{
+        el.onclick=()=>pickOpt(parseInt(el.dataset.i));
+      });
+    }
+    act.innerHTML='';
+    return;
+  }
+
+  if(c.t==='input'){
+    let sh='<div class="subs-box">';
+    (c.subs||[]).forEach((s,i)=>{
+      sh+='<div class="sub-row"><label>'+esc(s.label)+'</label>'+
+        '<input id="sub'+i+'" type="text" inputmode="decimal" placeholder="？"></div>';
+    });
+    sh+='</div>';
+    document.getElementById('flashcard').innerHTML=h+sh;
+    act.innerHTML='<button class="act-btn next" onclick="checkInput()">检查答案</button>';
+    return;
+  }
+
+  // 普通翻卡
+  act.innerHTML=
+    '<button class="act-btn unknown" onclick="markCard(-1)">不熟 ❌</button>'+
+    '<button class="act-btn" onclick="flipCard()">看答案 💡</button>'+
+    '<button class="act-btn known" onclick="markCard(1)">认识 ✅</button>';
+}
+
+function flipCard(){
+  if(flipped) return;
+  flipped=true;
+  const c=Q[qi];
+  let h='<div class="card-a"><div class="ans-label">答案</div>';
+  if(c.t==='saq' && Array.isArray(c.a)){
+    h+='<div class="ans-main">'+esc(c.a[0])+'</div><ul>';
+    for(let i=1;i<c.a.length;i++) h+='<li>'+esc(c.a[i])+'</li>';
+    h+='</ul>';
+  }else if(c.t==='calc' && c.steps){
+    h+='<div class="ans-main">'+esc(c.a)+'</div>';
+    h+='<div class="ans-steps"><b>解题步骤：</b><br>'+
+      (Array.isArray(c.steps)?c.steps.map((s,i)=>(i+1)+'. '+esc(s)).join('<br>'):esc(c.steps))+'</div>';
+  }else{
+    h+='<div class="ans-main">'+esc(Array.isArray(c.a)?c.a.join('；'):c.a)+'</div>';
+    if(c.subs){
+      h+='<div class="ans-steps"><b>答案：</b><br>'+
+        c.subs.map((s,i)=>(i+1)+'. '+esc(s.label)+' = '+esc(s.ans)).join('<br>')+'</div>';
+    }
+  }
+  if(c.n) h+='<div class="ans-note">💡 '+esc(c.n)+'</div>';
+  h+='</div>';
+  document.getElementById('flashcard').innerHTML+=h;
+
+  const act=document.getElementById('actRow');
+  act.innerHTML=
+    '<button class="act-btn unknown" onclick="markCard(-1)">不熟 ❌</button>'+
+    '<button class="act-btn fuzzy" onclick="markCard(2)">模糊 🤔</button>'+
+    '<button class="act-btn known" onclick="markCard(1)">认识 ✅</button>';
+}
+
+function pickOpt(i){
+  const c=Q[qi];
+  const right = c.t==='tf' ? (String(c.a).indexOf('对')===0 ? 0 : 1) : c.a;
+  const opts=document.getElementById('flashcard').querySelectorAll('.opt');
+  opts.forEach((el,j)=>{
+    el.onclick=null;
+    if(j===right) el.classList.add(j===i?'sel-right':'show-right');
+    if(j===i && i!==right) el.classList.add('sel-wrong');
+  });
+  const ok = (i===right);
+  if(ok) lastScore.right++; else lastScore.wrong++;
+  const st=cst(c.id);
+  setCard(c.id, {
+    st: ok ? (st.st===1?1:1) : -1,
+    hit: ok ? (st.hit||0)+1 : 0
+  });
+  if(todayCounted){
+    if(st.st===0){ todayCounted.new++; S.todayNew=(S.todayNew||0)+1; }
+    else { todayCounted.rev++; S.todayRev=(S.todayRev||0)+1; }
+    save();
+    checkDailyDone();
+  }
+  if(!ok && !retrySet.has(c.id)){ retrySet.add(c.id); Q.push(c); } // 错题重排一次
+  setTimeout(()=>{ qi++; renderCard(); }, ok?550:1150);
+}
+
+function checkInput(){
+  const c=Q[qi];
+  let allRight=true;
+  (c.subs||[]).forEach((s,i)=>{
+    const el=document.getElementById('sub'+i);
+    if(!el) return;
+    const v=el.value.trim();
+    let ok=false;
+    if(s.text){ ok = v===String(s.ans); }
+    else{
+      const num=parseFloat(v);
+      if(!isNaN(num) && typeof s.ans==='number'){
+        ok = Math.abs(num-s.ans) <= (s.tol!=null?s.tol:0.01);
+      }
+    }
+    el.classList.remove('right','wrong');
+    el.classList.add(ok?'right':'wrong');
+    if(!ok) allRight=false;
+  });
+  if(allRight || document.getElementById('actRow').dataset.checked){
+    if(allRight){
+      const st=cst(c.id);
+      setCard(c.id, {st:1, hit:(st.hit||0)+1});
+      lastScore.right++;
+      if(todayCounted){
+        if(st.st===0){ todayCounted.new++; S.todayNew=(S.todayNew||0)+1; }
+        else { todayCounted.rev++; S.todayRev=(S.todayRev||0)+1; }
+        save(); checkDailyDone();
+      }
+      toast('✅ 全对！下一题');
+      setTimeout(()=>{qi++; renderCard();}, 700);
+    }else{
+      document.getElementById('actRow').dataset.checked='1';
+      // 显示步骤
+      const stepsHtml = c.steps ? '<div class="ans-steps"><b>解题步骤：</b><br>'+
+        (Array.isArray(c.steps)?c.steps.map((s,i)=>(i+1)+'. '+esc(s)).join('<br>'):esc(c.steps))+'</div>' : '';
+      const ansHtml = '<div class="card-a"><div class="ans-label">参考答案</div><div class="ans-main">'+
+        c.subs.map((s,i)=>esc(s.label)+' = '+esc(s.ans)).join('　')+'</div>'+stepsHtml+'</div>';
+      document.getElementById('flashcard').innerHTML+=ansHtml;
+      document.getElementById('actRow').innerHTML=
+        '<button class="act-btn next" onclick="qi++; renderCard();">下一题 →</button>';
+      const st=cst(c.id);
+      setCard(c.id, {st:-1, hit:0});
+      lastScore.wrong++;
+    }
+  }else{
+    // 第一次检查，有错
+    document.getElementById('actRow').dataset.checked='1';
+    toast('❌ 有错，红色是错的，点下面看答案');
+    document.getElementById('actRow').innerHTML=
+      '<button class="act-btn next" onclick="checkInput()">看答案</button>';
+  }
+}
+
+function markCard(st){
+  const c=Q[qi];
+  const prev=cst(c.id);
+  setCard(c.id, {
+    st: st,
+    hit: st>0 ? (prev.hit||0)+1 : 0
+  });
+  if(todayCounted){
+    if(prev.st===0){ todayCounted.new++; S.todayNew=(S.todayNew||0)+1; }
+    else { todayCounted.rev++; S.todayRev=(S.todayRev||0)+1; }
+    save();
+    checkDailyDone();
+  }
+  qi++; renderCard();
+}
+
+function checkDailyDone(){
+  if(S.todayNew>=S.goal.new && S.todayRev>=S.goal.rev && S.daily[today()]!=='done'){
+    S.daily[today()]='done';
+    // streak：昨天也打卡则+1，否则从1计
+    const y=new Date(); y.setDate(y.getDate()-1);
+    const yk=y.getFullYear()+'-'+String(y.getMonth()+1).padStart(2,'0')+'-'+String(y.getDate()).padStart(2,'0');
+    if(S.lastCheckin===yk){ S.streak=(S.streak||0)+1; }
+    else { S.streak=1; }
+    S.lastCheckin=today();
+    save();
+    toast('🎉 今日任务完成！连续打卡 '+S.streak+' 天');
+    const fi=document.getElementById('fireIcon');
+    fi.classList.add('fire-pop'); setTimeout(()=>fi.classList.remove('fire-pop'),500);
+  }
+}
+
+function renderDone(){
+  const ok=lastScore.right, ng=lastScore.wrong;
+  const total=ok+ng;
+  const rate=total?Math.round(ok/total*100):0;
+  document.getElementById('flashcard').innerHTML=
+    '<div class="done-box"><div class="big">'+(rate>=80?'🎉':rate>=60?'👍':'💪')+'</div>'+
+    '<h2>本轮完成</h2>'+
+    '<p>共 '+total+' 张 · 对 '+ok+' · 错 '+ng+' · 正确率 '+rate+'%'+
+    (S.todayNew||S.todayRev? '<br>今日：新题 '+(S.todayNew||0)+' / '+S.goal.new+' · 复习 '+(S.todayRev||0)+' / '+S.goal.rev : '')+
+    '</p>'+
+    '<button class="big-btn" onclick="go(\'home\')">回首页</button>'+
+    '<div class="btn-row"><button class="big-btn ghost" onclick="exitStudy();startWrong()">再刷错题</button>'+
+    '<button class="big-btn ghost" onclick="exitStudy();startRandom()">再来一组</button></div></div>';
+  document.getElementById('actRow').innerHTML='';
+  document.getElementById('studyBar').innerHTML='';
+}
+
+/* ==================== 设置 ==================== */
+function renderSet(){
+  document.getElementById('goalNew').value=S.goal.new;
+  document.getElementById('goalRev').value=S.goal.rev;
+  const all=stats(null);
+  document.getElementById('aboutText').innerHTML=
+    '题库版本：'+(HUB.generated||'v1')+' · 共 '+HUB.decks.length+' 库 '+all.total+' 张<br>'+
+    '已掌握 '+all.mastered+' 张 · 错题 '+all.wrong+' 张 · 连续打卡 '+(S.streak||0)+' 天';
+}
+document.addEventListener('change', e=>{
+  if(e.target.id==='goalNew'){ S.goal.new=Math.max(1,parseInt(e.target.value)||10); save(); toast('已保存'); }
+  if(e.target.id==='goalRev'){ S.goal.rev=Math.max(1,parseInt(e.target.value)||20); save(); toast('已保存'); }
+});
+
+function exportProg(){
+  const data={v:1, cards:S.cards, daily:S.daily, streak:S.streak, lastDate:S.lastDate,
+    goal:S.goal, todayNew:S.todayNew, todayRev:S.todayRev};
+  const code='XHUB1.'+btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+  document.getElementById('codeArea').value=code;
+  toast('已导出，复制这串码发到另一台设备');
+}
+function importProg(){
+  const code=document.getElementById('codeArea').value.trim();
+  if(!code){ toast('先把进度码粘贴进来'); return; }
+  try{
+    const body=code.replace(/^XHUB1\./,'');
+    const data=JSON.parse(decodeURIComponent(escape(atob(body))));
+    // 合并：每个卡取更优状态
+    for(const id in (data.cards||{})){
+      const a=S.cards[id]||{st:0,hit:0}, b=data.cards[id];
+      if(!b) continue;
+      S.cards[id]={
+        st: Math.max(a.st||0, b.st||0)===1 ? 1 : Math.min(a.st||0, b.st||0),
+        hit: Math.max(a.hit||0, b.hit||0)
+      };
+    }
+    // 已知的 1 优先
+    for(const id in (data.cards||{})){
+      const a=S.cards[id], b=data.cards[id];
+      if(b && b.st===1) S.cards[id].st=1;
+    }
+    if(data.daily) S.daily=Object.assign({}, data.daily, S.daily);
+    S.streak=Math.max(S.streak||0, data.streak||0);
+    save();
+    toast('✅ 导入成功，进度已合并');
+    renderSet();
+  }catch(e){
+    toast('❌ 进度码格式不对，检查是否复制完整');
+  }
+}
+function copyCode(){
+  const ta=document.getElementById('codeArea');
+  ta.select(); ta.setSelectionRange(0,99999);
+  try{ document.execCommand('copy'); toast('已复制'); }
+  catch(e){ toast('长按手动复制'); }
+}
+function resetProg(){
+  if(!confirm('确定清空全部学习记录？不可恢复。')) return;
+  S={cards:{}, daily:{}, streak:0, lastDate:null, goal:S.goal, todayNew:0, todayRev:0};
+  save(); renderSet(); toast('已清空');
+}
+
+/* ==================== 手势滑动切卡 ==================== */
+let tx=0;
+document.addEventListener('touchstart', e=>{ tx=e.touches[0].clientX; }, {passive:true});
+document.addEventListener('touchend', e=>{
+  const dx=e.changedTouches[0].clientX-tx;
+  if(Math.abs(dx)>70 && document.getElementById('view-study').classList.contains('active')){
+    if(dx<0){ if(qi<Q.length-1){qi++; renderCard();} }
+    else { if(qi>0){qi--; renderCard();} }
+  }
+}, {passive:true});
+
+/* ==================== 启动 ==================== */
+renderHome();
+</script>
+</body>
+</html>
