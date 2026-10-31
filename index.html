@@ -678,6 +678,31 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
   border-radius:10px; background:rgba(191,90,242,.12); color:#d68cff; font-size:12.5px;
   line-height:1.55; font-weight:600;}
 .mix-link:active{background:rgba(191,90,242,.2);}
+/* --- 账号卡 --- */
+.acc-nosrv{font-size:12.2px; line-height:1.65; color:#ffd98a; background:rgba(255,159,10,.1);
+  border-radius:9px; padding:8px 10px; margin-bottom:11px;}
+.acc-adv{display:block; width:100%; text-align:left; margin-top:12px; padding:9px 11px;
+  border-radius:10px; background:var(--panel2); border:1px solid var(--line);
+  color:var(--sub); font-size:12.3px; line-height:1.5;}
+.acc-adv:active{background:#2a2f38;}
+.acc-steps{font-size:12.2px; line-height:1.72; color:#c3c8d0; margin:11px 0 9px;}
+.acc-steps a{color:#5fb0ff; text-decoration:none; border-bottom:1px solid rgba(95,176,255,.4);}
+.acc-steps b{color:#fff;}
+.acc-steps code{background:var(--panel2); padding:1px 5px; border-radius:4px; font-size:11.5px;}
+.acc-wrap input, .acc-wrap .set-row input{box-sizing:border-box; max-width:100%;}
+.acc-wrap .set-row label{flex:0 0 42px;}
+.acc-wrap .set-row input{flex:1;}
+.acc-steps, .acc-nosrv{word-break:break-word;}
+.sql-box{box-sizing:border-box; max-width:100%; -webkit-overflow-scrolling:touch;
+  background:#0d1117; border:1px solid #263041; border-radius:10px; padding:11px 12px;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:11px; line-height:1.62;
+  color:#9fd3ff; overflow-x:auto; margin:0 0 9px; white-space:pre;}
+.acc-user{display:flex; align-items:center; gap:11px; margin-bottom:12px;}
+.acc-avatar{width:38px; height:38px; flex:none; border-radius:50%; background:var(--panel2);
+  display:flex; align-items:center; justify-content:center; font-size:17px; border:1px solid var(--line);}
+.acc-tip{font-size:11.3px; color:var(--dim); margin:0 0 8px; line-height:1.5;}
+.acc-mail{font-size:13.5px; font-weight:700; color:#e8eaee; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.acc-last{font-size:11.5px; color:var(--dim); margin-top:2px;}
 /* --- 打印：只印错题本，白底黑字 --- */
 @media print{
   body{background:#fff !important;}
@@ -789,6 +814,74 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
 <div id="view-set" class="view">
   <div class="top"><h1>⚙️ 设置</h1><div class="sub">目标、进度同步、关于</div></div>
 
+  <div class="set-item acc-wrap" id="accCard">
+    <h3>👤 账号登录（手机 / 平板自动对齐）</h3>
+    <p>注册一个账号，手机登一次、平板登一次，之后打开页面就自动对齐——<b>不用再复制令牌</b>，也不会三个月后突然失效。</p>
+
+    <div id="accAnon">
+      <p class="acc-nosrv" id="accNoSrv">第一次用：点最下面「⚙️ 服务器设置」填两个值（一次性，约 5 分钟），之后每台设备只要输邮箱密码。</p>
+      <p class="acc-nosrv" id="accMig" style="display:none; background:rgba(95,176,255,.1); color:#9fd3ff">💡 检测到你在用旧的 GitHub 令牌同步。登录账号后本机数据会自动一起带上去，之后就彻底不用管令牌了。</p>
+      <div class="set-row"><label>邮箱</label>
+        <input id="clEmail" type="email" inputmode="email" autocomplete="username" placeholder="you@example.com">
+      </div>
+      <div class="set-row" style="margin-top:9px"><label>密码</label>
+        <input id="clPw" type="password" autocomplete="current-password" placeholder="至少 6 位">
+      </div>
+      <div class="gh-btns">
+        <button class="mini-btn blue" onclick="cloudLogin()">登录</button>
+        <button class="mini-btn" onclick="cloudSignup()">注册新账号</button>
+      </div>
+      <button class="acc-adv" onclick="accToggleAdv()">⚙️ 服务器设置（第一次用，填一次就好）</button>
+      <div id="accAdv" style="display:none">
+        <p class="acc-steps">
+          <b>1.</b> 打开 <a href="https://supabase.com/dashboard" target="_blank" rel="noopener">supabase.com</a>，用 GitHub 账号登录 → <b>New project</b>（名字随便填，Region 选 Singapore，数据库密码记一下）<br>
+          <b>2.</b> 建好后左侧 <b>SQL Editor</b> → New query → 粘贴下面这段 → 点 <b>Run</b><br>
+          <b>3.</b> 左侧 <b>Project Settings → API Keys</b>，复制 <b>Project URL</b> 和 <b>publishable key</b>（<code>sb_publishable_</code> 开头）填到下面
+        </p>
+        <pre class="sql-box" id="sqlBox">create table if not exists public.shuati_state (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  data jsonb not null default '{}'::jsonb,
+  rev bigint not null default 1,
+  updated_at timestamptz not null default now()
+);
+alter table public.shuati_state enable row level security;
+drop policy if exists "own_state" on public.shuati_state;
+create policy "own_state" on public.shuati_state
+  for all to authenticated
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+grant all on public.shuati_state to authenticated;</pre>
+        <p class="acc-tip">上面框里可以左右滑，看不全不影响，点下面直接复制。</p>
+        <button class="mini-btn" onclick="copySql()">📋 复制这段 SQL</button>
+        <div class="set-row" style="margin-top:12px"><label>地址</label><input id="accUrl" placeholder="https://xxxx.supabase.co"></div>
+        <div class="set-row" style="margin-top:9px"><label>Key</label><input id="accKey" type="password" placeholder="sb_publishable_... 或 eyJhbGci...（anon key）"></div>
+        <div class="gh-btns"><button class="mini-btn blue" onclick="cloudSaveServer()">保存服务器</button></div>
+      </div>
+    </div>
+
+    <div id="accOn" style="display:none">
+      <div class="acc-user">
+        <div class="acc-avatar">👤</div>
+        <div style="min-width:0">
+          <div class="acc-mail" id="accEmail"></div>
+          <div class="acc-last" id="accLast"></div>
+        </div>
+      </div>
+      <div class="gh-btns">
+        <button class="mini-btn blue" onclick="cloudSync()">立即同步</button>
+        <button class="mini-btn" onclick="cloudPullOnly()">仅下载云端</button>
+        <button class="mini-btn" onclick="cloudPushOnly()">仅上传本机</button>
+        <button class="mini-btn red" onclick="cloudLogout()">退出登录</button>
+      </div>
+      <label class="gh-auto"><input type="checkbox" id="accAuto" onchange="cloudSetAuto(this.checked)"> 自动同步（改完 4 秒内静默上传，打开页面自动下拉）</label>
+      <p class="gh-status" id="accSrv"></p>
+      <p class="gh-status">🔒 密码只用来换登录凭证，不存明文；数据在你的库里，别人读不到。</p>
+    </div>
+
+    <p id="accMsg" class="gh-status">未登录</p>
+    <button class="acc-adv" onclick="toggleGhCard()">⚙️ 备用：GitHub 私有仓库（旧的令牌方式，能用账号就别管它）</button>
+  </div>
+
   <div class="set-item">
     <h3>🎯 模考 · ⌨️ 拼写 · 🔈 朗读（v25）</h3>
     <p>模考按真实卷型组卷、计时、交卷出分；拼写练的是 CET-6 单词「写得出」；朗读用浏览器自带发音，不联网、不花钱。</p>
@@ -813,15 +906,15 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
     </div>
     <p style="margin-top:8px">这四格<b>互不相通</b>。换一个地方打开，看起来就是「记录全没了」——其实没丢，还在原来那个里面。</p>
     <p style="margin-top:6px"><b>让它们对齐只有两条路：</b><br>
-       ① 每个地方都填一次令牌、点「连接并同步」（一次性，之后自动对齐）；<br>
-       ② 或者用下面「导出文件 → 选择文件导入」手动搬一次（会合并，不覆盖）。</p>
+       ① 每个地方<b>登一次账号</b>（一次性，之后自动对齐，就是下面那张卡）；<br>
+       ② 或者用「导出文件 → 选择文件导入」手动搬一次（会合并，不覆盖）。</p>
     <p class="store-warn">⚠️ 微信内置浏览器清缓存、手机清存储时，那份本地数据会被真删掉。常同步才保险。</p>
   </div>
 
-  <div class="set-item" id="ghCard">
-    <h3>☁️ 云同步（GitHub 私有仓库）</h3>
-    <p>进度和笔迹都存到<b>你自己的 GitHub 私有仓库</b>，平板、手机自动对齐，换设备不用再导来导去。<br>
-       第一次用：填令牌 → 点「连接并同步」，仓库不存在会自动创建。</p>
+  <div class="set-item" id="ghCard" style="display:none">
+    <h3>☁️ 云同步（GitHub 私有仓库 · 备用）</h3>
+    <p>进度和笔迹存到<b>你自己的 GitHub 私有仓库</b>。账号方案用不了（比如想连的服务器打不开）时再用这个。<br>
+       填令牌 → 点「连接并同步」，仓库不存在会自动创建。</p>
     <div class="set-row"><label>仓库</label><input id="ghRepo" placeholder="留空自动建 用户名/shuati-data"></div>
     <div class="set-row" style="margin-top:9px"><label>令牌</label>
       <input id="ghToken" type="password" placeholder="ghp_...（勾 repo 权限即可）">
@@ -1883,6 +1976,7 @@ function renderDone(){
 /* ==================== 设置 ==================== */
 function renderSet(){
   applyGuestMode();
+  if(typeof renderAcc==='function') renderAcc();
   if(typeof ghFillSet==='function') ghFillSet();
   const all=stats(null);
   const tr=document.getElementById('ttsRateRow');
@@ -3507,6 +3601,7 @@ function copyGuestLink(){
 }
 function applyGuestMode(){
   if(!GUEST) return;
+  var ac = document.getElementById('accCard'); if(ac) ac.style.display = 'none';
   var gc = document.getElementById('ghCard'); if(gc) gc.style.display = 'none';
   var sc = document.getElementById('storeCard'); if(sc) sc.style.display = 'none';
   var t = document.querySelector('.app-title, #appTitle, header h1');
@@ -3807,6 +3902,10 @@ function ghSetAuto(v){
 }
 function ghTouch(){
   if(GH.suppress) return;
+  if(typeof CLOUD!=='undefined' && CLOUD){
+    if(CLOUD.suppress) return;
+    if(CLOUD.on && CLOUD.auto){ cloudTouch(); return; }   /* 登录了就只走账号同步，不再碰 GitHub */
+  }
   const c=ghCfg();
   if(!c.auto || !c.token) return;
   GH.dirty=true;
@@ -4973,17 +5072,391 @@ function mixLinkHtml(c){
     g.a+' ⇄ '+g.b+'</button>';
 }
 
+/* ==================== v27 账号云同步（邮箱登录） ==================== */
+/* 换掉 GitHub 令牌的三个理由：
+   ① 令牌 90 天过期，到期就是个 401，你还得记得去重生成；
+   ② 每台设备都要粘一次，粘错一个字符就白折腾；
+   ③ 国内直连 api.github.com 时好时坏。
+   现在是邮箱 + 密码：手机登一次、平板登一次，之后打开就自动对齐。       */
+
+const CLOUD_CFG_KEY = 'xzt_cloud_acc';
+
+/* ← 如果你已经建好服务器，把两个值填在这里，所有设备打开就只剩「登录」一个动作 */
+const CLOUD_URL_FIXED = '';
+const CLOUD_KEY_FIXED = '';
+
+var CLOUD = {
+  on:false, busy:false, timer:null, dirty:false, suppress:false,
+  at:null, rt:null, uid:null, exp:0, email:'', auto:true, lastAt:0, err:''
+};
+
+function cloudCfg(){
+  try{ return JSON.parse(localStorage.getItem(CLOUD_CFG_KEY)||'{}'); }catch(e){ return {}; }
+}
+function cloudSetCfg(c){ localStorage.setItem(CLOUD_CFG_KEY, JSON.stringify(c)); }
+function cloudUrl(){ var c=cloudCfg(); return String(c.url||CLOUD_URL_FIXED||'').replace(/\/+$/,''); }
+function cloudKey(){ var c=cloudCfg(); return String(c.key||CLOUD_KEY_FIXED||''); }
+function cloudReady(){ return !!(cloudUrl() && cloudKey()); }
+
+function cloudApplySession(){
+  const c=cloudCfg();
+  CLOUD.on   = !!c.at;
+  CLOUD.at   = c.at||null;
+  CLOUD.rt   = c.rt||null;
+  CLOUD.uid  = c.uid||null;
+  CLOUD.exp  = c.exp||0;
+  CLOUD.email= c.email||'';
+  CLOUD.lastAt = c.lastAt||0;
+  CLOUD.auto = (c.auto===undefined) ? true : !!c.auto;
+}
+function cloudSaveSession(s){
+  const c=cloudCfg();
+  if(s.access_token) c.at=s.access_token;
+  if(s.refresh_token) c.rt=s.refresh_token;
+  if(s.expires_in) c.exp=(Date.now()+(Number(s.expires_in)||3600)*1000);
+  if(s.user&&s.user.id) c.uid=s.user.id;
+  if(s.user&&s.user.email) c.email=s.user.email;
+  cloudSetCfg(c); cloudApplySession();
+}
+
+function cloudStatus(msg, cls){
+  const el=document.getElementById('accMsg'); if(!el) return;
+  el.textContent=msg; el.className='gh-status'+(cls?(' '+cls):'');
+}
+function cloudTime(ts){
+  if(!ts) return '还没同步过';
+  const d=new Date(ts), n=new Date();
+  const hm=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+  if(d.toDateString()===n.toDateString()) return '今天 '+hm;
+  return (d.getMonth()+1)+'/'+d.getDate()+' '+hm;
+}
+
+/* --- 网络层 --- */
+async function cloudFetch(path, opts, withAuth){
+  opts = opts||{};
+  const url = cloudUrl()+path;
+  const h = Object.assign({
+    'apikey': cloudKey(),
+    'Content-Type': 'application/json'
+  }, opts.headers||{});
+  if(withAuth && CLOUD.at) h['Authorization']='Bearer '+CLOUD.at;
+
+  let ctl=null;
+  if(typeof AbortController!=='undefined') ctl=new AbortController();
+  const tm = setTimeout(function(){ if(ctl) ctl.abort(); }, 20000);
+  let r;
+  try{
+    r = await fetch(url, {method:opts.method||'GET', headers:h, body:opts.body, signal:ctl?ctl.signal:undefined});
+  }catch(e){
+    clearTimeout(tm);
+    throw Object.assign(new Error('连不上服务器'), {net:true});
+  }
+  clearTimeout(tm);
+
+  const txt = await r.text();
+  let data=null;
+  try{ data = txt ? JSON.parse(txt) : null; }catch(e){ data = txt; }
+  if(!r.ok){
+    let msg = (data && (data.msg||data.message||data.error_description||data.error||data.hint)) || ('HTTP '+r.status);
+    if(typeof msg!=='string') msg=JSON.stringify(msg);
+    throw Object.assign(new Error(msg), {status:r.status, data:data});
+  }
+  return data;
+}
+
+function cloudErrText(e){
+  const m=String((e&&e.message)||'');
+  if(e&&e.net) return '连不上服务器，换下网络（Wi-Fi / 流量）再试';
+  if(e&&e.status===400 && /invalid login credentials/i.test(m)) return '邮箱或密码不对';
+  if(e&&e.status===422 && /already registered/i.test(m)) return '这个邮箱注册过了，直接点「登录」';
+  if(e&&e.status===422) return '邮箱格式不对，或密码太短（至少 6 位）';
+  if(e&&e.status===429) return '试太多次了，等一分钟再试';
+  if(e&&e.status===401) return '登录已过期，请重新登录';
+  if(/email not confirmed/i.test(m)) return '还没验证邮箱：去邮箱点确认链接（或在后台关掉「Confirm email」）';
+  if(/relation .*shuati_state.* does not exist/i.test(m)) return '数据库表还没建：点下面「服务器设置」里的 SQL 复制到后台跑一次';
+  return m||'出错了';
+}
+
+/* --- 登录 / 注册 / 退出 --- */
+function cloudCheckInput(){
+  const emEl=document.getElementById('clEmail'), pwEl=document.getElementById('clPw');
+  const em=(emEl&&emEl.value||'').trim(), pw=(pwEl&&pwEl.value||'');
+  if(!cloudReady()) return {err:'还没填服务器地址（点下面「服务器设置」）'};
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) return {err:'邮箱格式不对'};
+  if(pw.length<6) return {err:'密码至少 6 位'};
+  return {em:em, pw:pw};
+}
+async function cloudSignup(){
+  const v=cloudCheckInput(); if(v.err){ cloudStatus('⚠️ '+v.err,'err'); return; }
+  cloudStatus('正在注册…');
+  try{
+    const s = await cloudFetch('/auth/v1/signup', {method:'POST', body:JSON.stringify({email:v.em, password:v.pw})});
+    const sess = (s&&s.session) ? s.session : ((s&&s.access_token)? s : null);
+    if(sess){ cloudSaveSession(sess); cloudAfterLogin('账号已创建'); }
+    else { cloudStatus('📮 收到注册请求，去邮箱点确认链接，然后回来「登录」','warn'); }
+  }catch(e){
+    cloudStatus('❌ '+cloudErrText(e),'err');
+    if(e.status===422 && /already registered/i.test(e.message||'')){
+      const pw=document.getElementById('clPw'); if(pw) pw.focus();
+    }
+  }
+}
+async function cloudLogin(){
+  const v=cloudCheckInput(); if(v.err){ cloudStatus('⚠️ '+v.err,'err'); return; }
+  cloudStatus('正在登录…');
+  try{
+    const s = await cloudFetch('/auth/v1/token?grant_type=password', {method:'POST', body:JSON.stringify({email:v.em, password:v.pw})});
+    if(!s||!s.access_token) throw new Error('服务器没返回登录凭证');
+    cloudSaveSession(s);
+    cloudAfterLogin('登录成功');
+  }catch(e){ cloudStatus('❌ '+cloudErrText(e),'err'); }
+}
+function cloudAfterLogin(msg){
+  renderAcc();
+  cloudStatus('☁️ '+msg+'，正在对齐数据…','ok');
+  setTimeout(function(){ cloudSync(false,'both'); }, 120);
+}
+async function cloudLogout(){
+  if(!confirm('退出后本机不再自动同步（学习记录不会删，仍在本机）。确定？')) return;
+  try{ await cloudFetch('/auth/v1/logout', {method:'POST'}, true); }catch(e){}
+  const c=cloudCfg();
+  delete c.at; delete c.rt; delete c.uid; delete c.email;
+  cloudSetCfg(c); cloudApplySession();
+  renderAcc(); cloudStatus('已退出');
+}
+
+/* --- 续期 --- */
+async function cloudRefresh(){
+  const c=cloudCfg();
+  if(!c.rt) return false;
+  try{
+    const s = await cloudFetch('/auth/v1/token?grant_type=refresh_token', {method:'POST', body:JSON.stringify({refresh_token:c.rt})});
+    if(!s||!s.access_token) return false;
+    cloudSaveSession(s);
+    return true;
+  }catch(e){
+    if(e.status===400||e.status===401||e.status===403){       /* 刷新令牌也废了 = 要重新登录 */
+      const d=cloudCfg();
+      delete d.at; delete d.rt;
+      cloudSetCfg(d); cloudApplySession();
+      renderAcc();
+      cloudStatus('登录已过期，重新输一次密码就好','warn');
+    }
+    return false;
+  }
+}
+async function cloudEnsure(){
+  if(!CLOUD.at) return false;
+  if(CLOUD.exp-Date.now() > 90000) return true;   /* 还剩 90 秒以上就直接用 */
+  return await cloudRefresh();
+}
+
+/* --- 读写 --- */
+async function cloudPull(){
+  if(!await cloudEnsure()) throw Object.assign(new Error('登录已过期'), {status:401});
+  const rows = await cloudFetch('/rest/v1/shuati_state?select=data,rev,updated_at&user_id=eq.'+encodeURIComponent(CLOUD.uid), {}, true);
+  if(!rows || !rows.length) return null;
+  return {data: rows[0].data || null, rev: Number(rows[0].rev)||0};
+}
+
+/* 带版本号的上传：
+   baseRev 是刚才读到的版本。写的时候要求服务器上的 rev 还是这个值——
+   如果另一台设备在这中间推过，条件不成立、影响 0 行，我们就重来一次，
+   先把它推的合进来再推。这样两台同时改也不会互相抹掉。            */
+async function cloudPush(pack, baseRev, force){
+  if(!await cloudEnsure()) throw Object.assign(new Error('登录已过期'), {status:401});
+  const nowIso = new Date().toISOString();
+
+  if(baseRev==null && !force){
+    try{
+      await cloudFetch('/rest/v1/shuati_state', {
+        method:'POST',
+        headers:{'Prefer':'return=minimal'},
+        body: JSON.stringify([{user_id:CLOUD.uid, data:pack, rev:1, updated_at:nowIso}])
+      }, true);
+      return true;
+    }catch(e){
+      if(e.status===409 || /duplicate key/i.test(e.message||'')) return false;
+      throw e;
+    }
+  }
+  if(force){
+    await cloudFetch('/rest/v1/shuati_state?on_conflict=user_id', {
+      method:'POST',
+      headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},
+      body: JSON.stringify([{user_id:CLOUD.uid, data:pack, rev:(Number(baseRev)||0)+1, updated_at:nowIso}])
+    }, true);
+    return true;
+  }
+  const q='/rest/v1/shuati_state?user_id=eq.'+encodeURIComponent(CLOUD.uid)+'&rev=eq.'+Number(baseRev);
+  const r = await cloudFetch(q, {
+    method:'PATCH',
+    headers:{'Prefer':'return=representation'},
+    body: JSON.stringify({data:pack, rev:Number(baseRev)+1, updated_at:nowIso})
+  }, true);
+  return !!(r && r.length);
+}
+
+async function cloudSync(silent, mode){
+  mode = mode || 'both';
+  if(!CLOUD.on){ if(!silent) toast('先登录账号'); return; }
+  if(!cloudReady()){ if(!silent) toast('还没填服务器地址'); return; }
+  if(CLOUD.busy){ CLOUD.dirty=true; if(!silent) cloudStatus('上一轮还没结束，稍后自动补一次…'); return; }
+
+  CLOUD.busy=true; CLOUD.dirty=false; CLOUD.suppress=true;
+  if(!silent) cloudStatus(mode==='pull'?'正在下载…':(mode==='push'?'正在上传…':'同步中…'));
+  try{
+    let changed=0, bytes=0, ok=false;
+
+    for(let attempt=0; attempt<3 && !ok; attempt++){
+      const remote = (mode==='push' && attempt===0) ? null : await cloudPull();
+      if(remote && remote.data) changed += ghMerge(remote.data);
+
+      if(mode==='pull'){ ok=true; break; }
+
+      const pack = ghPack();
+      const raw = JSON.stringify(pack);
+      if(raw.length > 3.5*1024*1024){
+        throw Object.assign(new Error('数据太大'), {big:true, size:Math.round(raw.length/1024)});
+      }
+      ok = await cloudPush(pack, remote ? remote.rev : null, mode==='push');
+      bytes = raw.length;
+      if(!ok && attempt<2) await new Promise(function(r){ setTimeout(r, 120+Math.random()*180); });
+    }
+    if(!ok) throw new Error('云端被另一台设备同时改动，重试三次仍冲突');
+
+    const c=cloudCfg(); c.lastAt=Date.now(); cloudSetCfg(c); CLOUD.lastAt=c.lastAt;
+    const sizeTxt = bytes ? ' · '+Math.max(1,Math.round(bytes/1024))+' KB' : '';
+    cloudStatus('✅ 已同步 '+cloudTime(CLOUD.lastAt)+(changed?(' · 合并 '+changed+' 条'):'')+sizeTxt, 'ok');
+    if(!silent) toast(mode==='pull'?'已从云端下载 ✅':'同步完成 ✅');
+  }catch(e){
+    CLOUD.err=e.message||'';
+    const t=e.big ? ('数据 '+e.size+' KB 超过 3.5 MB 上限，多是手写笔迹攒太多') : cloudErrText(e);
+    cloudStatus('❌ 同步失败：'+t,'err');
+    if(!silent) toast('同步失败：'+t);
+  }finally{
+    CLOUD.busy=false; CLOUD.suppress=false;
+    if(CLOUD.dirty) setTimeout(function(){ CLOUD.dirty=false; cloudSync(true); }, 300);
+  }
+}
+function cloudPushOnly(){
+  if(!CLOUD.on){ toast('先登录账号'); return; }
+  if(!confirm('把本机数据覆盖到云端（云端更新的记录会被覆盖）。确定？')) return;
+  cloudSync(false,'push');
+}
+function cloudPullOnly(){
+  if(!CLOUD.on){ toast('先登录账号'); return; }
+  cloudSync(false,'pull');
+}
+function cloudTouch(){
+  if(CLOUD.suppress || !CLOUD.on || !CLOUD.auto) return;
+  CLOUD.dirty=true;
+  if(CLOUD.timer) return;
+  CLOUD.timer=setTimeout(function(){
+    CLOUD.timer=null;
+    if(CLOUD.dirty) cloudSync(true);
+  }, 4000);
+}
+function cloudSetAuto(v){
+  const c=cloudCfg(); c.auto=v?1:0; cloudSetCfg(c); CLOUD.auto=!!v;
+  if(v && CLOUD.on){ cloudSync(true); toast('已开启自动同步'); }
+}
+
+/* --- 服务器设置（第一次用） --- */
+function accToggleAdv(){
+  const el=document.getElementById('accAdv'); if(!el) return;
+  el.style.display = (el.style.display==='none') ? 'block' : 'none';
+}
+function cloudSaveServer(){
+  const uEl=document.getElementById('accUrl'), kEl=document.getElementById('accKey');
+  let u=(uEl&&uEl.value||'').trim().replace(/\/+$/,'');
+  let k=(kEl&&kEl.value||'').trim();
+  if(!/^https?:\/\//.test(u)){ cloudStatus('⚠️ 地址要 https:// 开头（在 Supabase 后台 Settings → Data API 里那个 URL）','err'); return; }
+  if(k.length<20){ cloudStatus('⚠️ key 似乎不完整，一长串都要','err'); return; }
+  const c=cloudCfg(); c.url=u; c.key=k; cloudSetCfg(c);
+  cloudStatus('正在检查服务器…');
+  cloudFetch('/auth/v1/health', {}).then(function(){
+    cloudStatus('✅ 服务器可用，可以注册或登录了','ok');
+    renderAcc();
+  }).catch(function(e){
+    if(e.status===401||e.status===403) { cloudStatus('⚠️ 地址通了但 key 不对，重新复制一次 publishable key','err'); }
+    else if(e.status===404){ cloudStatus('⚠️ 地址不对：应该是 https://xxxx.supabase.co ，末尾不要加 /rest/v1','err'); }
+    else cloudStatus('❌ 连不上：'+cloudErrText(e),'err');
+  });
+}
+function copySql(){
+  const sql=document.getElementById('sqlBox').textContent;
+  const ta=document.createElement('textarea');
+  ta.value=sql; document.body.appendChild(ta); ta.select();
+  let ok=false;
+  try{ ok=document.execCommand('copy'); }catch(e){}
+  document.body.removeChild(ta);
+  if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(sql);
+  toast(ok?'SQL 已复制，去后台 SQL Editor 粘贴执行':'复制失败，长按选中手动复制');
+}
+
+/* --- 设置页渲染 --- */
+function renderAcc(){
+  const anon=document.getElementById('accAnon'), on=document.getElementById('accOn');
+  if(!anon||!on) return;
+  if(CLOUD.on){
+    anon.style.display='none'; on.style.display='block';
+    const em=document.getElementById('accEmail');
+    if(em) em.textContent=CLOUD.email||'已登录';
+    const st=document.getElementById('accLast');
+    if(st) st.textContent = CLOUD.busy ? '同步中…' : ('上次同步：'+cloudTime(CLOUD.lastAt));
+    const box=document.getElementById('accAuto');
+    if(box) box.checked=!!CLOUD.auto;
+    const sv=document.getElementById('accSrv');
+    if(sv) sv.textContent = cloudUrl() ? ('服务器：'+cloudUrl().replace(/^https?:\/\//,'')) : '服务器：未设置';
+  }else{
+    anon.style.display='block'; on.style.display='none';
+    const uEl=document.getElementById('accUrl'), kEl=document.getElementById('accKey');
+    if(uEl && !uEl.value) uEl.value=cloudCfg().url||CLOUD_URL_FIXED||'';
+    if(kEl && !kEl.value) kEl.value=cloudCfg().key||CLOUD_KEY_FIXED||'';
+    const hint=document.getElementById('accNoSrv');
+    if(hint) hint.style.display = cloudReady() ? 'none' : 'block';
+    const mig=document.getElementById('accMig');
+    if(mig){
+      const gc=ghCfg();
+      mig.style.display = (gc.token && gc.token.length>10) ? 'block' : 'none';
+    }
+  }
+}
+function toggleGhCard(){
+  const el=document.getElementById('ghCard'); if(!el) return;
+  el.style.display = (el.style.display==='none') ? 'block' : 'none';
+}
+
 /* ==================== 启动 ==================== */
 hwEnsure();
 hwBind();
 hwSyncBtns();
 try{ hwRebuildThumbs(); }catch(e){}
 document.addEventListener('visibilitychange', function(){
-  if(document.visibilityState==='hidden' && GH.dirty && !GUEST){ ghSync(true); }
+  if(document.visibilityState!=='visible' || GUEST) return;
+  if(typeof CLOUD!=='undefined' && CLOUD && CLOUD.on && CLOUD.auto){
+    if(Date.now()-(CLOUD.lastAt||0) > 60000) cloudSync(true);
+  }
+});
+document.addEventListener('visibilitychange', function(){
+  var hid = (document.visibilityState==='hidden');
+  if(!hid || GUEST) return;
+  if(typeof CLOUD!=='undefined' && CLOUD && CLOUD.on){
+    if(CLOUD.dirty) cloudSync(true);
+    return;
+  }
+  if(GH.dirty){ ghSync(true); }
 });
 setTimeout(function(){
-  var c=ghCfg();
-  if(!GUEST && c.auto && c.token && c.repo){ ghSync(true); }
+  if(GUEST) return;
+  cloudApplySession();
+  if(CLOUD.on){
+    if(CLOUD.auto) cloudSync(true);          /* 打开页面先拉一次，把另一台设备的进度合过来 */
+  }else{
+    var c=ghCfg();
+    if(c.auto && c.token && c.repo){ ghSync(true); }
+  }
 }, 2500);
 renderHome();
 
