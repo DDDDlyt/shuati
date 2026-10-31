@@ -2548,7 +2548,7 @@ function applyGuestMode(){
 
 /* ==================== v7 云同步（GitHub 私有仓库） ==================== */
 const GH_CFG_KEY='xzt_gh_cfg';
-const GH={busy:false, timer:null, dirty:false, suppress:false, lastErr:''};
+const GH={busy:false, timer:null, dirty:false, suppress:false, lastErr:'', retry:0};
 
 function ghCfg(){
   try{ return JSON.parse(localStorage.getItem(GH_CFG_KEY)||'{}'); }catch(e){ return {}; }
@@ -2577,30 +2577,88 @@ function b64dec(b64){
   for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
   return new TextDecoder().decode(bytes);
 }
+/* 单次请求：带超时 + 空响应体容错 + 非 JSON 拦截 */
+async function ghOnce(path, opts, token){
+  const headers=Object.assign({
+    'Authorization':'token '+token,
+    'Accept':'application/vnd.github+json',
+    'X-GitHub-Api-Version':'2022-11-28'
+  }, (opts&&opts.headers)||{});
+  const url='https://api.github.com'+path;
+  const init=Object.assign({}, opts, {headers:headers, cache:'no-store'});
+  let timer=null, ctrl=null;
+  if(typeof AbortController==='function'){
+    ctrl=new AbortController();
+    init.signal=ctrl.signal;
+    timer=setTimeout(function(){ try{ ctrl.abort(); }catch(e){} }, 20000);
+  }
+  let r=null;
+  try{
+    r=await fetch(url, init);
+  }catch(err){
+    if(timer) clearTimeout(timer);
+    const e=new Error('网络被中断');
+    e.net=true; e.raw=(err&&err.name==='AbortError')?'超时':'连接失败';
+    throw e;
+  }
+  if(timer) clearTimeout(timer);
+  const txt=await r.text().catch(function(){ return ''; });
+  let body=null;
+  if(txt){
+    try{ body=JSON.parse(txt); }
+    catch(e){
+      // 拿回来的不是 JSON：多半被运营商 / 代理劫持或截断了
+      const ie=new Error('返回的不是正常数据');
+      ie.bad=true; ie.status=r.status; ie.raw=txt.slice(0,60);
+      throw ie;
+    }
+  }
+  if(!r.ok){
+    const e2=new Error((body&&body.message)||('HTTP '+r.status));
+    e2.status=r.status; throw e2;
+  }
+  if(body===null){
+    // 200 但空包 —— 典型断流，当作网络问题，交给上层重试
+    const ne=new Error('网络被中断');
+    ne.net=true; ne.raw='空响应'; throw ne;
+  }
+  return body;
+}
+/* 三次重试：0 / 900ms / 2000ms，只重试网络类错误，4xx 一律不重试 */
 async function ghReq(path, opts, tokenOverride){
   const c=ghCfg();
   const token=tokenOverride||c.token;
   if(!token) throw new Error('还没填令牌');
   opts=opts||{};
-  const headers=Object.assign({
-    'Authorization':'token '+token,
-    'Accept':'application/vnd.github+json',
-    'X-GitHub-Api-Version':'2022-11-28'
-  }, opts.headers||{});
-  const r=await fetch('https://api.github.com'+path, Object.assign({}, opts, {headers:headers}));
-  let body=null;
-  try{ body=await r.json(); }catch(e){}
-  if(!r.ok){
-    const e2=new Error((body&&body.message)||('HTTP '+r.status));
-    e2.status=r.status; throw e2;
+  const waits=[0,900,2000];
+  let last=null;
+  for(let i=0;i<waits.length;i++){
+    if(waits[i]){
+      GH.retry=i;
+      ghStatus('网络不稳，重试第 '+i+' 次…');
+      await new Promise(function(res){ setTimeout(res, waits[i]); });
+    }
+    try{
+      const out=await ghOnce(path, opts, token);
+      GH.retry=0;
+      return out;
+    }catch(e){
+      last=e;
+      // 401/403/404/422 这类是配置问题，重试没意义
+      if(e.status && !e.bad) throw e;
+      if(e.status===404) throw e;
+    }
   }
-  return body;
+  GH.retry=0;
+  throw last;
 }
 function ghErrHint(e){
-  if(e.status===401) return '（令牌无效或过期）';
-  if(e.status===403) return '（权限不足或触发限流）';
+  if(e.status===401) return '（令牌无效或过期，重新生成一个再填进来）';
+  if(e.status===403) return '（权限不足或触发限流，等几分钟再试）';
   if(e.status===404) return '（仓库不存在或没权限）';
   if(e.status===422) return '（请求被拒绝，检查仓库名）';
+  if(e.net) return '（连不上 GitHub，换个网络再试；实在不行用下面的「导出文件」互传）';
+  if(e.bad) return '（网络被劫持或截断，换个网络再试）';
   if(String(e.message||'').indexOf('Failed to fetch')>=0) return '（网络不通，试试换网络或用文件互传）';
   return '';
 }
@@ -2677,8 +2735,10 @@ async function ghSync(silent, mode){
     if(mode!=='push'){
       try{
         const f=await ghReq(path+'?t='+Date.now());
+        if(!f||!f.sha) throw Object.assign(new Error('云端返回空'), {net:true});
         sha=f.sha;
-        remote=JSON.parse(b64dec(f.content||''));
+        try{ remote=JSON.parse(b64dec(f.content||'')); }
+        catch(pe){ remote=null; }   // 云端文件坏了就当没同步过，别整个流程挂掉
       }catch(e){ if(e.status!==404) throw e; }
     }
     const changed = remote ? ghMerge(remote) : 0;
@@ -2694,8 +2754,15 @@ async function ghSync(silent, mode){
     if(!silent) toast(mode==='pull'?'已从云端下载 ✅':'同步完成 ✅');
   }catch(e){
     GH.lastErr=e.message||'unknown';
-    ghStatus('❌ 同步失败：'+(e.message||'')+ghErrHint(e), 'err');
-    if(!silent) toast('同步失败：'+(e.message||''));
+    const hint=ghErrHint(e);
+    ghStatus('❌ 同步失败：'+(e.message||'')+hint, 'err');
+    if(!silent && hint) toast('同步失败：'+(e.message||'')+hint);
+    else if(!silent) toast('同步失败：'+(e.message||''));
+    if((e.net||e.bad) && !silent){
+      // 网络类失败：把「导出文件」这条后路指出来
+      const el=document.getElementById('fileStatus');
+      if(el) el.textContent='网络连不上 GitHub 时，点上面「导出文件」，发到另一台设备「选择文件导入」也能对齐。';
+    }
   }finally{ GH.busy=false; }
 }
 async function ghConnect(){
@@ -2726,7 +2793,12 @@ async function ghConnect(){
     }
     await ghSync();
   }catch(e){
-    ghStatus('❌ 连接失败：'+(e.message||'')+ghErrHint(e), 'err');
+    const hint=ghErrHint(e);
+    ghStatus('❌ 连接失败：'+(e.message||'')+hint, 'err');
+    if(e.net||e.bad){
+      const el=document.getElementById('fileStatus');
+      if(el) el.textContent='连不上 GitHub 也能用：点上面「导出文件」发到另一台设备「选择文件导入」，效果一样。';
+    }
   }
 }
 function ghPush(){
