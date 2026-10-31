@@ -2443,9 +2443,14 @@ function tmOpen(w){
   document.getElementById('tmDef').innerHTML = d.replace(/考点[:：]/g, '<em>考点：</em>');
   // 关联知识点
   var rel = [];
+  var w2 = (w.length >= 3) ? w.slice(0, 2) : w;
   knowAll().forEach(function(k){
-    if((k.keys && k.keys.indexOf(w) >= 0) || (k.n && k.n.indexOf(w) >= 0) ||
-       (k.core && k.core.indexOf(w) >= 0)) rel.push(k);
+    if(k.n && k.n.indexOf(w) >= 0){ rel.push(k); return; }
+    if(k.core && k.core.indexOf(w) >= 0){ rel.push(k); return; }
+    var ks = k.keys || [];
+    for(var i = 0; i < ks.length; i++){
+      if(ks[i].indexOf(w) >= 0 || (w2 !== w && ks[i].indexOf(w2) >= 0)){ rel.push(k); return; }
+    }
   });
   var rh = '';
   if(rel.length){
