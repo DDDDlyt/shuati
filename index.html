@@ -141,6 +141,42 @@ button{font-family:inherit; cursor:pointer; border:none; outline:none;}
 .act-btn.unknown{background:rgba(255,69,58,.16); color:var(--bad);}
 .act-btn.fuzzy{background:rgba(255,159,10,.16); color:var(--warn);}
 .act-btn.next{background:var(--blue); color:#fff;}
+.act-btn.recall{background:rgba(10,132,255,.18); color:var(--blue); border:1px solid rgba(10,132,255,.4);}
+.act-btn.sug{box-shadow:0 0 0 2px currentColor inset; font-weight:800;}
+/* ===== v18 主动回忆 ===== */
+.rec-box{margin-top:14px; padding-top:14px; border-top:1px dashed var(--line);}
+.rec-t{font-size:12.5px; color:var(--sub); margin-bottom:8px;}
+.rec-t span{color:var(--dim);}
+.rec-area{width:100%; min-height:46px; padding:11px 12px; border-radius:12px;
+  background:var(--panel2); color:var(--txt); border:1px solid var(--line);
+  font-size:15px; font-family:inherit; line-height:1.6; resize:none; outline:none;}
+.rec-area:focus{border-color:rgba(10,132,255,.6); background:#1d222b;}
+.rec-area.rec-done{opacity:.55;}
+.rec-res{margin-top:12px; padding:12px 13px; border-radius:12px; font-size:13px; line-height:1.7;}
+.rec-res.good{background:rgba(52,199,89,.12); border:1px solid rgba(52,199,89,.35);}
+.rec-res.mid{background:rgba(255,159,10,.12); border:1px solid rgba(255,159,10,.35);}
+.rec-res.bad{background:rgba(255,69,58,.12); border:1px solid rgba(255,69,58,.35);}
+.rec-res.none{background:var(--panel2); border:1px solid var(--line); color:var(--sub);}
+.rec-res .rec-h{font-size:14px; margin-bottom:6px;}
+.rec-res .rec-h b{font-size:16px;}
+.rec-res .rec-mine{color:var(--dim); font-size:12.5px; margin-bottom:8px; word-break:break-all;}
+.rec-res .rec-miss-t{color:var(--sub); font-size:12px; margin:6px 0 2px;}
+.rec-res .rec-miss{margin:0; padding-left:18px; color:var(--txt);}
+.rec-res .rec-miss li{margin:3px 0; font-size:12.5px; line-height:1.6;}
+/* ===== v18 填空题 ===== */
+.fill-q{line-height:2.6;}
+.fill-inp{width:96px; min-width:60px; padding:5px 8px; margin:0 3px; border-radius:8px;
+  background:var(--panel2); color:var(--txt); border:1px solid var(--line);
+  font-size:15px; font-family:inherit; text-align:center; outline:none;}
+.fill-inp:focus{border-color:var(--blue); background:#1d222b;}
+.fill-inp.fill-ok{border-color:rgba(52,199,89,.7); background:rgba(52,199,89,.12); color:var(--ok);}
+.fill-inp.fill-no{border-color:rgba(255,69,58,.7); background:rgba(255,69,58,.1); color:var(--bad);}
+.fill-tip{font-size:12px; color:var(--dim); margin-top:10px;}
+.fill-cmp{margin-top:10px;}
+.fill-row{font-size:13px; padding:6px 0; color:var(--sub); border-bottom:1px solid var(--line);}
+.fill-row:last-child{border-bottom:none;}
+.fill-row.ok .fc-ok{color:var(--ok);}
+.fill-row.no b{color:var(--bad);}
 /* 完成页 */
 .done-box{text-align:center; padding:40px 20px;}
 .done-box .big{font-size:52px; margin-bottom:10px;}
@@ -1211,6 +1247,8 @@ function renderCard(){
     return;
   }
 
+  if(c.t==='fill' && String(c.q).indexOf('__')>=0){ renderFillCard(c); return; }
+
   if(c.t==='input'){
     let sh='<div class="subs-box">';
     (c.subs||[]).forEach((s,i)=>{
@@ -1223,18 +1261,42 @@ function renderCard(){
     return;
   }
 
-  // 普通翻卡
+  // 普通翻卡：先回忆，再核对
+  c._recHint = (c.t==='term') ? '名词：写它的定义要点（是什么 + 关键特征）'
+             : (c.t==='essay'||c.t==='saq') ? '写答题要点，能写几条写几条'
+             : (c.t==='calc') ? '写下公式或关键一步'
+             : '写关键词就行';
+  document.getElementById('flashcard').innerHTML +=
+    '<div class="rec-box">'+
+      '<div class="rec-t">✍️ 先凭记忆写 —— <span>'+esc(c._recHint)+'</span></div>'+
+      '<textarea id="recArea" class="rec-area" rows="1" autocomplete="off" autocapitalize="off" spellcheck="false" '+
+        'placeholder="写不出来就点下面「直接看答案」，但那样不算会"></textarea>'+
+    '</div>';
+  const ra=document.getElementById('recArea');
+  if(ra){
+    ra.addEventListener('input', function(){
+      this.style.height='auto';
+      this.style.height=Math.min(this.scrollHeight, 160)+'px';
+    });
+  }
   act.innerHTML= (HW_TYPES[c.t] ? '<button class="act-btn hwbtn" onclick="openHW(\'write\')">'+
       ((S.hw&&S.hw[c.id])?'✏️ 我的笔迹':'✏️ 手写作答')+'</button>' : '')+
-    '<button class="act-btn unknown" onclick="markCard(-1)">不熟 ❌</button>'+
-    '<button class="act-btn" onclick="flipCard()">看答案 💡</button>'+
-    '<button class="act-btn known" onclick="markCard(1)">认识 ✅</button>';
+    '<button class="act-btn" onclick="flipCard(0)">👀 直接看答案</button>'+
+    '<button class="act-btn recall" onclick="flipCard(1)">✍️ 写完了，对答案</button>';
 }
 
-function flipCard(){
+function flipCard(fromRecall){
   if(flipped) return;
-  flipped=true;
   const c=Q[qi];
+  let txt='';
+  try{ const ta=document.getElementById('recArea'); if(ta) txt=ta.value; }catch(e){}
+  if(fromRecall && !String(txt).trim()){
+    toast('先写两个关键词；不想写就点「直接看答案」');
+    return;
+  }
+  flipped=true;
+  const g = fromRecall ? recGrade(c, txt) : null;
+
   let h='<div class="card-a"><div class="ans-label">答案</div>';
   if(c.t==='saq' && Array.isArray(c.a)){
     h+='<div class="ans-main">'+esc(c.a[0])+'</div><ul>';
@@ -1261,12 +1323,176 @@ function flipCard(){
        '<button class="mini-btn" onclick="hwDel(\'' + c.id + '\')">删除</button></div></div>';
   }
   h+='</div>';
+  h+=recPanel(g, txt);
   document.getElementById('flashcard').innerHTML+=h;
 
   const act=document.getElementById('actRow');
+  const sug = !g ? 'fuzzy' : (g.rate>=0.5 ? 'known' : (g.rate<0.25 ? 'unknown' : 'fuzzy'));
+  const unv = g ? '' : ',1';   // 没先回忆 → 标记未验证
   act.innerHTML=
+    '<button class="act-btn unknown'+(sug==='unknown'?' sug':'')+'" onclick="markCard(-1'+unv+')">不熟 ❌'+
+      (sug==='unknown'?'　·建议':'')+'</button>'+
+    '<button class="act-btn fuzzy'+(sug==='fuzzy'?' sug':'')+'" onclick="markCard(2'+unv+')">模糊 🤔'+
+      (sug==='fuzzy'?'　·建议':'')+'</button>'+
+    '<button class="act-btn known'+(sug==='known'?' sug':'')+'" onclick="markCard(1'+unv+')">认识 ✅'+
+      (sug==='known'?'　·建议':'')+'</button>';
+  const ra=document.getElementById('recArea');
+  if(ra){ ra.readOnly=true; ra.classList.add('rec-done'); }
+}
+
+/* ---------- 主动回忆：要点切分 / 关键词抽取 / 命中核对 ---------- */
+function recNorm(s){
+  return String(s==null?'':s)
+    .replace(/[\s\u3000]/g,'')
+    .replace(/[₀₁₂₃₄₅₆₇₈₉]/g,function(ch){return '0123456789'['₀₁₂₃₄₅₆₇₈₉'.indexOf(ch)];})
+    .replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]/g,function(ch){return '0123456789'['⁰¹²³⁴⁵⁶⁷⁸⁹'.indexOf(ch)];})
+    .replace(/[⁺⁻]/g,function(ch){return ch==='⁺'?'+':'-';})
+    .replace(/[，,。;；:：、（）()\[\]【】「」“”"'‘’·—–>＜<>]/g,'')
+    .toLowerCase();
+}
+function recPoints(c){
+  if(c.t==='saq' && Array.isArray(c.a)) return c.a.slice(0,10);
+  const a = Array.isArray(c.a) ? c.a.join('；') : String(c.a==null?'':c.a);
+  const cut = (re)=>a.split(re).map(x=>x.trim()).filter(x=>x.length>=2);
+  let parts = cut(/[；;。\n]+/);
+  // 名词/填空类卡片，一句话里常塞好几个考点，按逗号顿号细切；长答题只按句子切，别切碎
+  if((c.t==='term'||c.t==='fill') && parts.length<3) parts = cut(/[；;。\n①②③④⑤⑥⑦⑧、]+|，|,/);
+  if(parts.length<2) parts = cut(/[；;。\n①②③④⑤⑥⑦⑧、]+|，|,/); // 整段不分句的，按逗号兜底
+  if(parts.length<2) parts = cut(/[①②③④⑤⑥⑦⑧]/);              // 还不行才按序号切
+  return parts.length ? parts.slice(0,8) : [a];
+}
+function recTokens(str){
+  const s=String(str||''), out=[];
+  try{ for(const k in TERMS){ if(k.length>=2 && s.indexOf(k)>=0) out.push(k); } }catch(e){}
+  const en=s.match(/[A-Za-zΑ-Ωα-ω][A-Za-zΑ-Ωα-ω0-9₂₃'\-]{1,}/g);
+  if(en) en.forEach(x=>out.push(x));
+  const num=s.match(/\d+(?:\.\d+)?/g);
+  if(num) num.forEach(x=>{ if(x.length>=1) out.push(x); });
+  const seen={}, r=[];
+  out.forEach(t=>{ t=String(t).trim(); const k=recNorm(t);
+    if(k.length<2 || seen[k]) return; seen[k]=1; r.push(t); });
+  return r;
+}
+function recGrade(c, txt){
+  const pts=recPoints(c), u=String(txt||''), nu=recNorm(u);
+  if(!u.trim()) return {total:pts.length, hit:0, miss:pts, rate:0, wrote:false};
+  const miss=[];
+  let hit=0;
+  pts.forEach(p=>{
+    const toks=recTokens(p);
+    let ok=false;
+    if(toks.length){
+      // 要点里常有 Hb / O₂ 这种到处出现的词，单个命中不算数：要命中一半以上
+      const n=toks.filter(t=>{ const k=recNorm(t); return k.length>=2 && nu.indexOf(k)>=0; }).length;
+      ok = toks.length<=2 ? n>=1 : (n/toks.length)>=0.5;
+    } else {
+      ok = nu.indexOf(recNorm(p).slice(0,3))>=0;
+    }
+    if(ok) hit++; else miss.push(p);
+  });
+  return {total:pts.length, hit:hit, miss:miss, rate:pts.length?hit/pts.length:0, wrote:true};
+}
+function recPanel(g, txt){
+  if(!g) return '<div class="rec-res none">⚠️ 这题你没先回忆。<b>看着答案觉得「会」是最容易骗自己的</b>——'+
+    '这题的复习间隔已被压到 7 天内，下次还得真写出来。</div>';
+  const pct = Math.round(g.rate*100);
+  const cls = g.rate>=0.5 ? 'good' : (g.rate<0.25 ? 'bad' : 'mid');
+  let h='<div class="rec-res '+cls+'">'+
+    '<div class="rec-h">你写出来的要点：<b>'+g.hit+' / '+g.total+'</b>（'+pct+'%）</div>';
+  if(g.hit>0) h+='<div class="rec-mine">你写的：'+esc(String(txt).slice(0,120))+'</div>';
+  if(g.miss.length){
+    h+='<div class="rec-miss-t">漏掉的：</div><ul class="rec-miss">';
+    g.miss.slice(0,5).forEach(p=>{ h+='<li>'+esc(p.length>60?p.slice(0,60)+'…':p)+'</li>'; });
+    if(g.miss.length>5) h+='<li>…还有 '+(g.miss.length-5)+' 条</li>';
+    h+='</ul>';
+  }else{
+    h+='<div class="rec-miss-t">要点全覆盖 ✅</div>';
+  }
+  h+='</div>';
+  return h;
+}
+
+
+/* ---------- 填空题：输入 + 自动判分 ---------- */
+function fillMatch(mine, ans){
+  const m=recNorm(mine); if(!m) return false;
+  const a=recNorm(ans);
+  const core=recNorm(String(ans).replace(/[（(][^）)]*[）)]/g,''));
+  if(m===a || m===core) return true;
+  if(core.length>=2 && (m.indexOf(core)>=0 || core.indexOf(m)>=0)) return true;
+  const na=(a.match(/^[\d.]+/)||[])[0], nm=(m.match(/^[\d.]+/)||[])[0];
+  if(na && nm && na===nm) return true;
+  return false;
+}
+function renderFillCard(c){
+  const segs=String(c.q).split(/_{2,}/);
+  const n=segs.length-1;
+  const isExam = c.c && c.c.indexOf('考研')>=0;
+  const favOn = cst(c.id).fav ? 1 : 0;
+  let h='<div class="card-top"><div class="card-tag'+(isExam?' exam':'')+'">'+
+    (TYPE_LABEL[c.t]||c.t)+(c.c?' · '+esc(c.c):'')+'</div>'+
+    '<button class="fav-star'+(favOn?' on':'')+'" onclick="event.stopPropagation();toggleFav()">'+
+    (favOn?'★':'☆')+'</button></div>';
+  h+='<div class="card-q fill-q">';
+  for(let i=0;i<segs.length;i++){
+    h+=termify(segs[i]);
+    if(i<n) h+='<input class="fill-inp" id="fi'+i+'" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="'+(i+1)+'">';
+  }
+  h+='</div><div class="fill-tip">直接在空里填，填完点「检查」。填错了才需要自己评。</div>';
+  document.getElementById('flashcard').innerHTML=h;
+  document.getElementById('actRow').innerHTML=
+    '<button class="act-btn next" onclick="checkFill()">检查 ✍️</button>';
+  setTimeout(function(){ const a=document.getElementById('fi0'); if(a){ try{a.focus();}catch(e){} } },140);
+  const ins=document.querySelectorAll('.fill-inp');
+  ins.forEach(function(el){
+    el.addEventListener('keydown', function(e){
+      if(e.key!=='Enter') return;
+      e.preventDefault();
+      const nx=el.nextElementSibling;
+      if(nx && nx.classList && nx.classList.contains('fill-inp')) nx.focus();
+      else checkFill();
+    });
+  });
+}
+function checkFill(){
+  const c=Q[qi];
+  const segs=String(c.q).split(/_{2,}/);
+  const ans=String(c.a==null?'':c.a).split(/[；;]/).map(x=>x.trim());
+  const n=segs.length-1;
+  const rows=[]; let right=0;
+  for(let i=0;i<n;i++){
+    const el=document.getElementById('fi'+i);
+    const v=el?el.value:'';
+    const ok=fillMatch(v, ans[i]||'');
+    if(ok) right++;
+    if(el){ el.classList.add(ok?'fill-ok':'fill-no'); el.readOnly=true; }
+    rows.push({ok:ok, mine:v, ans:ans[i]||''});
+  }
+  if(right===n && n>0){
+    applyScore(c.id, true);
+    const fc=document.getElementById('flashcard');
+    fc.insertAdjacentHTML('beforeend','<div class="rec-res good"><div class="rec-h">全对 ✅ '+n+'/'+n+
+      '　这题算真会，下次间隔拉长。</div></div>');
+    document.getElementById('actRow').innerHTML=
+      '<button class="act-btn next" onclick="qi++;renderCard()">下一题 →</button>';
+    return;
+  }
+  // 有错：给出对照，再让用户自评（默认模糊）
+  let h='<div class="card-a"><div class="ans-label">正确答案</div>';
+  h+='<div class="ans-main">'+esc(ans.join('；'))+'</div>';
+  h+='<div class="fill-cmp">';
+  rows.forEach(function(r,i){
+    h+='<div class="fill-row'+(r.ok?' ok':' no')+'">'+(i+1)+'. '+
+      (r.ok?'<span class="fc-ok">你填对了</span>':'你填「'+esc(r.mine||'空')+'」→ 应为 <b>'+esc(r.ans)+'</b>')+'</div>';
+  });
+  h+='</div>';
+  h+=hookHtml(c);
+  if(c.n) h+='<div class="ans-note">💡 '+esc(c.n)+'</div>';
+  h+='</div>';
+  document.getElementById('flashcard').insertAdjacentHTML('beforeend', h);
+  document.getElementById('actRow').innerHTML=
     '<button class="act-btn unknown" onclick="markCard(-1)">不熟 ❌</button>'+
-    '<button class="act-btn fuzzy" onclick="markCard(2)">模糊 🤔</button>'+
+    '<button class="act-btn fuzzy sug" onclick="markCard(2)">模糊 🤔　·建议</button>'+
     '<button class="act-btn known" onclick="markCard(1)">认识 ✅</button>';
 }
 
@@ -1359,10 +1585,10 @@ function checkInput(){
   }
 }
 
-function markCard(st){
+function markCard(st, unverified){
   const c=Q[qi];
   const prev=cst(c.id);
-  applyScore(c.id, st>0, st===2);
+  applyScore(c.id, st>0, st===2, !!unverified);
   if(todayCounted){
     if(prev.st===0){ todayCounted.new++; S.todayNew=(S.todayNew||0)+1; }
     else { todayCounted.rev++; S.todayRev=(S.todayRev||0)+1; }
@@ -1490,11 +1716,13 @@ function nextDue(lv){
   return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 }
 /* ok=答对/认识；fuzzy=模糊 */
-function applyScore(id, ok, fuzzy){
+function applyScore(id, ok, fuzzy, unverified){
   const prev=cst(id);
   let lv=prev.lv||0;
+  // 没先回忆就点"会"：lv 封顶 4（7 天后再见一次），不给 60/120 天的信任
+  const cap = unverified ? 4 : IV.length-1;
   if(fuzzy)            lv=Math.max(0, lv-1);
-  else if(ok)          lv=Math.min(lv+1, IV.length-1);
+  else if(ok)          lv=Math.min(lv+1, cap);
   else                 lv=0;
   setCard(id, {
     st: fuzzy?2:(ok?1:-1),
