@@ -274,6 +274,11 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
 #pcBox .pc-h b{flex:1; font-size:17px; color:#fff}
 #pcBox .pc-h button{background:#22303d; color:#9dc4de; border:0; border-radius:9px; padding:7px 12px; font-size:12px}
 #pcBox .pc-tip{font-size:12.5px; line-height:1.7; color:#9aa0aa; margin:0 0 10px}
+.pc-mode{display:none; gap:8px; margin:0 0 10px}
+.pc-mode.on{display:flex}
+.pc-chip{flex:1; background:#1b2028; color:#8b93a1; border:1px solid #2c3441; border-radius:10px;
+  padding:9px 6px; font-size:12.5px; line-height:1.3}
+.pc-chip.on{background:rgba(10,132,255,.16); color:#5fb0ff; border-color:#0a84ff}
 #pcArea{width:100%; flex:1; min-height:150px; max-height:44vh; background:#0f1216; color:#cfd6de;
   border:1px solid #2c3441; border-radius:12px; padding:11px 12px; font-size:12px; line-height:1.5;
   font-family:ui-monospace,Menlo,Consolas,monospace; resize:none; word-break:break-all; -webkit-user-select:all; user-select:all}
@@ -619,6 +624,7 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
       <button class="eye-btn" id="ghEye" onclick="ghToggleToken()" title="显示 / 复制令牌">👁</button>
     </div>
     <p class="gh-mini" id="ghTokHint"></p>
+    <p class="gh-mini">没有令牌？<a href="https://github.com/settings/tokens/new?scopes=repo&amp;description=shuati" target="_blank" rel="noopener" style="color:#5fb0ff">点这里直接生成</a>（只勾 <b>repo</b>，90 天）→ 生成后复制 <b>ghp_</b> 开头那串，粘到上面。</p>
     <div class="gh-btns">
       <button class="mini-btn blue" onclick="ghConnect()">连接并同步</button>
       <button class="mini-btn" onclick="ghSync()">立即同步</button>
@@ -729,6 +735,10 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
   <div id="pcBox">
     <div class="pc-h"><b id="pcTitle">复制数据</b><button onclick="pcClose()">关闭</button></div>
     <p class="pc-tip" id="pcTip"></p>
+    <div class="pc-mode" id="pcMode">
+      <button class="pc-chip on" id="pcChip1" onclick="exportClip(1)">只要答题记录（小）</button>
+      <button class="pc-chip" id="pcChip2" onclick="exportClip(0)">连笔迹一起（大）</button>
+    </div>
     <textarea id="pcArea" spellcheck="false" autocomplete="off" autocapitalize="off"></textarea>
     <div class="pc-foot">
       <button class="mini-btn" id="pcSel" onclick="pcSelectAll()">全选</button>
@@ -2957,8 +2967,38 @@ function b64decBytes(b64){
   return out;
 }
 /* 打包成文本：支持 gzip 就压（前缀 GZ:），否则原文 base64（前缀 JS:） */
-async function packText(){
-  const json=JSON.stringify(ghPack());
+/* 兼容老内核：没有 CompressionStream 时（微信 X5）临时加载自带 pako */
+function ensurePako(){
+  if(window.pako) return Promise.resolve(true);
+  if(ensurePako.p) return ensurePako.p;
+  ensurePako.p = new Promise(function(res){
+    var s=document.createElement('script');
+    s.src='./pako.min.js';
+    s.onload=function(){ res(!!window.pako); };
+    s.onerror=function(){ res(false); };
+    document.head.appendChild(s);
+    setTimeout(function(){ res(!!window.pako); }, 4000);
+  });
+  return ensurePako.p;
+}
+/* 日期压成天数（2020-01-01 起），省字节 */
+const DUE0=Date.UTC(2020,0,1);
+function dueNum(s){ const t=Date.parse((s||'')+'T00:00:00Z'); return isNaN(t)?0:Math.round((t-DUE0)/86400000); }
+function dueStr(n){ return n ? new Date(DUE0+n*86400000).toISOString().slice(0,10) : ''; }
+/* 打包成文本：优先浏览器 gzip（GZ:），其次自带 pako（PK:），最后原文 base64（JS:）
+   light=1 只带答题记录（卡片压成数组，体积小一个数量级） */
+async function packText(light){
+  const d=ghPack();
+  if(light){
+    const cc={};
+    for(const id in (S.cards||{})){
+      const r=S.cards[id]; if(!r) continue;
+      cc[id]=[r.st||0, r.hit||0, r.lv||0, dueNum(r.due), r.fav?1:0, r.g||0];
+    }
+    d.cards=cc; d.cf=1; d.packAt=Date.now(); d.light=1;
+    delete d.hw; delete d.ink; delete d.hwOpt;
+  }
+  const json=JSON.stringify(d);
   const raw=new TextEncoder().encode(json);
   if(typeof CompressionStream==='function'){
     try{
@@ -2969,51 +3009,70 @@ async function packText(){
       return 'GZ:'+b64encBytes(new Uint8Array(buf));
     }catch(e){}
   }
+  try{
+    if(await ensurePako()) return 'PK:'+b64encBytes(window.pako.gzip(raw));
+  }catch(e){}
   return 'JS:'+b64encBytes(raw);
 }
+/* 把精简格式的卡片数组还原成正常对象 */
+function pcExpand(d){
+  if(!d || d.cf!==1) return d;
+  const cc=d.cards||{}, out={}, at=d.packAt||Date.now();
+  for(const id in cc){
+    const a=cc[id];
+    if(!Array.isArray(a)){ out[id]=a; continue; }
+    out[id]={st:a[0]||0, hit:a[1]||0, lv:a[2]||0, due:dueStr(a[3]), fav:a[4]?1:0, g:a[5]||0, t:at};
+  }
+  d.cards=out; delete d.cf; delete d.packAt;
+  return d;
+}
 /* 解包：兼容 GZ: / JS: / 纯 JSON */
-async function unpackText(s){
-  s=String(s||'').trim();
-  if(!s) throw new Error('内容为空');
-  const mode=s.slice(0,3), body=s.slice(3);
-  if(mode==='GZ:'){
-    if(typeof DecompressionStream!=='function') throw new Error('这个浏览器不支持解压，换个设备导入');
-    let bytes;
-    try{ bytes=pcB64(body); }
-    catch(e){ throw new Error('这段数据不完整（开头或结尾被截掉了），重新复制一次'); }
-    let txt;
+/* 解 gzip：浏览器原生优先，没有就用自带 pako */
+async function pcGunzip(bytes){
+  if(typeof DecompressionStream==='function'){
     try{
       const ds=new DecompressionStream('gzip');
       const w=ds.writable.getWriter();
       w.write(bytes); w.close();
-      txt=await new Response(ds.readable).text();
+      return await new Response(ds.readable).text();
     }catch(e){ throw new Error('这段数据不完整（中间缺了一截），重新复制一次'); }
-    try{ return JSON.parse(txt); }
+  }
+  if(!(await ensurePako())) throw new Error('这台设备解不了压，换个设备导入');
+  try{ return new TextDecoder().decode(window.pako.ungzip(bytes)); }
+  catch(e){ throw new Error('这段数据不完整（中间缺了一截），重新复制一次'); }
+}
+async function unpackText(s){
+  s=String(s||'').trim();
+  if(!s) throw new Error('内容为空');
+  const mode=s.slice(0,3), body=s.slice(3);
+  if(mode==='GZ:' || mode==='PK:'){
+    let bytes;
+    try{ bytes=pcB64(body); }
+    catch(e){ throw new Error('这段数据不完整（开头或结尾被截掉了），重新复制一次'); }
+    let txt=await pcGunzip(bytes);
+    let obj;
+    try{ obj=JSON.parse(txt); }
     catch(e){ throw new Error('这段数据不完整（解出来是半截），重新复制一次'); }
+    return pcExpand(obj);
   }
   if(mode==='JS:'){
     let bytes;
     try{ bytes=pcB64(body); }
     catch(e){ throw new Error('这段数据不完整（开头或结尾被截掉了），重新复制一次'); }
-    try{ return JSON.parse(new TextDecoder().decode(bytes)); }
+    try{ return pcExpand(JSON.parse(new TextDecoder().decode(bytes))); }
     catch(e){ throw new Error('这段数据不完整（中间缺了一截），重新复制一次'); }
   }
-  try{ return JSON.parse(s); }   // 也吃老的 .json 文件内容
+  try{ return pcExpand(JSON.parse(s)); }   // 也吃老的 .json 文件内容
   catch(e){}
   // 兜底：没前缀但内容像 base64，按 gzip 魔数猜一下（微信把开头字母吞掉时救命用）
   try{
     const bytes=pcB64(s);
     if(bytes[0]===0x1f && bytes[1]===0x8b){
-      if(typeof DecompressionStream==='function'){
-        const ds=new DecompressionStream('gzip');
-        const w=ds.writable.getWriter();
-        w.write(bytes); w.close();
-        const txt=await new Response(ds.readable).text();
-        return JSON.parse(txt);
-      }
+      const txt=await pcGunzip(bytes);
+      return pcExpand(JSON.parse(txt));
     }
   }catch(e){}
-  throw new Error('这不是刷题数据（应该是 GZ: 或 JS: 开头的一段，或者 .json 文件内容）');
+  throw new Error('这不是刷题数据（应该是 GZ: / PK: / JS: 开头的一段，或者 .json 文件内容）');
 }
 /* 清理 + 解码 base64：去掉微信复制的空格/换行/省略号，补齐 padding */
 function pcB64(str){
@@ -3022,18 +3081,23 @@ function pcB64(str){
   const pad=(4 - clean.length % 4) % 4;
   return b64decBytes(clean + '='.repeat(pad));
 }
-var PC={mode:'out', parts:[], idx:0, got:{}, total:0};
+var PC={mode:'out', parts:[], idx:0, got:{}, total:0, light:1};
 const PC_CHUNK=2600;   // 每段字符数：微信里这个长度复制最稳
-async function exportClip(){
+async function exportClip(light){
   PC.mode='out'; PC.idx=0;
+  PC.light = (light===0) ? 0 : 1;
   const mask=document.getElementById('pcMask');
   document.getElementById('pcTitle').textContent='📋 复制数据';
   document.getElementById('pcOk').style.display='none';
   document.getElementById('pcSel').style.display='';
+  const pm=document.getElementById('pcMode'); if(pm) pm.classList.add('on');
+  const c1=document.getElementById('pcChip1'), c2=document.getElementById('pcChip2');
+  if(c1) c1.className='pc-chip'+(PC.light?' on':'');
+  if(c2) c2.className='pc-chip'+(PC.light?'':' on');
   document.getElementById('pcNote').textContent='正在打包…';
   mask.classList.add('on');
   let txt='';
-  try{ txt=await packText(); }
+  try{ txt=await packText(PC.light); }
   catch(e){ document.getElementById('pcNote').textContent='打包失败：'+(e.message||''); return; }
   // 切段：数据短就直接一整段，长了才分
   if(txt.length <= PC_CHUNK){
@@ -3053,9 +3117,12 @@ async function pcShowPart(i){
   const part=PC.parts[i];
   area.value=part; area.readOnly=true;
   const multi=PC.total>1;
+  const why = PC.light
+    ? '（只带答题记录，不含手写笔迹和批注）'
+    : '（含手写笔迹和批注）';
   document.getElementById('pcTip').textContent = multi
-    ? ('数据有点长，分成了 '+PC.total+' 段。一段一段来：复制这一段发到微信，然后点「下一段 →」，直到 '+PC.total+' 段都发完。另一台设备逐段粘贴，会自动拼起来。')
-    : '下面就是你的全部进度。长按全选 → 复制 → 粘到微信（发给自己或「传输助手」）。到另一台设备打开本页点「粘贴导入」。';
+    ? ('数据'+why+'，分成了 '+PC.total+' 段。段数多就换上面「只要答题记录」，或者干脆用云同步。一段一段来：复制这一段，点「下一段 →」，直到最后一段。')
+    : ('下面就是你的全部进度'+why+'。全选 → 复制 → 到另一台设备打开本页点「粘贴导入」。');
   let copied=false;
   try{ await navigator.clipboard.writeText(part); copied=true; }catch(e){}
   pcSelectAll();
@@ -3073,15 +3140,22 @@ async function pcShowPart(i){
   }
   const kb=Math.max(1,Math.round(part.length/1024));
   const head = multi ? ('第 '+(i+1)+' / '+PC.total+' 段（约 '+kb+' KB）。') : ('约 '+kb+' KB。');
-  note.textContent = head + (copied
-    ? '✅ 已复制，直接去微信粘贴。没粘上就长按上面的框手动全选复制。'
+  let msg = head + (copied
+    ? '✅ 已复制，直接去粘贴。没粘上就长按上面的框手动全选复制。'
     : '内容已全选，长按上面的框 → 复制。');
+  if(PC.total > 15){
+    msg = '⚠️ 段数太多了（'+PC.total+' 段），别硬复制。'
+        + (PC.light ? '你这台设备的浏览器不支持压缩，只能原文传。建议用「☁️ 云同步」，一次搞定。'
+                    : '点上面「只要答题记录」会小很多，实在要带笔迹就用云同步。');
+  }
+  note.textContent = msg;
   if(copied) toast(multi ? ('已复制第 '+(i+1)+' 段') : '已复制 ✅');
 }
 function importClip(){
   PC.mode='in'; PC.got={}; PC.total=0;
   const mask=document.getElementById('pcMask');
   document.getElementById('pcTitle').textContent='📥 粘贴导入';
+  const pm=document.getElementById('pcMode'); if(pm) pm.classList.remove('on');
   document.getElementById('pcTip').textContent=
     '会自动去读剪贴板；读不到就长按下面框手动粘贴。会合并不覆盖——两边各自刷过的记录都会保留。';
   document.getElementById('pcOk').style.display='';
@@ -3182,9 +3256,10 @@ function pcApply(data){
   }
   const n=ghMerge(data);
   save();
+  const noArt = data.light ? '（手写笔迹和批注没带过来）' : '';
   PC.got={}; PC.total=0;
   const el=document.getElementById('fileStatus');
-  if(el) el.textContent='✅ 已从文本导入，合并 '+n+' 条记录';
+  if(el) el.textContent='✅ 已从文本导入，合并 '+n+' 条记录'+noArt;
   toast('导入成功，合并 '+n+' 条 ✅');
   pcClose();
   if(typeof renderSet==='function') renderSet();
