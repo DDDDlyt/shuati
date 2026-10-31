@@ -255,6 +255,13 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
 .hw-mine-b{display:flex;gap:8px;margin-top:7px}
 .hw-pen{color:#ffd60a}
 
+/* ===== v15 令牌显示/复制 ===== */
+.eye-btn{flex:0 0 auto;background:#22303d;color:#9dc4de;border:0;border-radius:9px;
+  padding:0 11px;font-size:15px;line-height:1;height:34px;display:flex;align-items:center}
+.eye-btn:active{background:#2c3d4d}
+.gh-mini{font-size:11.5px;color:#8b93a1;line-height:1.6;margin:7px 0 0}
+.gh-mini b{color:#ffd60a}
+
 /* ===== v14 文本互传 ===== */
 .mt-hint{font-size:12.5px;color:#8b93a1;line-height:1.65;margin:0}
 #pcMask{position:fixed; inset:0; background:rgba(0,0,0,.62); z-index:520; display:none;
@@ -607,7 +614,11 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
     <p>进度和笔迹都存到<b>你自己的 GitHub 私有仓库</b>，平板、手机自动对齐，换设备不用再导来导去。<br>
        第一次用：填令牌 → 点「连接并同步」，仓库不存在会自动创建。</p>
     <div class="set-row"><label>仓库</label><input id="ghRepo" placeholder="留空自动建 用户名/shuati-data"></div>
-    <div class="set-row" style="margin-top:9px"><label>令牌</label><input id="ghToken" type="password" placeholder="ghp_...（勾 repo 权限即可）"></div>
+    <div class="set-row" style="margin-top:9px"><label>令牌</label>
+      <input id="ghToken" type="password" placeholder="ghp_...（勾 repo 权限即可）">
+      <button class="eye-btn" id="ghEye" onclick="ghToggleToken()" title="显示 / 复制令牌">👁</button>
+    </div>
+    <p class="gh-mini" id="ghTokHint"></p>
     <div class="gh-btns">
       <button class="mini-btn blue" onclick="ghConnect()">连接并同步</button>
       <button class="mini-btn" onclick="ghSync()">立即同步</button>
@@ -2854,6 +2865,7 @@ async function ghConnect(){
       }else throw e;
     }
     await ghSync();
+    ghTokHint();
   }catch(e){
     const hint=ghErrHint(e);
     ghStatus('❌ 连接失败：'+(e.message||'')+hint, 'err');
@@ -2900,9 +2912,35 @@ function ghFillSet(){
   const r=document.getElementById('ghRepo'); if(r) r.value=c.repo||'';
   const t=document.getElementById('ghToken'); if(t) t.value=c.token||'';
   const a=document.getElementById('ghAuto'); if(a) a.checked=!!c.auto;
+  ghTokHint();
   if(c.lastAt) ghStatus('上次同步 '+ghTime(c.lastAt)+' · 当前数据 '+ghSize(), 'ok');
   else if(c.token) ghStatus('令牌已填，点「连接并同步」');
   else ghStatus('未连接');
+}
+function ghTokHint(){
+  const el=document.getElementById('ghTokHint'); if(!el) return;
+  const c=ghCfg();
+  el.innerHTML = c.token
+    ? '这台设备已存令牌（<b>'+(c.token.length>10?c.token.slice(0,7)+'…'+c.token.slice(-4):'已填')+'</b>）。换设备时点右边 👁 复制，粘到那台去。'
+    : '还没有令牌？GitHub → 头像 → Settings → Developer settings → Personal access tokens → Tokens (classic) → Generate new token，勾上 <b>repo</b>，生成后复制那串 ghp_… 粘这里。';
+}
+function ghToggleToken(){
+  const t=document.getElementById('ghToken'); if(!t) return;
+  const el=document.getElementById('ghTokHint');
+  const shown = t.type==='text';
+  t.type = shown ? 'password' : 'text';
+  document.getElementById('ghEye').textContent = shown ? '👁' : '🙈';
+  const v=(t.value||'').trim();
+  if(!v){ if(el) el.innerHTML='框里还没有令牌，先粘一个进来。'; return; }
+  // 复制一份，方便发到另一台设备
+  let done=false;
+  try{
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(v).then(function(){}, function(){});
+      done=true;
+    }
+  }catch(e){}
+  if(done) toast('令牌已复制，发到另一台设备粘贴');
 }
 
 /* ---- 文件互传 ---- */
