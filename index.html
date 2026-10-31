@@ -2856,6 +2856,11 @@ setTimeout(function(){
   if(!GUEST && c.auto && c.token && c.repo){ ghSync(true); }
 }, 2500);
 renderHome();
+
+if('serviceWorker' in navigator && location.protocol==='https:'){
+  navigator.serviceWorker.register('./sw.js').catch(function(){});
+}
+
 </script>
 </body>
 </html>
