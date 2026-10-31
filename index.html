@@ -232,6 +232,9 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
 .card-top .card-tag{margin-bottom:0}
 .fav-star{background:none;border:none;color:var(--dim);font-size:21px;padding:0;line-height:1;flex:none}
 .fav-star.on{color:#ffd60a}
+.kd-link{font-size:11px; padding:4px 9px; border-radius:8px; background:#1b2a3a;
+  color:#8ecfff; border:1px solid #2f5570; flex:none;}
+.kd-link:active{background:#23405a;}
 .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
 .stat-cell{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:13px}
 .stat-cell b{display:block;font-size:23px;color:var(--blue);line-height:1.2}
@@ -528,6 +531,44 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
   border:1px solid #35414f; border-radius:11px; padding:8px 14px; font-size:12px;
   color:#b9c2cd; display:none; white-space:nowrap;}
 #inkBar .ink-tip.on{display:block}
+/* ===== v21 章节精讲 ===== */
+#rdBody{padding-bottom:30px;}
+.rd-subj{display:flex; gap:8px; overflow-x:auto; padding:2px 0 13px;}
+.rd-subj button{flex:0 0 auto; padding:8px 14px; border-radius:11px; background:var(--panel);
+  border:1px solid #2b3441; color:var(--sub); font-size:13px; white-space:nowrap;}
+.rd-subj button.on{background:#0f2438; border-color:#33608f; color:#7cc4ff; font-weight:700;}
+.rd-ch{display:flex; align-items:center; gap:11px; background:var(--panel); border-radius:14px;
+  padding:13px 14px; margin-bottom:9px; cursor:pointer;}
+.rd-ch:active{background:var(--panel2);}
+.rd-ch .n{width:27px; height:27px; border-radius:9px; background:#222a36; color:var(--sub);
+  font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+.rd-ch .t{flex:1; min-width:0;}
+.rd-ch .t b{display:block; font-size:14.5px;}
+.rd-ch .t span{font-size:11px; color:var(--dim);}
+.rd-ch .go{color:var(--dim); font-size:13px; flex-shrink:0;}
+.rd-ch.read .n{background:#12331f; color:#4ade80;}
+.rd-hero{background:linear-gradient(160deg,#152233,#171a20); border:1px solid #26405c;
+  border-radius:16px; padding:16px; margin-bottom:14px;}
+.rd-hero h2{margin:0 0 6px; font-size:19px;}
+.rd-hero .m{font-size:11.5px; color:var(--sub);}
+.rd-intro{margin-top:12px; padding-top:12px; border-top:1px solid #26313f;
+  font-size:13.5px; line-height:1.9; color:#c9d6e3;}
+.rd-k{background:var(--panel); border-radius:16px; padding:15px 16px; margin-bottom:12px;}
+.rd-k h3{margin:0 0 10px; font-size:15.5px; display:flex; align-items:baseline; gap:8px; flex-wrap:wrap;}
+.rd-k h3 i{font-style:normal; font-size:11px; color:var(--dim); font-weight:400;}
+.rd-k .body{font-size:14px; line-height:1.9; color:#dfe3e8;}
+.rd-k .body b{color:#fff; background:rgba(10,132,255,.16); padding:0 3px; border-radius:3px;}
+.rd-k .body .tm{background:rgba(142,207,255,.10); border-radius:3px;}
+.rd-keys{display:flex; flex-wrap:wrap; gap:6px; margin-top:12px;}
+.rd-keys span{font-size:11px; padding:3px 8px; border-radius:7px; background:#1d2430; color:#8ba3ba;}
+.rd-trap{margin-top:11px; padding:10px 12px; border-radius:11px; background:#251a1c; border:1px solid #45262a;}
+.rd-trap div{font-size:12.5px; line-height:1.72; color:#ffb3ac;}
+.rd-trap div+div{margin-top:5px;}
+.rd-hook{margin-top:10px; padding:10px 12px; border-radius:11px; background:#241f12;
+  border:1px solid #4b3d1d; font-size:12.5px; line-height:1.72; color:#ffd98a;}
+.rd-foot{display:flex; gap:9px; margin-top:6px;}
+.rd-foot .big-btn{flex:1; margin-top:0;}
+@media (max-width:400px){ .rd-k{padding:13px 14px;} }
 </style>
 </head>
 <body>
@@ -735,6 +776,15 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
     <div class="st-title"><b>⚡ 记忆钩子</b><span id="hookSub">—</span></div>
   </div>
   <div id="hookBody"></div>
+</div>
+
+<!-- ============ v21 章节精讲 ============ -->
+<div id="view-read" class="view">
+  <div class="study-top">
+    <button class="icon-btn" onclick="rdBack()">←</button>
+    <div class="st-title"><b id="rdTitle">📖 章节精讲</b><span id="rdSub">—</span></div>
+  </div>
+  <div id="rdBody"></div>
 </div>
 
 <!-- v12-ink 批注工具条 -->
@@ -1013,7 +1063,7 @@ function go(v){
   document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
   const el=document.getElementById('view-'+v); if(el) el.classList.add('active');
   document.getElementById('navHome').classList.toggle('on', v==='home');
-  const nk=document.getElementById('navKnow'); if(nk) nk.classList.toggle('on', v==='know'||v==='kd'||v==='hook'||v==='term');
+  const nk=document.getElementById('navKnow'); if(nk) nk.classList.toggle('on', v==='know'||v==='kd'||v==='hook'||v==='term'||v==='read');
   document.getElementById('navStudy').classList.toggle('on', v==='study');
   const ns=document.getElementById('navStat'); if(ns) ns.classList.toggle('on', v==='stat');
   document.getElementById('navSet').classList.toggle('on', v==='set');
@@ -1024,6 +1074,7 @@ function go(v){
   if(v==='hook') renderHook();
   if(v==='search') doSearch();
   if(v==='term') renderTerm();
+  if(v==='read'){ READ.ch=null; READ.from=null; renderRead(); }   // 从导航进来总是先看章节目录
   if(v!=='kd' && v!=='study'){ inkDetach(); }
   window.scrollTo(0,0);
 }
@@ -1207,8 +1258,10 @@ function renderCard(){
   const favOn = cst(c.id).fav ? 1 : 0;
   let h='<div class="card-top"><div class="card-tag'+(isExam?' exam':'')+'">'+
     (TYPE_LABEL[c.t]||c.t)+(c.c?' · '+esc(c.c):'')+'</div>'+
+    '<div style="display:flex;align-items:center;gap:8px">'+
+    (Array.isArray(c.k)&&c.k.length?'<button class="kd-link" onclick="event.stopPropagation();readForKid(\''+c.k[0]+'\')">📖 讲解</button>':'')+
     '<button class="fav-star'+(favOn?' on':'')+'" onclick="event.stopPropagation();toggleFav()">'+
-    (favOn?'★':'☆')+'</button></div>';
+    (favOn?'★':'☆')+'</button></div></div>';
   h+='<div class="card-q">'+termify(c.q)+'</div>';
 
   // 填空题干显示下划线（已在 q 里包含）
@@ -1425,8 +1478,10 @@ function renderFillCard(c){
   const favOn = cst(c.id).fav ? 1 : 0;
   let h='<div class="card-top"><div class="card-tag'+(isExam?' exam':'')+'">'+
     (TYPE_LABEL[c.t]||c.t)+(c.c?' · '+esc(c.c):'')+'</div>'+
+    '<div style="display:flex;align-items:center;gap:8px">'+
+    (Array.isArray(c.k)&&c.k.length?'<button class="kd-link" onclick="event.stopPropagation();readForKid(\''+c.k[0]+'\')">📖 讲解</button>':'')+
     '<button class="fav-star'+(favOn?' on':'')+'" onclick="event.stopPropagation();toggleFav()">'+
-    (favOn?'★':'☆')+'</button></div>';
+    (favOn?'★':'☆')+'</button></div></div>';
   h+='<div class="card-q fill-q">';
   for(let i=0;i<segs.length;i++){
     h+=termify(segs[i]);
@@ -1910,6 +1965,189 @@ function weakList(n){
   return arr.slice(0, n||5);
 }
 
+/* ==================== v21：按章节精讲（预习用） ==================== */
+var CH_INTRO = {
+  p1: '这章是生化的地基。先把 20 种氨基酸按侧链分成四类，再往上搭三层：一级结构（肽键）→ 二级（α 螺旋、β 折叠）→ 三级（折叠与稳定力）→ 四级（亚基排布）。考试反复考的就两件事：pI 怎么算、分离纯化方法怎么选——盐析 / 透析 / 凝胶过滤 / 电泳，各分离的是「溶解度、小分子、分子大小、电荷」中的哪一个。',
+  p2: '从「酶为什么快、为什么专一」讲起，核心是一条米氏方程和三个常数：Km、Vmax、kcat。四种抑制类型是必考表，判断依据永远是 Km 和 Vmax 变没变——记住这个，表就不用背。最后是调节：别构、共价修饰、酶原激活，本质都是「改构象或改共价键来开关活性」。',
+  p3: '一条主线：葡萄糖怎么变成 CO₂ 和 H₂O，能量在哪几步产生。EMP 在胞质、TCA 在线粒体基质、氧化磷酸化在内膜——三个位置经常混。会算 ATP 才算真会，注意教材口径（旧 36/38，新 30/32），考试按你们教材走。糖异生基本是 EMP 的逆向绕行，重点记那几个「绕不过去的坎」。',
+  p4: '这章只挂了一个知识点，但它是脂肪动员的全部主线：活化 → 转运 → 脱氢 → 水化 → 再脱氢 → 硫解，每轮砍两个碳，产 1 FADH₂ + 1 NADH + 1 乙酰 CoA。软脂酸 7 轮怎么算出 106 个 ATP 是经典题。酮体在肝里生成、肝外用——这个「肝生酮、肝不用酮」是常考点。',
+  p5: '从碱基配对讲到中心法则的三条流水线：复制（半保留、双向、冈崎片段）、转录（模板链和编码链千万别搞反）、翻译（核糖体三步）。这章名词密度最高，建议自己列一张三列表：谁做、做什么、需要什么，比反复读有效。',
+  g1: '遗传学的算术章。分离定律和自由组合定律的本质，是减数分裂时同源染色体与非同源染色体的行为。9:3:3:1 的各种变形（9:7、13:3、9:6:1、15:1）全是从这里推出来的——记住「哪两个表现型被合并了」，比背比例快得多。',
+  g2: '从「基因在染色体上排队」开始：连锁互换、三点测交算图距和双交换、干涉系数。染色体层面是结构变异（缺失 / 重复 / 倒位 / 易位）和数目变异（整倍体 / 非整倍体），每种变异的减数分裂行为不同，画一次联会图就明白了。最后是细胞质遗传——母性影响和母系遗传不是一回事。',
+  g3: '两块内容，都是「统计味」的。数量性状看遗传率、看正态分布、看加性方差；群体遗传看哈迪-温伯格平衡，会从一代基因型频率反推等位基因频率。突变部分记类型、诱变剂、修复途径四条线，别混「突变」和「修复」。',
+  g4: '细菌和噬菌体是遗传学的实验工具：接合、转化、转导三种水平转移，各用什么证据证明、影印法怎么筛突变体。分子部分把复制转录翻译再走一遍，加上 RNAi 和操纵子——乳糖操纵子的正负调控是必考图，要能默画。',
+  g5: '这章是「认技术」：PCR、电泳、Southern / Northern / Western、测序、基因敲除，各自测的是 DNA、RNA 还是蛋白。发育部分讲果蝇体轴基因的层级（母体效应 → 分节 → 体节极性 → 同源异型），以及细胞凋亡在发育中的角色。',
+  e1: 'CET-6 词汇按主题网络记，比按字母表背有效得多。每张卡是一个词根或主题簇，先记「这一簇共同的意思」，再记拼写。目标 550 分的话，阅读里的高频动词和抽象名词优先，生僻名词可以放。',
+  e2: '听力考的不是听懂每个词，是预判。看选项猜场景（校园 / 职场 / 科研 / 消费），抓信号词（however、actually、the point is），答案通常在转折后面。新闻听力抓开头五秒的主语加动词。',
+  e3: '三段框架：引入（现象或争议）→ 主体（两个理由 + 例证）→ 结尾（重申 + 建议）。分数差距在句子上：把 very important 换成 carries substantial weight，把简单句改成带从句的复合句，但要保证不错——错一句的代价大于炫一句的收益。',
+  e4: '中国文化与社会话题是高频。难点在四字词和没有英文对应的概念（比如「天人合一」），套路是先拆成「谁 - 做什么 - 怎么样」的简单句，再合并。朝代、节气、非遗这类专有名词必须提前背，考场上现想来不及。'
+};
+
+var READ = {subj:null, ch:null};
+
+/* 在含 HTML 标签的正文里高亮术语：只处理文本片段，不动标签 */
+function termifyHtml(html){
+  return String(html||'').split(/(<[^>]+>)/).map(function(seg){
+    if(seg.charAt(0)==='<') return seg;
+    return termify(seg);
+  }).join('');
+}
+function rdEnsure(){ if(!S.read) S.read={}; }
+function rdKnow(chid){
+  var out=null;
+  (KNOW.subjects||[]).forEach(function(sj){
+    (sj.chs||[]).forEach(function(ch){ if(ch.id===chid) out={sj:sj, ch:ch, pos:sj.chs.indexOf(ch)+1}; });
+  });
+  return out;
+}
+function chCards(ch){
+  var seen={}, arr=[];
+  (ch.ks||[]).forEach(function(k){
+    knowCards(k.id).forEach(function(c){ if(seen[c.id]) return; seen[c.id]=1; arr.push(c); });
+  });
+  return arr;
+}
+function rdSubj(id){ READ.subj=id; READ.ch=null; renderRead(); }
+function rdBack(){
+  if(READ.from==='study'){ READ.from=null; go('study'); return; }   // 从刷题跳来的，原路回去
+  if(READ.ch){ READ.ch=null; renderRead(); }
+  else { go('know'); }
+}
+function renderRead(){
+  rdEnsure();
+  if(!READ.subj) READ.subj=(KNOW.subjects[0]||{}).id;
+  if(READ.ch){ rdChapter(READ.ch); return; }
+
+  var sj=null;
+  (KNOW.subjects||[]).forEach(function(x){ if(x.id===READ.subj) sj=x; });
+  if(!sj) sj=KNOW.subjects[0];
+
+  document.getElementById('rdTitle').textContent='📖 章节精讲';
+  var totalCh=0, totalK=0;
+  (KNOW.subjects||[]).forEach(function(x){ totalCh+=(x.chs||[]).length; totalK+=(x.chs||[]).reduce(function(a,c){return a+c.ks.length;},0); });
+  document.getElementById('rdSub').textContent=totalCh+' 章 · '+totalK+' 个知识点';
+
+  var h='<div class="rd-subj">';
+  (KNOW.subjects||[]).forEach(function(x){
+    h+='<button class="'+(x.id===sj.id?'on':'')+'" onclick="rdSubj(\''+x.id+'\')">'+x.ic+' '+esc(x.n)+'</button>';
+  });
+  h+='</div>';
+  h+='<div class="kbd-tip" style="margin:0 0 12px">先读一遍再刷题。每章开头有一段「这章在讲什么」，正文是讲透版，底下配易错和口诀。</div>';
+
+  /* 上次读到哪 */
+  var lastId=null, lastTs=0;
+  for(var kk in S.read){ if(S.read[kk]>lastTs){ lastTs=S.read[kk]; lastId=kk; } }
+  if(lastId){
+    var lo=rdKnow(lastId);
+    if(lo){
+      h+='<div class="rd-ch read" onclick="openCh(\''+lastId+'\',1)" style="border:1px solid #26405c">'+
+        '<div class="n">✓</div><div class="t"><b>接着读：'+esc(lo.ch.n)+'</b>'+
+        '<span>'+esc(lo.sj.n)+' · 第 '+lo.pos+' 章 · 上次读到</span></div>'+
+        '<div class="go">继续 →</div></div>';
+    }
+  }
+
+  (sj.chs||[]).forEach(function(ch,i){
+    var cs=chCards(ch);
+    var done=S.read[ch.id];
+    h+='<div class="rd-ch'+(done?' read':'')+'" onclick="openCh(\''+ch.id+'\')">'+
+      '<div class="n">'+(done?'✓':(i+1))+'</div>'+
+      '<div class="t"><b>'+esc(ch.n)+'</b><span>'+ch.ks.length+' 个知识点 · '+cs.length+' 题</span></div>'+
+      '<div class="go">读 →</div></div>';
+  });
+
+  document.getElementById('rdBody').innerHTML=h;
+  window.scrollTo(0,0);
+}
+function openCh(chid, resume){ READ.ch=chid; READ.resume=!!resume; renderRead(); }
+function rdChapter(chid){
+  rdEnsure();
+  var o=rdKnow(chid);
+  if(!o){ READ.ch=null; renderRead(); return; }
+  var sj=o.sj, ch=o.ch, pos=o.pos;
+  var cards=chCards(ch);
+
+  document.getElementById('rdTitle').textContent=ch.n;
+  document.getElementById('rdSub').textContent=sj.n+' · 第 '+pos+' 章';
+
+  var h='<div class="rd-hero"><h2>'+esc(ch.n)+'</h2>'+
+    '<div class="m">'+sj.ic+' '+esc(sj.n)+' · 第 '+pos+'/'+sj.chs.length+' 章 · '+
+      ch.ks.length+' 个知识点 · '+cards.length+' 题</div>'+
+    (CH_INTRO[chid] ? '<div class="rd-intro">'+esc(CH_INTRO[chid])+'</div>' : '')+
+    '</div>';
+
+  (ch.ks||[]).forEach(function(k,i){
+    var n=knowCards(k.id).length;
+    h+='<div class="rd-k" id="rdk-'+k.id+'"><h3>'+(i+1)+'. '+esc(k.n)+'<i>'+n+' 题</i></h3>'+
+      '<div class="body">'+termifyHtml((k.core||'').replace(/\n/g,'<br>'))+'</div>';
+    if(k.keys && k.keys.length){
+      h+='<div class="rd-keys">'+k.keys.slice(0,10).map(function(t){ return '<span>'+esc(t)+'</span>'; }).join('')+'</div>';
+    }
+    if(k.traps && k.traps.length){
+      h+='<div class="rd-trap">'+k.traps.map(function(t){ return '<div>⚠️ '+esc(t)+'</div>'; }).join('')+'</div>';
+    }
+    if(k.hook){ h+='<div class="rd-hook">🧠 '+esc(k.hook)+'</div>'; }
+    h+='<div class="rd-foot" style="margin-top:11px"><button class="big-btn ghost" style="font-size:13px;padding:11px" onclick="startKnow(\''+k.id+'\')">刷这 '+n+' 题</button></div>';
+    h+='</div>';
+  });
+
+  h+='<div class="rd-foot"><button class="big-btn" onclick="startChapter(\''+chid+'\')">读完，刷本章 '+cards.length+' 题</button></div>';
+  h+='<div class="rd-foot" style="margin-top:9px">'+
+     (pos>1 ? '<button class="big-btn ghost" onclick="openCh(\''+sj.chs[pos-2].id+'\')">← 上一章</button>' : '')+
+     (pos<sj.chs.length ? '<button class="big-btn ghost" onclick="openCh(\''+sj.chs[pos].id+'\')">下一章 →</button>' : '')+
+     '</div>';
+
+  document.getElementById('rdBody').innerHTML=h;
+  S.read[chid]=Date.now(); save();
+  var backY=0;
+  if(READ.resume){ backY=(S.rpos && S.rpos[chid])||0; READ.resume=false; }
+  window.scrollTo(0, backY);
+}
+function startChapter(chid){
+  var o=rdKnow(chid); if(!o) return;
+  var all=chCards(o.ch);
+  if(!all.length){ toast('这一章还没挂题'); return; }
+  var q=all.slice().sort(function(a,b){
+    var sa=cst(a.id), sb=cst(b.id);
+    var ra=(sa.st<0?0:sa.st===0?1:2), rb=(sb.st<0?0:sb.st===0?1:2);
+    return ra-rb;
+  });
+  var take=q.slice(0,40);
+  startSession(take, '精讲 · '+o.ch.n+'（'+take.length+'/'+q.length+' 题）', 'know');
+}
+/* 刷题时点「📖 讲解」：跳到该知识点所在章节，并滚到它那一段 */
+function readForKid(kid){
+  var found=null;
+  (KNOW.subjects||[]).forEach(function(sj){
+    (sj.chs||[]).forEach(function(ch){
+      (ch.ks||[]).forEach(function(k){ if(k.id===kid) found={sj:sj, ch:ch}; });
+    });
+  });
+  if(!found){ toast('这个知识点还没写讲解'); return; }
+  READ.subj=found.sj.id; READ.ch=found.ch.id; READ.resume=false; READ.from='study';
+  document.querySelectorAll('.view').forEach(function(x){ x.classList.remove('active'); });
+  var v=document.getElementById('view-read'); if(v) v.classList.add('active');
+  var nk=document.getElementById('navKnow'); if(nk) nk.classList.add('on');
+  var ns=document.getElementById('navStudy'); if(ns) ns.classList.remove('on');
+  renderRead();
+  setTimeout(function(){
+    var el=document.getElementById('rdk-'+kid);
+    if(el){ el.scrollIntoView({block:'start'}); window.scrollBy(0,-8); }
+  }, 90);
+}
+/* 记住读到哪一行，下次「接着读」能落回原处 */var rdScrollT=null;
+window.addEventListener('scroll', function(){
+  if(!READ.ch) return;
+  var v=document.getElementById('view-read');
+  if(!v || !v.classList.contains('active')) return;
+  if(rdScrollT) clearTimeout(rdScrollT);
+  rdScrollT=setTimeout(function(){
+    if(!S.rpos) S.rpos={};
+    S.rpos[READ.ch]=Math.round(window.scrollY);
+    save();
+  }, 700);
+}, {passive:true});
+
 /* v20：知识点专攻排序 —— 不是只看错题，还要看「到期」和「学了没掌握」 */
 function drillList(){
   var arr = [];
@@ -1974,6 +2212,7 @@ function renderKnow(){
     '<div class="ko-legend"><span><em style="background:var(--ok)"></em>已掌握 '+mas+'</span>'+
     '<span><em style="background:var(--warn)"></em>学过未掌握 '+(tot-mas-wrongCard)+'</span>'+
     '<span><em style="background:var(--bad)"></em>错题 '+wrongCard+'</span></div>'+
+    '<button class="ko-hook-btn" style="background:linear-gradient(135deg,#17293a,#141b23); border-color:#2f5570; color:#9fd6ff; font-size:14px" onclick="go(\'read\')">📖 按章节精讲 · 14 章通读，预习/复习都用它</button>'+
     '<button class="ko-hook-btn" onclick="go(\'hook\')">⚡ 打开钩子墙 · '+hookCount()+' 条口诀，覆盖 '+hookCover()+' 张题</button>'+
     '<button class="ko-hook-btn" style="background:linear-gradient(135deg,#16232e,#151a20); border-color:#2b4152; color:#8ecfff" onclick="go(\'term\')">📖 打开术语表 · '+TERM_KEYS.length+' 条，看不懂题就先查词</button></div>';
 
@@ -3104,7 +3343,7 @@ function ghPack(){
     lastDate:S.lastDate||null, lastCheckin:S.lastCheckin||null,
     goal:S.goal||{new:10,rev:20}, todayNew:S.todayNew||0, todayRev:S.todayRev||0,
     hw:S.hw||{}, hwOpt:S.hwOpt||{onlyPen:0},
-    ink:S.ink||{}
+    ink:S.ink||{}, read:S.read||{}, rpos:S.rpos||{}
   };
 }
 function ghMerge(remote){
@@ -3150,8 +3389,20 @@ function ghMerge(remote){
     if(!a){ S.hw[id]=b; changed++; }
     else if((b.at||0)>(a.at||0)){ S.hw[id]=b; changed++; }
   }
+  /* v21：阅读进度也合并（只在新，不覆盖本地更新的） */
+  let readCh=0;
+  const rr=remote.read||{};
+  for(const k in rr){
+    if(!S.read) S.read={};
+    if(!S.read[k] || rr[k]>S.read[k]){ S.read[k]=rr[k]; readCh++; }
+  }
+  const rp=remote.rpos||{};
+  for(const k in rp){
+    if(!S.rpos) S.rpos={};
+    if(typeof rp[k]==='number' && S.rpos[k]!==rp[k]){ S.rpos[k]=rp[k]; }
+  }
   GH.suppress=false;
-  if(changed){
+  if(changed || readCh){
     save();
     try{ hwRebuildThumbs(); }catch(e){}
   }
