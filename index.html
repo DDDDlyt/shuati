@@ -2937,30 +2937,59 @@ async function packText(){
 async function unpackText(s){
   s=String(s||'').trim();
   if(!s) throw new Error('内容为空');
-  if(s.indexOf('GZ:')===0){
-    if(typeof DecompressionStream!=='function') throw new Error('这个浏览器不支持解压，换一个设备导入');
-    const bytes=b64decBytes(s.slice(3));
-    const ds=new DecompressionStream('gzip');
-    const w=ds.writable.getWriter();
-    w.write(bytes); w.close();
-    const txt=await new Response(ds.readable).text();
-    return JSON.parse(txt);
-  }
-  if(s.indexOf('JS:')===0){
-    const txt=new TextDecoder().decode(b64decBytes(s.slice(3)));
+  const mode=s.slice(0,3), body=s.slice(3);
+  if(mode==='GZ:'){
+    if(typeof DecompressionStream!=='function') throw new Error('这个浏览器不支持解压，换个设备导入');
+    let bytes;
+    try{ bytes=pcB64(body); }
+    catch(e){ throw new Error('这段数据不完整（开头或结尾被截掉了），重新复制一次'); }
+    let txt;
+    try{
+      const ds=new DecompressionStream('gzip');
+      const w=ds.writable.getWriter();
+      w.write(bytes); w.close();
+      txt=await new Response(ds.readable).text();
+    }catch(e){ throw new Error('这段数据不完整（中间缺了一截），重新复制一次'); }
     try{ return JSON.parse(txt); }
-    catch(e){ throw new Error('这段文本解不开，可能复制时缺了一半'); }
+    catch(e){ throw new Error('这段数据不完整（解出来是半截），重新复制一次'); }
+  }
+  if(mode==='JS:'){
+    let bytes;
+    try{ bytes=pcB64(body); }
+    catch(e){ throw new Error('这段数据不完整（开头或结尾被截掉了），重新复制一次'); }
+    try{ return JSON.parse(new TextDecoder().decode(bytes)); }
+    catch(e){ throw new Error('这段数据不完整（中间缺了一截），重新复制一次'); }
   }
   try{ return JSON.parse(s); }   // 也吃老的 .json 文件内容
-  catch(e){ throw new Error('这不是刷题数据（应该是 GZ: 或 JS: 开头的一段，或者 .json 文件内容）'); }
+  catch(e){}
+  // 兜底：没前缀但内容像 base64，按 gzip 魔数猜一下（微信把开头字母吞掉时救命用）
+  try{
+    const bytes=pcB64(s);
+    if(bytes[0]===0x1f && bytes[1]===0x8b){
+      if(typeof DecompressionStream==='function'){
+        const ds=new DecompressionStream('gzip');
+        const w=ds.writable.getWriter();
+        w.write(bytes); w.close();
+        const txt=await new Response(ds.readable).text();
+        return JSON.parse(txt);
+      }
+    }
+  }catch(e){}
+  throw new Error('这不是刷题数据（应该是 GZ: 或 JS: 开头的一段，或者 .json 文件内容）');
 }
-var PC={mode:'out'};
+/* 清理 + 解码 base64：去掉微信复制的空格/换行/省略号，补齐 padding */
+function pcB64(str){
+  const clean=String(str||'').replace(/[^A-Za-z0-9+/=]/g,'').replace(/=+$/,'');
+  if(!clean) throw new Error('empty');
+  const pad=(4 - clean.length % 4) % 4;
+  return b64decBytes(clean + '='.repeat(pad));
+}
+var PC={mode:'out', parts:[], idx:0, got:{}, total:0};
+const PC_CHUNK=2600;   // 每段字符数：微信里这个长度复制最稳
 async function exportClip(){
-  PC.mode='out';
+  PC.mode='out'; PC.idx=0;
   const mask=document.getElementById('pcMask');
   document.getElementById('pcTitle').textContent='📋 复制数据';
-  document.getElementById('pcTip').textContent=
-    '下面就是你的全部进度。长按全选 → 复制 → 粘到微信（可以发给自己或「文件传输助手」）。到另一台设备打开本页，点「粘贴导入」贴回去。';
   document.getElementById('pcOk').style.display='none';
   document.getElementById('pcSel').style.display='';
   document.getElementById('pcNote').textContent='正在打包…';
@@ -2968,35 +2997,58 @@ async function exportClip(){
   let txt='';
   try{ txt=await packText(); }
   catch(e){ document.getElementById('pcNote').textContent='打包失败：'+(e.message||''); return; }
-  const area=document.getElementById('pcArea');
-  area.value=txt;
-  area.readOnly=true;
-  const kb=Math.max(1,Math.round(txt.length/1024));
-  // 优先直接写剪贴板（微信里可能被拦，所以下面还有手动复制这条路）
-  let copied=false;
-  try{
-    await navigator.clipboard.writeText(txt);
-    copied=true;
-  }catch(e){}
-  pcSelectAll();
-  let msg = copied
-    ? '✅ 已复制到剪贴板（'+kb+' KB），直接去微信粘贴就行。若没粘上，就长按上面的框手动全选复制。'
-    : '内容已全选，长按上面的框 → 复制（'+kb+' KB）。';
-  if(txt.length > 120000){
-    msg += '　⚠️ 数据比较大，粘贴可能有点慢。要是卡得难受，改用上面的「云同步」：两台设备各填一次令牌就行。';
+  // 切段：数据短就直接一整段，长了才分
+  if(txt.length <= PC_CHUNK){
+    PC.parts=[txt];
+  }else{
+    const n=Math.ceil(txt.length/PC_CHUNK);
+    PC.parts=[];
+    for(let i=0;i<n;i++) PC.parts.push('P'+(i+1)+'/'+n+'|'+txt.slice(i*PC_CHUNK,(i+1)*PC_CHUNK));
   }
-  document.getElementById('pcNote').textContent=msg;
-  if(copied) toast('已复制 ✅');
+  PC.total=PC.parts.length;
+  await pcShowPart(0);
+}
+async function pcShowPart(i){
+  PC.idx=i;
+  const area=document.getElementById('pcArea');
+  const note=document.getElementById('pcNote');
+  const part=PC.parts[i];
+  area.value=part; area.readOnly=true;
+  const multi=PC.total>1;
+  document.getElementById('pcTip').textContent = multi
+    ? ('数据有点长，分成了 '+PC.total+' 段。一段一段来：复制这一段发到微信，然后点「下一段 →」，直到 '+PC.total+' 段都发完。另一台设备逐段粘贴，会自动拼起来。')
+    : '下面就是你的全部进度。长按全选 → 复制 → 粘到微信（发给自己或「传输助手」）。到另一台设备打开本页点「粘贴导入」。';
+  let copied=false;
+  try{ await navigator.clipboard.writeText(part); copied=true; }catch(e){}
+  pcSelectAll();
+  // 按钮：多段时右侧变成「下一段」
+  const sel=document.getElementById('pcSel');
+  if(multi && i<PC.total-1){
+    sel.textContent='下一段 →';
+    sel.onclick=function(){ pcShowPart(PC.idx+1); };
+  }else if(multi){
+    sel.textContent='已到末段';
+    sel.onclick=function(){ toast('全部 '+PC.total+' 段都看过了'); };
+  }else{
+    sel.textContent='全选';
+    sel.onclick=pcSelectAll;
+  }
+  const kb=Math.max(1,Math.round(part.length/1024));
+  const head = multi ? ('第 '+(i+1)+' / '+PC.total+' 段（约 '+kb+' KB）。') : ('约 '+kb+' KB。');
+  note.textContent = head + (copied
+    ? '✅ 已复制，直接去微信粘贴。没粘上就长按上面的框手动全选复制。'
+    : '内容已全选，长按上面的框 → 复制。');
+  if(copied) toast(multi ? ('已复制第 '+(i+1)+' 段') : '已复制 ✅');
 }
 function importClip(){
-  PC.mode='in';
+  PC.mode='in'; PC.got={}; PC.total=0;
   const mask=document.getElementById('pcMask');
   document.getElementById('pcTitle').textContent='📥 粘贴导入';
   document.getElementById('pcTip').textContent=
-    '把另一台设备复制的那段文本粘到下面，点「导入」。会合并不覆盖——两边各自刷过的记录都会保留。';
+    '把另一台设备复制的文本粘到下面，点「导入」。会合并不覆盖——两边各自刷过的记录都会保留。';
   document.getElementById('pcOk').style.display='';
   document.getElementById('pcSel').style.display='none';
-  document.getElementById('pcNote').textContent='也可以粘老的 .json 文件内容，一样能认。';
+  document.getElementById('pcNote').textContent='分几段发的就一段一段粘，粘完一段点「导入」，会自动接着等下一段。';
   const area=document.getElementById('pcArea');
   area.value=''; area.readOnly=false;
   mask.classList.add('on');
@@ -3007,32 +3059,81 @@ function pcSelectAll(){
   try{ area.focus(); area.setSelectionRange(0, area.value.length); }catch(e){}
   try{ area.select(); }catch(e){}
 }
+/* 解析一段：返回 {i,n,body} 或 {whole:文本} */
+function pcParsePart(txt){
+  const m=/^\s*P(\d+)\s*\/\s*(\d+)\s*\|/.exec(txt);
+  if(m){
+    const i=parseInt(m[1],10), n=parseInt(m[2],10);
+    const body=txt.slice(m[0].length);
+    return {i:i, n:n, body:body};
+  }
+  return {whole:txt};
+}
 async function pcConfirm(){
   if(PC.mode!=='in') return;
   const area=document.getElementById('pcArea');
   const note=document.getElementById('pcNote');
-  const txt=area.value;
-  if(!String(txt||'').trim()){ note.textContent='框里是空的，先把文本粘进来。'; return; }
+  const raw=area.value;
+  if(!String(raw||'').trim()){ note.textContent='框里是空的，先把文本粘进来。'; return; }
+  const p=pcParsePart(raw);
+  // 分段：先攒起来
+  if(p.i){
+    if(PC.total && p.n!==PC.total){ PC.got={}; }   // 换了另一批，重来
+    PC.total=p.n;
+    PC.got[p.i]=p.body.trim();
+    const have=Object.keys(PC.got).length;
+    if(have<PC.total){
+      const miss=[];
+      for(let k=1;k<=PC.total;k++) if(!PC.got[k]) miss.push(k);
+      note.textContent='✅ 已收到第 '+p.i+' 段（'+have+'/'+PC.total+'）。还差第 '+miss.join('、')+' 段，继续粘下一段。';
+      area.value='';
+      setTimeout(function(){ try{ area.focus(); }catch(e){} }, 120);
+      return;
+    }
+    // 集齐，拼起来解
+    note.textContent='已收齐 '+PC.total+' 段，正在合并…';
+    let full='';
+    for(let k=1;k<=PC.total;k++) full+=PC.got[k];
+    try{
+      const data=await unpackText(full);
+      return pcApply(data);
+    }catch(e){
+      PC.got={}; PC.total=0;
+      note.textContent='❌ 拼起来解不开：'+(e.message||'')+'。可能哪一段没复制全，重新来一遍。';
+      return;
+    }
+  }
+  // 一次粘完整段
   note.textContent='正在导入…';
   try{
-    const data=await unpackText(txt);
-    if(!data || typeof data!=='object' || (!data.cards && !data.daily && !data.hw && !data.ink))
-      throw new Error('这段内容里没有可识别的进度');
-    const n=ghMerge(data);
-    save();
-    const el=document.getElementById('fileStatus');
-    if(el) el.textContent='✅ 已从文本导入，合并 '+n+' 条记录';
-    toast('导入成功，合并 '+n+' 条 ✅');
-    pcClose();
-    renderSet && renderSet();
+    const data=await unpackText(p.whole);
+    return pcApply(data);
   }catch(e){
-    note.textContent='❌ 导入失败：'+(e.message||'内容格式不对')+'，检查有没有复制完整。';
+    note.textContent='❌ 导入失败：'+(e.message||'内容格式不对');
   }
+}
+function pcApply(data){
+  if(!data || typeof data!=='object' || (!data.cards && !data.daily && !data.hw && !data.ink)){
+    document.getElementById('pcNote').textContent='❌ 这段内容里没有可识别的进度。';
+    return;
+  }
+  const n=ghMerge(data);
+  save();
+  PC.got={}; PC.total=0;
+  const el=document.getElementById('fileStatus');
+  if(el) el.textContent='✅ 已从文本导入，合并 '+n+' 条记录';
+  toast('导入成功，合并 '+n+' 条 ✅');
+  pcClose();
+  if(typeof renderSet==='function') renderSet();
+  if(typeof renderHome==='function') renderHome();
 }
 function pcClose(){
   document.getElementById('pcMask').classList.remove('on');
   const area=document.getElementById('pcArea');
   area.value=''; area.readOnly=false;
+  PC.got={}; PC.total=0;
+  const sel=document.getElementById('pcSel');
+  sel.textContent='全选'; sel.onclick=pcSelectAll;
 }
 function exportFile(){
   try{
