@@ -819,7 +819,7 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
     <p>注册一个账号，手机登一次、平板登一次，之后打开页面就自动对齐——<b>不用再复制令牌</b>，也不会三个月后突然失效。</p>
 
     <div id="accAnon">
-      <p class="acc-nosrv" id="accNoSrv">第一次用：点最下面「⚙️ 服务器设置」填两个值（一次性，约 5 分钟），之后每台设备只要输邮箱密码。</p>
+      <p class="acc-nosrv" id="accNoSrv">服务器已经内置好了，什么都不用配置——直接注册一个账号（邮箱 + 密码），手机、平板各登一次就能自动对齐。</p>
       <p class="acc-nosrv" id="accMig" style="display:none; background:rgba(95,176,255,.1); color:#9fd3ff">💡 检测到你在用旧的 GitHub 令牌同步。登录账号后本机数据会自动一起带上去，之后就彻底不用管令牌了。</p>
       <div class="set-row"><label>邮箱</label>
         <input id="clEmail" type="email" inputmode="email" autocomplete="username" placeholder="you@example.com">
@@ -831,7 +831,7 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
         <button class="mini-btn blue" onclick="cloudLogin()">登录</button>
         <button class="mini-btn" onclick="cloudSignup()">注册新账号</button>
       </div>
-      <button class="acc-adv" onclick="accToggleAdv()">⚙️ 服务器设置（第一次用，填一次就好）</button>
+      <button class="acc-adv" onclick="accToggleAdv()">⚙️ 高级：手动换服务器（一般用不到）</button>
       <div id="accAdv" style="display:none">
         <p class="acc-steps">
           <b>1.</b> 打开 <a href="https://supabase.com/dashboard" target="_blank" rel="noopener">supabase.com</a>，用 GitHub 账号登录 → <b>New project</b>（名字随便填，Region 选 Singapore，数据库密码记一下）<br>
@@ -5082,8 +5082,9 @@ function mixLinkHtml(c){
 const CLOUD_CFG_KEY = 'xzt_cloud_acc';
 
 /* ← 如果你已经建好服务器，把两个值填在这里，所有设备打开就只剩「登录」一个动作 */
-const CLOUD_URL_FIXED = '';
-const CLOUD_KEY_FIXED = '';
+/* 内置服务器（方案A）。设置页手动填的值会覆盖它；换项目时改这两行重新发布即可 */
+const CLOUD_URL_FIXED = 'https://foadnjdgasnhmxztlkfy.supabase.co';
+const CLOUD_KEY_FIXED = 'sb_publishable_FO7PBsXSo23PNyCjgTEDDQ_CDd4ABqW';
 
 var CLOUD = {
   on:false, busy:false, timer:null, dirty:false, suppress:false,
@@ -5415,7 +5416,7 @@ function renderAcc(){
     if(uEl && !uEl.value) uEl.value=cloudCfg().url||CLOUD_URL_FIXED||'';
     if(kEl && !kEl.value) kEl.value=cloudCfg().key||CLOUD_KEY_FIXED||'';
     const hint=document.getElementById('accNoSrv');
-    if(hint) hint.style.display = cloudReady() ? 'none' : 'block';
+    if(hint) hint.style.display = CLOUD.on ? 'none' : 'block';
     const mig=document.getElementById('accMig');
     if(mig){
       const gc=ghCfg();
