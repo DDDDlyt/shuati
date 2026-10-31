@@ -1,5 +1,5 @@
 /* 刷题总台 Service Worker：离线也能刷题 */
-const CACHE = 'shuati-v22';
+const CACHE = 'shuati-v24';
 const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './pako.min.js'];
 
 self.addEventListener('install', e => {
