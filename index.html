@@ -658,6 +658,26 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
   background:rgba(52,199,89,.16); font-size:11px;}
 .wb-n{font-size:12px; color:var(--sub); margin-top:4px; line-height:1.6;}
 .empty{color:var(--sub); font-size:13px; text-align:center; padding:30px 10px; line-height:1.8;}
+/* --- 易混对照 --- */
+.mix-item{background:var(--panel); border:1px solid var(--line); border-radius:14px;
+  padding:12px 14px; margin-bottom:10px;}
+.mix-item.open{border-color:#33465c; background:#1b2029;}
+.mix-h{display:flex; justify-content:space-between; align-items:center; gap:10px; cursor:pointer;}
+.mix-names{font-size:14.5px; font-weight:700; display:flex; align-items:center; gap:7px; flex-wrap:wrap; line-height:1.5;}
+.mix-vs{color:var(--dim); font-weight:400;}
+.mix-arrow{color:var(--sub); font-size:12px; flex:none;}
+.mix-rule{font-size:12.5px; color:#ffd98a; line-height:1.68; margin-top:8px;
+  background:rgba(255,159,10,.08); border-radius:9px; padding:8px 10px;}
+.mix-body{margin-top:10px; display:flex; flex-direction:column; gap:9px;}
+.mix-col{background:var(--panel2); border-radius:11px; padding:10px 12px;}
+.mix-col h4{margin:0 0 5px; font-size:13px; color:var(--teal);}
+.mix-col.b h4{color:#d68cff;}
+.mix-col p{margin:0; font-size:12.8px; line-height:1.78; color:#d6d9de;}
+.mix-col p b{color:#fff;}
+.mix-link{display:block; width:100%; text-align:left; margin-top:10px; padding:9px 12px;
+  border-radius:10px; background:rgba(191,90,242,.12); color:#d68cff; font-size:12.5px;
+  line-height:1.55; font-weight:600;}
+.mix-link:active{background:rgba(191,90,242,.2);}
 /* --- 打印：只印错题本，白底黑字 --- */
 @media print{
   body{background:#fff !important;}
@@ -948,6 +968,12 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
 </div>
 
 <!-- ============ 底部导航 ============ -->
+<!-- ============ 易混对照 ============ -->
+<div id="view-mix" class="view">
+  <div class="top"><h1>⚖️ 易混对照</h1><div class="sub">两个概念老串？摆在一起看</div></div>
+  <div id="mixBody"></div>
+</div>
+
 <!-- ============ 模考：选卷 ============ -->
 <div id="view-examPick" class="view">
   <div class="top"><h1>🎯 模考</h1><div class="sub">计时 · 交卷 · 出分</div></div>
@@ -1229,6 +1255,7 @@ function go(v){
   if(v==='stat') renderStat();
   if(v==='examPick') renderExamPick();
   if(v==='wb') renderWB();
+  if(v==='mix') renderMix();
   if(v==='spell' && !SP.list.length) startSpell();
   if(v!=='exam' && typeof EX!=='undefined' && (EX.on || EX.timer)){   /* 中途离开 = 弃考，计时停掉 */
     if(EX.timer){ clearInterval(EX.timer); EX.timer=null; }
@@ -1475,7 +1502,7 @@ function renderCard(){
   }
 
   // 普通翻卡：先回忆，再核对
-  c._recHint = (c.t==='term' && hasEn(c.q)) ? '这是英文单词：写它的中文意思，想练拼写点下面 ⌨️'
+  c._recHint = (c.t==='term' && isEnWord(c.q)) ? '这是英文单词：写它的中文意思，想练拼写点下面 ⌨️'
              : (c.t==='term') ? '名词：写它的定义要点（是什么 + 关键特征）'
              : (c.t==='essay'||c.t==='saq') ? '写答题要点，能写几条写几条'
              : (c.t==='calc') ? '写下公式或关键一步'
@@ -1493,7 +1520,7 @@ function renderCard(){
       this.style.height=Math.min(this.scrollHeight, 160)+'px';
     });
   }
-  if(c.t==='term' && hasEn(c.q)){
+  if(c.t==='term' && isEnWord(c.q)){
     document.getElementById('flashcard').innerHTML +=
       '<button class="spk-line" onclick="event.stopPropagation();startSpellOne(\''+c.id+'\')">⌨️ 练这个词的拼写</button>';
   }
@@ -1535,6 +1562,7 @@ function flipCard(fromRecall){
   if(c.n) h+='<div class="ans-note">💡 '+esc(c.n)+'</div>';
   if(hasEn(Array.isArray(c.a)?c.a.join(' '):c.a))
     h+='<button class="spk-line" onclick="event.stopPropagation();speakAns()">🔊 念一遍答案</button>';
+  h+=mixLinkHtml(c);
   if(HW_TYPES[c.t]) h+='<button class="hwcopy" onclick="event.stopPropagation();openHW(\'copy\')">✏️ 抄写一遍（看着答案写，加深记忆）</button>';
   if(S.hw && S.hw[c.id]){
     h+='<div class="hw-mine"><div class="hw-mine-t">✏️ 我的笔迹</div>'+
@@ -2400,7 +2428,8 @@ function renderKnow(){
     '<span><em style="background:var(--bad)"></em>错题 '+wrongCard+'</span></div>'+
     '<button class="ko-hook-btn" style="background:linear-gradient(135deg,#17293a,#141b23); border-color:#2f5570; color:#9fd6ff; font-size:14px" onclick="go(\'read\')">📖 按章节精讲 · 14 章通读，预习/复习都用它</button>'+
     '<button class="ko-hook-btn" onclick="go(\'hook\')">⚡ 打开钩子墙 · '+hookCount()+' 条口诀，覆盖 '+hookCover()+' 张题</button>'+
-    '<button class="ko-hook-btn" style="background:linear-gradient(135deg,#16232e,#151a20); border-color:#2b4152; color:#8ecfff" onclick="go(\'term\')">📖 打开术语表 · '+TERM_KEYS.length+' 条，看不懂题就先查词</button></div>';
+    '<button class="ko-hook-btn" style="background:linear-gradient(135deg,#16232e,#151a20); border-color:#2b4152; color:#8ecfff" onclick="go(\'term\')">📖 打开术语表 · '+TERM_KEYS.length+' 条，看不懂题就先查词</button>'+
+    '<button class="ko-hook-btn" style="background:linear-gradient(135deg,#2a1d2e,#1a1620); border-color:#5a3768; color:#d9a8ff" onclick="go(\'mix\')">⚖️ 易混对照 · '+MIXED.length+' 组，专治两个概念串了</button></div>';
 
   /* v20：专攻清单 —— 39 个知识点全部排序，不是只挑 5 个 */
   var dl = drillList();
@@ -2587,6 +2616,7 @@ function showExplain(c){
     if(c.n) h += '<div class="ans-note">💡 '+esc(c.n)+'</div>';
     h += '</div>';
   }
+  h += mixLinkHtml(c);
   h += knBlockHtml(c);
   box.insertAdjacentHTML('beforeend', h);
   document.getElementById('actRow').innerHTML =
@@ -4239,6 +4269,10 @@ function hwRebuildThumbs(){
 
 /* ---------- 通用小工具 ---------- */
 function hasEn(s){ return /[A-Za-z]{2,}/.test(String(s||'')); }
+function isEnWord(s){
+  var t=String(s||'').trim();
+  return t.length<=40 && /[A-Za-z]/.test(t) && !/[\u4e00-\u9fff]/.test(t);
+}
 function enRuns(s){
   var m=String(s||'').match(/[A-Za-z][A-Za-z'\-]*(?:\s+[A-Za-z][A-Za-z'\-]*){0,24}/g);
   return m ? m.join(' ') : '';
@@ -4796,6 +4830,147 @@ function renderExamPick(){
     h+='<div class="empty" style="margin-top:14px">还没考过。第一次建议选「期中快测」，20 题 30 分钟，先适应计时压力。</div>';
   }
   document.getElementById('exPickBody').innerHTML=h;
+}
+
+/* ==================== v26：易混概念对照（专治"两个概念在脑子里串了"） ==================== */
+var MIXED=[
+  {k:['kinetics'], a:'Km（米氏常数）', ad:'反应速度达到最大速度一半时的底物浓度，单位 mol/L。反映酶对底物的亲和力：<b>Km 越小，亲和力越大</b>。只与酶和底物的种类、温度、pH 有关，<b>与酶浓度无关</b>。',
+   b:'Vmax（最大反应速度）', bd:'底物饱和时的最大速度，单位 mol/(L·s)。<b>与酶浓度成正比</b>——酶加倍，Vmax 加倍。',
+   rule:'题目说「加酶量 / 酶浓度」→ 看 Vmax；说「换底物 / 亲和力 / 达到一半速度」→ 看 Km。'},
+  {k:['inhibit'], a:'竞争性抑制', ad:'抑制剂与底物结构相似，<b>争同一个活性中心</b>；Km 增大、Vmax 不变；<b>加大底物浓度可以解除</b>。',
+   b:'非竞争性抑制', bd:'抑制剂结合在活性中心<b>以外</b>的部位；Km 不变、Vmax 降低；加多少底物都解除不了。',
+   rule:'双倒数图交点在 y 轴 = 竞争性（Vmax 不变）；交点在 x 轴 = 非竞争性（Km 不变）。'},
+  {k:['inhibit'], a:'可逆抑制', ad:'非共价结合，透析、超滤可以去除，抑制程度随抑制剂浓度变化。竞争性、非竞争性都属于这类。',
+   b:'不可逆抑制', bd:'与活性中心基团<b>共价结合</b>（有机磷—胆碱酯酶、氰化物—细胞色素氧化酶），透析去不掉，只能等新酶合成。',
+   rule:'判据只有一条：透析后活性回不回来。'},
+  {k:['regulate'], a:'别构调节', ad:'效应物<b>非共价</b>结合调节部位，改变构象，快速可逆；有协同效应，动力学曲线呈 S 形。',
+   b:'共价修饰调节', bd:'由<b>另一种酶</b>催化（磷酸化 / 去磷酸化），共价改变酶的结构，需要另一种酶才能逆转，放大效应强。',
+   rule:'有没有「另一个酶」参与：有 = 共价修饰，没有 = 别构。'},
+  {k:['struct'], a:'α-螺旋', ad:'<b>同一条肽链内</b>，第 i 位 C=O 与第 i+4 位 N-H 形成氢键；每圈 3.6 个残基，螺距 0.54 nm，每个残基上升 0.15 nm。',
+   b:'β-折叠', bd:'<b>两条或多条链段之间</b>形成氢键，呈锯齿状片层；相邻链间距约 0.47 nm。',
+   rule:'氢键在链内 = α螺旋，链间 = β折叠。注意 <b>0.34 nm 是 B-DNA 的碱基对间距</b>，不是蛋白质的。'},
+  {k:['struct','sep'], a:'变性', ad:'理化因素破坏<b>空间构象</b>，二级以上结构解体，一级结构（肽键）不变；生物活性丧失，<b>但未必沉淀</b>。',
+   b:'沉淀', bd:'蛋白质从溶液中<b>析出</b>，可由盐析、等电点、有机溶剂引起；<b>未必变性</b>（盐析出的蛋白还能溶回去）。',
+   rule:'问「活性 / 构象」是变性，问「析出 / 溶解度」是沉淀。两件事可以同时发生，也可以只发生一件。'},
+  {k:['sep'], a:'盐析', ad:'<b>高浓度</b>中性盐（硫酸铵）夺走水化层、中和电荷，蛋白析出；不变性、可复溶，用来做分段纯化。',
+   b:'盐溶', bd:'<b>低浓度</b>盐提高离子强度、屏蔽分子间电荷排斥，蛋白溶解度反而升高。',
+   rule:'盐多析出、盐少溶解。同一种盐，浓度不同，效果相反。'},
+  {k:['dnarep','trans'], a:'复制', ad:'DNA→DNA，<b>半保留</b>；需要 RNA 引物提供 3\'-OH；双向进行；A 配 T；整条模板都复制。',
+   b:'转录', bd:'DNA→RNA；只转录<b>基因区段</b>（有启动子、终止子）；<b>不需要引物</b>；A 配 U；只有一条链当模板。',
+   rule:'看产物 + 要不要引物。要引物的一定是复制。'},
+  {k:['trans','transl'], a:'转录', ad:'以 DNA 为模板合成 RNA，发生在细胞核（原核在同一空间进行）。',
+   b:'翻译', bd:'以 <b>mRNA</b> 为模板，在核糖体上合成多肽；需要 tRNA 搬运氨基酸、GTP 供能。',
+   rule:'模板是 DNA 还是 mRNA——这一步就能分开。'},
+  {k:['trans'], a:'内含子', ad:'基因中<b>转录但不翻译</b>的片段，转录后由剪接体切除；可变剪接的来源，一个基因因此能出多种蛋白。',
+   b:'外显子', bd:'保留在成熟 mRNA 中、<b>编码氨基酸</b>的片段。',
+   rule:'成熟 mRNA 里还在的是外显子，被剪掉的是内含子。'},
+  {k:['geneexp'], a:'启动子', ad:'<b>RNA 聚合酶</b>识别并结合、决定转录起始位点的 DNA 序列（原核 -10 区、-35 区）。',
+   b:'操纵基因', bd:'<b>阻遏蛋白</b>结合的 DNA 序列，只决定这一段「开 / 关」，不结合聚合酶。',
+   rule:'结合的是聚合酶（启动子）还是阻遏蛋白（操纵基因）。'},
+  {k:['geneexp'], a:'顺式作用元件', ad:'<b>DNA 上的序列</b>（启动子、增强子、沉默子），只能调控同一条 DNA 上的基因，不能扩散到别处。',
+   b:'反式作用因子', bd:'由别的基因编码的<b>蛋白质</b>（转录因子），可扩散，能作用于任何带相应元件的基因。',
+   rule:'本身是 DNA 序列（顺式）还是蛋白质（反式）。'},
+  {k:['geneexp'], a:'增强子', ad:'<b>远距离</b>也能增强转录，位置和方向都不敏感，正着放反着放都有效。',
+   b:'沉默子', bd:'抑制转录，同样位置方向不敏感，需要结合阻遏蛋白起作用。',
+   rule:'上调是增强子，下调是沉默子——两者的共同点是"远、且不分方向"。'},
+  {k:['mutation'], a:'错义突变', ad:'碱基替换使一个密码子变成<b>编码另一种氨基酸</b>的密码子，产生异常蛋白（镰刀型贫血：Glu→Val）。',
+   b:'无义突变', bd:'密码子变成<b>终止密码子</b>（UAA / UAG / UGA），肽链提前终止，通常后果更严重。',
+   rule:'看有没有提前出现终止信号。'},
+  {k:['mutation'], a:'移码突变', ad:'插入或缺失<b>非 3 整数倍</b>的碱基，读码框整体改变，<b>突变点之后</b>的氨基酸全部改变。',
+   b:'点突变', bd:'单个碱基替换（转换 / 颠换），只改变<b>一个</b>密码子。',
+   rule:'突变点之后的序列是不是全变了——全变就是移码。'},
+  {k:['chromo'], a:'倒位', ad:'<b>同一条染色体</b>上某片段 180° 翻转，基因数目不变、顺序变了；倒位杂合子会抑制交换。',
+   b:'易位', bd:'染色体片段接到<b>另一条非同源染色体</b>上（相互易位、罗伯逊易位）。',
+   rule:'有没有跨染色体。没跨就是倒位，跨了就是易位。'},
+  {k:['chromo'], a:'缺失', ad:'染色体片段<b>丢了</b>（5p- 猫叫综合征）；缺失杂合子可能出现假显性。',
+   b:'重复', bd:'片段<b>多出一份</b>（果蝇棒眼，16A 区重复）；可产生位置效应。',
+   rule:'长度变短是缺失，变长是重复。'},
+  {k:['linkage'], a:'完全连锁', ad:'同一染色体上的基因<b>完全不交换</b>，测交后代只有亲本型（例：雄果蝇）。',
+   b:'不完全连锁', bd:'发生交换，出现<b>重组型</b>，重组率 < 50%；重组率可用来算图距。',
+   rule:'测交后代有没有重组型。有 → 不完全连锁。'},
+  {k:['quant'], a:'基因频率', ad:'某等位基因的数目 ÷ 该位点<b>等位基因总数</b>。',
+   b:'基因型频率', bd:'某基因型的个体数 ÷ 群体<b>个体总数</b>。',
+   rule:'分母是"等位基因"还是"个体"。Hardy-Weinberg 平衡下 p = f(AA) + ½f(Aa)。'},
+  {k:['quant'], a:'遗传漂变', ad:'<b>小群体</b>中基因频率的<b>随机</b>波动，与适应无关，可导致基因固定或丢失（瓶颈效应、奠基者效应）。',
+   b:'自然选择', bd:'由<b>适应度差异</b>引起的<b>定向</b>改变，适者留下更多后代。',
+   rule:'随机 = 漂变，定向 = 选择。小群体里漂变才明显。'},
+  {k:['micro'], a:'转化', ad:'<b>感受态细菌</b>直接摄取环境中的裸露 DNA（肺炎双球菌实验）。',
+   b:'转导', bd:'以<b>噬菌体</b>为媒介把供体 DNA 带进受体（普遍性 / 局限性转导）。',
+   rule:'有没有噬菌体当搬运工。顺带记：接合是通过性菌毛直接接触转移质粒，连搬运工都没有。'},
+  {k:['glycolysis','gluconeo'], a:'糖酵解', ad:'葡萄糖→2 丙酮酸，<b>净生成 2 ATP + 2 NADH</b>，在胞质，无氧也能进行。',
+   b:'糖异生', bd:'丙酮酸→葡萄糖，<b>消耗 4 ATP + 2 GTP + 2 NADH</b>，主要在肝（肾）。',
+   rule:'方向 + 能量正负。糖异生<b>不是糖酵解的简单逆反</b>，要靠 3 个底物循环绕过不可逆步骤。'},
+  {k:['etc','atpcalc'], a:'底物水平磷酸化', ad:'高能底物把磷酸基团<b>直接</b>交给 ADP（1,3-二磷酸甘油酸、PEP、琥珀酰 CoA）。',
+   b:'氧化磷酸化', bd:'NADH / FADH₂ 经<b>呼吸链</b>传递，泵出质子形成梯度，ATP 合酶合成 ATP。',
+   rule:'有没有呼吸链和质子梯度。有就是氧化磷酸化。'},
+  {k:['betaox'], a:'β-氧化', ad:'<b>线粒体基质</b>，降解方向；以 FAD、NAD⁺ 为受氢体；产物乙酰 CoA + NADH + FADH₂。',
+   b:'脂肪酸合成', bd:'<b>胞质</b>，合成方向；以 <b>NADPH</b> 供氢；丙二酰 CoA 提供二碳单位，ACP 携带酰基。',
+   rule:'部位 + 辅酶 + 方向。口诀：<b>氧化在线粒体用 NAD，合成在胞质用 NADP</b>。'},
+  {k:['betaox'], a:'生酮', ad:'<b>肝线粒体</b>，乙酰 CoA 过剩（饥饿、糖尿病）时合成乙酰乙酸、β-羟丁酸、丙酮。',
+   b:'酮体利用', bd:'<b>肝外组织</b>（心、脑、骨骼肌）氧化利用酮体；肝缺琥珀酰 CoA 转硫酶，<b>能造不能用</b>。',
+   rule:'肝能生酮、不能利用酮体——这是最常考的一句。'},
+  {k:['dnarep','trans'], a:'DNA 聚合酶', ad:'需要<b>引物 3\'-OH</b>，沿 5\'→3\' 延伸，具 3\'→5\' 外切<b>校对</b>活性。',
+   b:'RNA 聚合酶', bd:'<b>不需要引物</b>，可直接起始，<b>没有校对</b>活性。',
+   rule:'要不要引物：要的一定是 DNA 聚合酶。'},
+  {k:['mendel'], a:'完全显性', ad:'杂合子表现与显性纯合子<b>完全一致</b>（AA = Aa），F₂ 表型比 3:1。',
+   b:'不完全显性', bd:'杂合子表现为<b>中间型</b>（红花×白花→粉花），F₂ 表型比 <b>1:2:1</b>。',
+   rule:'看 F₂ 的表型比：3:1 是完全显性，1:2:1 是不完全显性（此时表型比 = 基因型比）。'},
+  {k:['num','mendel'], a:'有丝分裂', ad:'一次复制、<b>一次</b>分裂，子细胞 2n 与母细胞相同；无联会、无交换。',
+   b:'减数分裂', bd:'一次复制、<b>两次</b>分裂，子细胞 n（染色体数减半）；前期 I 有联会和交换。',
+   rule:'子细胞染色体数减没减半——减半就是减数分裂。'}
+];
+
+var MIXOPEN={};
+function mixFor(kids){
+  if(!Array.isArray(kids)||!kids.length) return [];
+  var out=[];
+  for(var i=0;i<MIXED.length;i++){
+    var g=MIXED[i];
+    for(var j=0;j<g.k.length;j++){ if(kids.indexOf(g.k[j])>=0){ out.push({i:i, g:g}); break; } }
+  }
+  return out;
+}
+function mixToggle(i){
+  MIXOPEN[i]=!MIXOPEN[i];
+  renderMix();
+  if(MIXOPEN[i]){
+    var el=document.getElementById('mix'+i);
+    if(el) el.scrollIntoView({block:'center', behavior:'smooth'});
+  }
+}
+function openMix(i){
+  go('mix');
+  MIXOPEN[i]=true;
+  renderMix();
+  setTimeout(function(){
+    var el=document.getElementById('mix'+i);
+    if(el) el.scrollIntoView({block:'center'});
+  },80);
+}
+function renderMix(){
+  var h='<div class="wb-head">共 '+MIXED.length+' 组最容易串的概念。点标题展开两边的定义，<b>最后那句「判据」是考场上真正用得上的</b>。</div>';
+  MIXED.forEach(function(g,i){
+    var open=!!MIXOPEN[i];
+    h+='<div class="mix-item'+(open?' open':'')+'" id="mix'+i+'">'+
+      '<div class="mix-h" onclick="mixToggle('+i+')">'+
+        '<div class="mix-names"><b>'+g.a+'</b><span class="mix-vs">⇄</span><b>'+g.b+'</b></div>'+
+        '<span class="mix-arrow">'+(open?'▴':'▾')+'</span></div>'+
+      '<div class="mix-rule">🎯 '+g.rule+'</div>'+
+      (open?'<div class="mix-body">'+
+        '<div class="mix-col"><h4>'+g.a+'</h4><p>'+g.ad+'</p></div>'+
+        '<div class="mix-col b"><h4>'+g.b+'</h4><p>'+g.bd+'</p></div>'+
+      '</div>':'')+
+      '</div>';
+  });
+  document.getElementById('mixBody').innerHTML=h;
+}
+/* 答错时给一个「和它最容易混的是……」的入口 */
+function mixLinkHtml(c){
+  var hit=mixFor(c&&c.k);
+  if(!hit.length) return '';
+  var g=hit[0].g, i=hit[0].i;
+  return '<button class="mix-link" onclick="event.stopPropagation();openMix('+i+')">⚖️ 和它最容易混的是：'+
+    g.a+' ⇄ '+g.b+'</button>';
 }
 
 /* ==================== 启动 ==================== */
