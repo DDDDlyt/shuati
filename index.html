@@ -2668,11 +2668,31 @@ function hwAddPoint(e){
 function hwStart(e){
   const now=performance.now();
   if(!HW.strokes.length) HW.t0=now;
+  /* 上一次没正常抬笔（capture 失败、移出画布又回来）：先收笔，避免丢一段 */
+  if(HW.cur){ if(HW.cur.pts.length) HW.strokes.push(HW.cur); HW.cur=null; }
+  /* v22 断笔续接：笔尖快速移动时会短暂离屏（接触不良），屏幕上断成一串点。
+     抬笔到落笔间隔很短、且离上一点很近、粗细/橡皮没变 → 当作同一笔续上 */
+  if(!HW.playing && HW.strokes.length){
+    const last=HW.strokes[HW.strokes.length-1];
+    const lp=last.pts[last.pts.length-1];
+    if(lp){
+      const r=HW.cv.getBoundingClientRect();
+      const x=(e.clientX-r.left)/HW.w, y=(e.clientY-r.top)/HW.h;
+      const dt=now-(HW._lastEnd||0);
+      const dx=(x-lp.x)*HW.w, dy=(y-lp.y)*HW.h;
+      const wantW=HW.size*(HW.er?4.5:1);
+      if(dt<200 && dx*dx+dy*dy<2500 && last.er===HW.er && Math.abs(last.w-wantW)<0.01){
+        HW.cur=last; HW.strokes.pop(); /* 续接：先弹出原笔，避免 hwEnd 重复 push */
+        hwAddPoint(e); hwPaintLast();
+        return;
+      }
+    }
+  }
   HW.cur={w:HW.size*(HW.er?4.5:1), c:'#111318', er:HW.er, st:Math.round(now-HW.t0), _t0:now, _d:1, pts:[]};
   hwAddPoint(e);
   hwPaintLast();
 }
-function hwEnd(){ if(HW.cur){ if(HW.cur.pts.length) HW.strokes.push(HW.cur); HW.cur=null; } }
+function hwEnd(){ if(HW.cur){ if(HW.cur.pts.length) HW.strokes.push(HW.cur); HW._lastEnd=performance.now(); HW.cur=null; } }
 function hwBind(){
   const cv=document.getElementById('hwCv'); if(!cv) return;
   /* v19：画布上的触摸一律不冒泡到 document，防止被当成翻页手势 */
@@ -2683,6 +2703,7 @@ function hwBind(){
     if(hwOpt().onlyPen && e.pointerType==='touch') return;
     if(e.pointerType==='pen' && !hwOpt().penHint){ hwOpt().penHint=1; toast('检测到手写笔，压感已开启 ✏️'); }
     e.preventDefault();
+    if(HW._leaveT){ clearTimeout(HW._leaveT); HW._leaveT=null; }
     if(HW.playing){ HW.playing=false; }
     try{ cv.setPointerCapture(e.pointerId); }catch(err){}
     hwStart(e);
@@ -2691,12 +2712,21 @@ function hwBind(){
     if(!HW.cur) return;
     if(hwOpt().onlyPen && e.pointerType==='touch') return;
     e.preventDefault();
+    if(HW._leaveT){ clearTimeout(HW._leaveT); HW._leaveT=null; }
     const evs=(e.getCoalescedEvents && e.getCoalescedEvents().length) ? e.getCoalescedEvents() : [e];
     for(let i=0;i<evs.length;i++) hwAddPoint(evs[i]);
     hwPaintLast();
   });
-  ['pointerup','pointercancel','pointerleave'].forEach(function(t){
-    cv.addEventListener(t, function(e){ hwEnd(); });
+  ['pointerup','pointercancel'].forEach(function(t){
+    cv.addEventListener(t, function(e){
+      if(HW._leaveT){ clearTimeout(HW._leaveT); HW._leaveT=null; }
+      hwEnd();
+    });
+  });
+  /* capture 失败时笔尖滑出画布：别立刻断笔，等 300ms，回来就接着写 */
+  cv.addEventListener('pointerleave', function(e){
+    if(HW._leaveT) clearTimeout(HW._leaveT);
+    HW._leaveT=setTimeout(function(){ HW._leaveT=null; hwEnd(); }, 300);
   });
   window.addEventListener('resize', function(){
     if(document.getElementById('hwMask').classList.contains('on')){
@@ -2718,8 +2748,8 @@ function hwToggleOnlyPen(){
   hwOpt().onlyPen = hwOpt().onlyPen?0:1; save(); hwSyncBtns();
   toast(hwOpt().onlyPen?'已开启：只识别手写笔':'已关闭：笔和手指都能写');
 }
-function hwUndo(){ HW.strokes.pop(); HW.cur=null; hwRedrawAll(); }
-function hwClear(){ HW.strokes=[]; HW.cur=null; hwClearDraw(); }
+function hwUndo(){ HW.strokes.pop(); HW.cur=null; HW._lastEnd=0; hwRedrawAll(); }
+function hwClear(){ HW.strokes=[]; HW.cur=null; HW._lastEnd=0; hwClearDraw(); }
 function hwTotal(){
   let m=0;
   for(let i=0;i<HW.strokes.length;i++){
@@ -2732,7 +2762,7 @@ function hwSpeed(){ HW.sp = HW.sp===1?2:(HW.sp===2?4:1); hwSyncBtns(); }
 function hwPlay(){
   if(HW.playing){ HW.playing=false; document.getElementById('hwPlayBtn').textContent='▶ 回放'; return; }
   if(!HW.strokes.length){ toast('还没写东西'); return; }
-  HW.cur=null; hwClearDraw(); HW.playing=true;
+  if(HW.cur){ if(HW.cur.pts.length) HW.strokes.push(HW.cur); HW.cur=null; }  hwClearDraw(); HW.playing=true;
   const btn=document.getElementById('hwPlayBtn'); btn.textContent='⏸ 停止';
   const t0=performance.now(), sp=HW.sp, total=hwTotal();
   function frame(now){
@@ -2982,6 +3012,30 @@ function inkDown(e){
   e.preventDefault();
   try{ INK.cv.setPointerCapture(e.pointerId); }catch(err){}
   var pos = inkPos(e), st = inkStyle();
+  /* v22 断笔续接：快速划重点时笔尖短暂离屏，别断成点 */
+  var now = performance.now();
+  if(INK.strokes.length){
+    var last = INK.strokes[INK.strokes.length-1], lp = last.p;
+    if(lp && lp.length>=3){
+      var dt = now-(INK._lastEnd||0);
+      var x0 = lp.length>=6 ? lp[lp.length-3] : lp[0];
+      var y0 = lp.length>=6 ? lp[lp.length-2] : lp[1];
+      var dx = pos[0]-x0, dy = pos[1]-y0;
+      if(dt<200 && dx*dx+dy*dy<0.0025 && last.c===st.c && last.w===st.w && (last.e||0)===(st.e||0)){
+        INK.cur = last;
+        INK.cur.p.push(pos[0], pos[1], e.pressure||0.5);
+        var c2 = INK.ctx, p2 = INK.cur.p, n2 = p2.length;
+        c2.save(); c2.lineCap='round'; c2.lineJoin='round';
+        c2.globalAlpha=INK.cur.a; c2.strokeStyle=INK.cur.c; c2.lineWidth=INK.cur.w;
+        c2.globalCompositeOperation=INK.cur.e ? 'destination-out' : 'source-over';
+        c2.beginPath();
+        c2.moveTo((n2>=6?p2[n2-6]:p2[0])*INK.w, (n2>=6?p2[n2-5]:p2[1])*INK.h);
+        c2.lineTo(p2[n2-3]*INK.w, p2[n2-2]*INK.h);
+        c2.stroke(); c2.restore();
+        return;
+      }
+    }
+  }
   INK.cur = {c:st.c, w:st.w, a:st.a, e:st.e, p:[pos[0], pos[1], e.pressure||0.5]};
   INK.strokes.push(INK.cur);
   var c = INK.ctx;
@@ -3011,8 +3065,10 @@ function inkUp(e){
     if(INK.penTimer) clearTimeout(INK.penTimer);
     INK.penTimer = setTimeout(function(){ INK.penLive = false; }, 600);
   }
-  if(!INK.cur) return;
-  INK.cur = null;
+  if(INK.cur){
+    INK._lastEnd = performance.now();
+    INK.cur = null;
+  }
   inkQueueSave();
 }
 function inkQueueSave(){
@@ -3067,13 +3123,14 @@ function inkTogglePenOnly(){
 }
 function inkUndo(){
   if(!INK.strokes.length){ toast('没有可撤销的笔迹'); return; }
+  INK._lastEnd=0;
   INK.strokes.pop();
   inkRedraw(); inkSaveNow();
 }
 function inkClear(){
   if(!INK.strokes.length) return;
   if(!confirm('清空这一页的所有批注？')) return;
-  INK.strokes = [];
+  INK.strokes = []; INK._lastEnd=0;
   inkRedraw(); inkSaveNow();
   toast('已清空');
 }
