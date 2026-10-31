@@ -26,7 +26,7 @@ https://你的用户名.github.io/shuati/
 
 **所以这次不用 `git init`，不用重新 `add` 一遍。** 只需要：
 
-1. 换掉里面旧的 `index.html`（换成最新版，890 张卡）
+1. 换掉里面旧的 `index.html`（换成最新版，1158 张卡）
 2. 加一个 GitHub 的远程地址（叫 `github`，跟 `origin` 并存）
 3. 推上去
 
@@ -74,7 +74,7 @@ GitHub 从 2021 年起就不允许用账号密码推代码了，必须用令牌�
 
 ## 第四步：更新本地的 index.html（关键一步，别跳）
 
-你 `D:\shuati` 里的 `index.html` 是**旧版（556 张卡）**，现在题库已经涨到 **890 张（9 个题库）**。
+你 `D:\shuati` 里的 `index.html` 是**旧版（556 张卡）**，现在题库已经涨到 **1158 张（11 个题库）**。
 
 1. 下载本目录下的 `index.html`
 2. 覆盖 `D:\shuati\index.html`（同名的直接替换）
@@ -94,7 +94,7 @@ git status
 
 ```bash
 git add .
-git commit -m "题库更新到 890 张（9 个题库）"
+git commit -m "题库更新到 1158 张（11 个题库）"
 ```
 
 然后加远程（**两个远程并存，`origin` 还是 Gitee，`github` 是新加的**）：
@@ -192,5 +192,5 @@ git push origin main
 
 | 文件 | 内容 |
 |---|---|
-| `index.html` | 刷题总台网页本体，**零外部依赖**，9 个题库 890 张卡 |
+| `index.html` | 刷题总台网页本体，**零外部依赖**，11 个题库 1158 张卡 |
 | `README.md` | 就是本教程 |
