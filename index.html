@@ -240,6 +240,14 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
 .hw-thumb{width:100%;max-height:220px;object-fit:contain;background:#fff;border-radius:7px;display:block}
 .hw-mine-b{display:flex;gap:8px;margin-top:7px}
 .hw-pen{color:#ffd60a}
+
+/* ===== v7 云同步 ===== */
+.gh-btns{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+.gh-status{margin-top:9px;font-size:12px;color:#8b93a1;line-height:1.5;word-break:break-all}
+.gh-status.ok{color:#34c759}
+.gh-status.err{color:#ff6b6b}
+.gh-auto{display:flex;align-items:center;gap:7px;margin-top:11px;font-size:13px;color:#9aa0aa}
+.set-row input{flex:1;min-width:0}
 </style>
 </head>
 <body>
@@ -355,12 +363,32 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
   </div>
 
   <div class="set-item">
-    <h3>同步进度（平板 ⇄ 手机）</h3>
-    <p>进度存在本设备浏览器里。换设备时：<b>旧设备「导出」→ 把这串码发到新设备 → 新设备「粘贴导入」</b>，进度自动合并。</p>
-    <textarea class="code-area" id="codeArea" placeholder="导出的进度码会出现在这里；导入时把码粘贴到这里"></textarea>
-    <button class="mini-btn blue" onclick="exportProg()">导出进度</button>
-    <button class="mini-btn" onclick="importProg()">导入合并</button>
-    <button class="mini-btn" onclick="copyCode()">复制</button>
+    <h3>☁️ 云同步（GitHub 私有仓库）</h3>
+    <p>进度和笔迹都存到<b>你自己的 GitHub 私有仓库</b>，平板、手机自动对齐，换设备不用再导来导去。<br>
+       第一次用：填令牌 → 点「连接并同步」，仓库不存在会自动创建。</p>
+    <div class="set-row"><label>仓库</label><input id="ghRepo" placeholder="留空自动建 用户名/shuati-data"></div>
+    <div class="set-row" style="margin-top:9px"><label>令牌</label><input id="ghToken" type="password" placeholder="ghp_...（勾 repo 权限即可）"></div>
+    <div class="gh-btns">
+      <button class="mini-btn blue" onclick="ghConnect()">连接并同步</button>
+      <button class="mini-btn" onclick="ghSync()">立即同步</button>
+      <button class="mini-btn" onclick="ghPush()">仅上传本机</button>
+      <button class="mini-btn" onclick="ghPull()">仅下载云端</button>
+      <button class="mini-btn red" onclick="ghDisconnect()">断开</button>
+    </div>
+    <p id="ghStatus" class="gh-status">未连接</p>
+    <label class="gh-auto"><input type="checkbox" id="ghAuto" onchange="ghSetAuto(this.checked)"> 自动同步（每 60 秒静默同步一次）</label>
+    <p class="gh-status">🔒 令牌只存在这台设备的浏览器里，不会上传，也不会写进同步文件。</p>
+  </div>
+
+  <div class="set-item">
+    <h3>📁 手动互传（不联网也能用）</h3>
+    <p>导出成一个文件发到微信/QQ 给自己，另一台设备点「选择文件导入」，自动合并。</p>
+    <div class="gh-btns">
+      <button class="mini-btn blue" onclick="exportFile()">导出文件</button>
+      <button class="mini-btn" onclick="pickImport()">选择文件导入</button>
+    </div>
+    <input type="file" id="impFile" accept=".json,.txt,application/json" style="display:none" onchange="importFile(this)">
+    <p id="fileStatus" class="gh-status"></p>
   </div>
 
   <div class="set-item">
@@ -455,7 +483,7 @@ function load(){
     return {cards:{}, daily:{}, streak:0, lastDate:null, lastCheckin:null, goal:{new:10, rev:20}, todayNew:0, todayRev:0, hw:{}, hwThumb:{}, hwOpt:{onlyPen:0}};
   }
 }
-function save(){ localStorage.setItem(LSKEY, JSON.stringify(S)); }
+function save(){ localStorage.setItem(LSKEY, JSON.stringify(S)); ghTouch(); }
 
 function today(){
   const d=new Date();
@@ -482,7 +510,7 @@ const TYPE_LABEL={term:'名词',mc:'选择',tf:'判断',fill:'填空',saq:'简�
 
 /* 卡片状态 */
 function cst(id){ return S.cards[id] || {st:0, hit:0, lv:0, due:null, fav:0}; }
-function setCard(id, patch){ S.cards[id] = Object.assign(cst(id), patch); save(); }
+function setCard(id, patch){ S.cards[id] = Object.assign(cst(id), patch, {t:Date.now()}); save(); }
 
 /* 统计 */
 function stats(deckId){
@@ -890,6 +918,7 @@ function renderDone(){
 function renderSet(){
   document.getElementById('goalNew').value=S.goal.new;
   document.getElementById('goalRev').value=S.goal.rev;
+  if(typeof ghFillSet==='function') ghFillSet();
   const all=stats(null);
   document.getElementById('aboutText').innerHTML=
     '题库版本：'+(HUB.generated||'v1')+' · 共 '+HUB.decks.length+' 库 '+all.total+' 张<br>'+
@@ -1385,10 +1414,307 @@ function hwExportAll(){
 
 /* ---- 注入点：卡片上手写按钮 ---- */
 
+
+/* ==================== v7 云同步（GitHub 私有仓库） ==================== */
+const GH_CFG_KEY='xzt_gh_cfg';
+const GH={busy:false, timer:null, dirty:false, suppress:false, lastErr:''};
+
+function ghCfg(){
+  try{ return JSON.parse(localStorage.getItem(GH_CFG_KEY)||'{}'); }catch(e){ return {}; }
+}
+function ghSetCfg(c){ localStorage.setItem(GH_CFG_KEY, JSON.stringify(c)); }
+function ghTime(ts){
+  const d=new Date(ts);
+  return (d.getMonth()+1)+'/'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+}
+function ghStatus(msg, cls){
+  const el=document.getElementById('ghStatus'); if(!el) return;
+  el.textContent=msg; el.className='gh-status'+(cls?(' '+cls):'');
+}
+function ghSize(){
+  try{ return Math.max(1,Math.round(JSON.stringify(ghPack()).length/1024))+' KB'; }catch(e){ return ''; }
+}
+function b64enc(str){
+  const bytes=new TextEncoder().encode(str);
+  let bin=''; const CH=0x8000;
+  for(let i=0;i<bytes.length;i+=CH) bin+=String.fromCharCode.apply(null, bytes.subarray(i,i+CH));
+  return btoa(bin);
+}
+function b64dec(b64){
+  const bin=atob(String(b64||'').replace(/\s/g,''));
+  const bytes=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
+  return new TextDecoder().decode(bytes);
+}
+async function ghReq(path, opts, tokenOverride){
+  const c=ghCfg();
+  const token=tokenOverride||c.token;
+  if(!token) throw new Error('还没填令牌');
+  opts=opts||{};
+  const headers=Object.assign({
+    'Authorization':'token '+token,
+    'Accept':'application/vnd.github+json',
+    'X-GitHub-Api-Version':'2022-11-28'
+  }, opts.headers||{});
+  const r=await fetch('https://api.github.com'+path, Object.assign({}, opts, {headers:headers}));
+  let body=null;
+  try{ body=await r.json(); }catch(e){}
+  if(!r.ok){
+    const e2=new Error((body&&body.message)||('HTTP '+r.status));
+    e2.status=r.status; throw e2;
+  }
+  return body;
+}
+function ghErrHint(e){
+  if(e.status===401) return '（令牌无效或过期）';
+  if(e.status===403) return '（权限不足或触发限流）';
+  if(e.status===404) return '（仓库不存在或没权限）';
+  if(e.status===422) return '（请求被拒绝，检查仓库名）';
+  if(String(e.message||'').indexOf('Failed to fetch')>=0) return '（网络不通，试试换网络或用文件互传）';
+  return '';
+}
+function ghPack(){
+  return {
+    app:'shuati', v:7, at:Date.now(),
+    cards:S.cards||{}, daily:S.daily||{}, streak:S.streak||0,
+    lastDate:S.lastDate||null, lastCheckin:S.lastCheckin||null,
+    goal:S.goal||{new:10,rev:20}, todayNew:S.todayNew||0, todayRev:S.todayRev||0,
+    hw:S.hw||{}, hwOpt:S.hwOpt||{onlyPen:0}
+  };
+}
+function ghMerge(remote){
+  if(!remote||typeof remote!=='object') return 0;
+  let changed=0;
+  GH.suppress=true;
+  const rc=remote.cards||{};
+  for(const id in rc){
+    const b=rc[id]; if(!b) continue;
+    const a=S.cards[id];
+    if(!a){ S.cards[id]=b; changed++; continue; }
+    const ta=a.t||0, tb=b.t||0;
+    if(tb>ta){ S.cards[id]=b; changed++; }
+    else if(ta===0 && tb===0){
+      const st=Math.max(a.st||0, b.st||0);
+      const hit=Math.max(a.hit||0, b.hit||0);
+      const lv=Math.max(a.lv||0, b.lv||0);
+      if(st!==(a.st||0)||hit!==(a.hit||0)||lv!==(a.lv||0)){
+        S.cards[id]=Object.assign({}, a, {st:st,hit:hit,lv:lv}); changed++;
+      }
+    }
+  }
+  const rd=remote.daily||{};
+  for(const k in rd){
+    if(!S.daily[k] || (rd[k]==='done' && S.daily[k]!=='done')){ S.daily[k]=rd[k]; changed++; }
+  }
+  const st2=Math.max(S.streak||0, remote.streak||0);
+  if(st2>(S.streak||0)){ S.streak=st2; changed++; }
+  if(!S.hw) S.hw={};
+  if(!S.hwThumb) S.hwThumb={};
+  const rh=remote.hw||{};
+  for(const id in rh){
+    const b=rh[id]; if(!b) continue;
+    const a=S.hw[id];
+    if(!a){ S.hw[id]=b; changed++; }
+    else if((b.at||0)>(a.at||0)){ S.hw[id]=b; changed++; }
+  }
+  GH.suppress=false;
+  if(changed){
+    save();
+    try{ hwRebuildThumbs(); }catch(e){}
+  }
+  return changed;
+}
+async function ghSync(silent, mode){
+  mode = mode || 'both';           // both | pull | push
+  const c=ghCfg();
+  if(!c.token || !c.repo){ if(!silent) toast('先去设置页填令牌'); return; }
+  if(GH.busy) return;
+  GH.busy=true; GH.dirty=false;
+  if(!silent) ghStatus(mode==='pull'?'正在下载…':(mode==='push'?'正在上传…':'同步中…'));
+  try{
+    const path='/repos/'+c.repo+'/contents/shuati-sync.json';
+    let sha=null, remote=null;
+    if(mode!=='push'){
+      try{
+        const f=await ghReq(path+'?t='+Date.now());
+        sha=f.sha;
+        remote=JSON.parse(b64dec(f.content||''));
+      }catch(e){ if(e.status!==404) throw e; }
+    }
+    const changed = remote ? ghMerge(remote) : 0;
+    if(mode!=='pull'){
+      const payload=ghPack();
+      const body={message:'sync '+(new Date().toISOString()), content:b64enc(JSON.stringify(payload))};
+      if(sha) body.sha=sha;
+      await ghReq(path, {method:'PUT', body:JSON.stringify(body)});
+    }
+    c.lastAt=Date.now(); ghSetCfg(c);
+    const tip = mode==='pull' ? '✅ 已下载云端 · ' : '✅ 已同步 · ';
+    ghStatus(tip+ghTime(c.lastAt)+' · '+(changed?('合并 '+changed+' 条 · '):'')+ghSize(), 'ok');
+    if(!silent) toast(mode==='pull'?'已从云端下载 ✅':'同步完成 ✅');
+  }catch(e){
+    GH.lastErr=e.message||'unknown';
+    ghStatus('❌ 同步失败：'+(e.message||'')+ghErrHint(e), 'err');
+    if(!silent) toast('同步失败：'+(e.message||''));
+  }finally{ GH.busy=false; }
+}
+async function ghConnect(){
+  const repoEl=document.getElementById('ghRepo');
+  const tokEl=document.getElementById('ghToken');
+  let repo=(repoEl.value||'').trim().replace(/^https?:\/\/github\.com\//,'').replace(/\.git$/,'').replace(/\/$/,'');
+  const token=(tokEl.value||'').trim();
+  if(!token){ toast('先填令牌'); return; }
+  ghStatus('检查令牌…');
+  try{
+    const u=await ghReq('/user', {}, token);
+    if(!repo){ repo=u.login+'/shuati-data'; repoEl.value=repo; }
+    const c=ghCfg();
+    c.token=token; c.repo=repo;
+    ghSetCfg(c);
+    ghStatus('检查仓库 '+repo+' …');
+    try{
+      await ghReq('/repos/'+repo, {}, token);
+    }catch(e){
+      if(e.status===404){
+        const name=repo.indexOf('/')>=0?repo.split('/')[1]:repo;
+        ghStatus('仓库不存在，正在创建 '+name+' …');
+        await ghReq('/user/repos', {method:'POST', body:JSON.stringify({
+          name:name, private:true, auto_init:true,
+          description:'刷题总台同步数据（私有，勿公开）'
+        })}, token);
+      }else throw e;
+    }
+    await ghSync();
+  }catch(e){
+    ghStatus('❌ 连接失败：'+(e.message||'')+ghErrHint(e), 'err');
+  }
+}
+function ghPush(){
+  if(!ghCfg().token){ toast('先去设置页填令牌'); return; }
+  if(!confirm('会把本机数据覆盖到云端（云端更新的记录会被覆盖）。确定？')) return;
+  ghSync(false,'push');
+}
+function ghPull(){
+  if(!ghCfg().token){ toast('先去设置页填令牌'); return; }
+  ghSync(false,'pull');
+}
+function ghDisconnect(){
+  const c=ghCfg();
+  if(!c.token){ toast('本来就没连'); return; }
+  if(!confirm('断开后本机不再自动同步（进度和笔迹不会删）。确定？')) return;
+  delete c.token; delete c.auto; ghSetCfg(c);
+  ghFillSet(); toast('已断开');
+}
+function ghSetAuto(v){
+  const c=ghCfg(); c.auto=v?1:0; ghSetCfg(c);
+  if(v && c.token){ ghSync(true); toast('已开启自动同步'); }
+  else if(v){ toast('先点「连接并同步」'); }
+}
+function ghTouch(){
+  if(GH.suppress) return;
+  const c=ghCfg();
+  if(!c.auto || !c.token) return;
+  GH.dirty=true;
+  if(GH.timer) return;
+  GH.timer=setTimeout(function(){
+    GH.timer=null;
+    if(GH.dirty) ghSync(true);
+  }, 60000);
+}
+function ghFillSet(){
+  const c=ghCfg();
+  const r=document.getElementById('ghRepo'); if(r) r.value=c.repo||'';
+  const t=document.getElementById('ghToken'); if(t) t.value=c.token||'';
+  const a=document.getElementById('ghAuto'); if(a) a.checked=!!c.auto;
+  if(c.lastAt) ghStatus('上次同步 '+ghTime(c.lastAt)+' · 当前数据 '+ghSize(), 'ok');
+  else if(c.token) ghStatus('令牌已填，点「连接并同步」');
+  else ghStatus('未连接');
+}
+
+/* ---- 文件互传 ---- */
+function exportFile(){
+  try{
+    const blob=new Blob([JSON.stringify(ghPack())],{type:'application/json'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download='刷题进度-'+today()+'.json';
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 4000);
+    const el=document.getElementById('fileStatus');
+    if(el) el.textContent='已导出 '+Math.round(blob.size/1024)+' KB，发到另一台设备再「选择文件导入」';
+    toast('文件已导出');
+  }catch(e){ toast('导出失败'); }
+}
+function pickImport(){ const f=document.getElementById('impFile'); if(f) f.click(); }
+function importFile(inp){
+  const f=inp.files&&inp.files[0]; if(!f) return;
+  const rd=new FileReader();
+  rd.onload=function(){
+    const el=document.getElementById('fileStatus');
+    try{
+      const data=JSON.parse(String(rd.result));
+      const n=ghMerge(data);
+      if(el) el.textContent='✅ 导入成功，合并 '+n+' 条记录';
+      toast('导入成功 ✅');
+    }catch(e){
+      if(el) el.textContent='❌ 文件格式不对：'+(e.message||'');
+    }
+  };
+  rd.readAsText(f);
+  inp.value='';
+}
+
+/* ---- 笔迹缩略图重建（云端只传 strokes，缩略图本地生成） ---- */
+function hwRenderThumb(rec, w){
+  if(!rec||!rec.strokes||!rec.strokes.length) return '';
+  const ratio=(rec.h||800)/(rec.w||600);
+  const W=w, H=Math.min(420, Math.max(110, Math.round(w*ratio)));
+  const c=document.createElement('canvas'); c.width=W; c.height=H;
+  const x=c.getContext('2d');
+  x.fillStyle='#fff'; x.fillRect(0,0,W,H);
+  x.lineCap='round'; x.lineJoin='round';
+  for(let k=0;k<rec.strokes.length;k++){
+    const s=rec.strokes[k]; if(!s.pts||!s.pts.length) continue;
+    x.strokeStyle=s.er?'#fff':(s.c||'#111318');
+    if(s.pts.length===1){
+      x.fillStyle=x.strokeStyle;
+      x.beginPath(); x.arc(s.pts[0].x*W, s.pts[0].y*H, Math.max(0.8,(s.w||3)/2), 0, 6.2832); x.fill();
+      continue;
+    }
+    for(let i=1;i<s.pts.length;i++){
+      const a=s.pts[i-1], b=s.pts[i];
+      x.lineWidth=Math.max(0.6,(s.w||3)*(0.45+(b.p!=null?b.p:0.5)*1.15));
+      x.beginPath(); x.moveTo(a.x*W,a.y*H); x.lineTo(b.x*W,b.y*H); x.stroke();
+    }
+  }
+  try{ return c.toDataURL('image/jpeg',0.5); }catch(e){ return ''; }
+}
+function hwRebuildThumbs(){
+  hwEnsure();
+  const ids=Object.keys(S.hw||{});
+  let made=0;
+  for(let i=0;i<ids.length;i++){
+    const id=ids[i];
+    if(S.hwThumb && S.hwThumb[id]) continue;
+    const url=hwRenderThumb(S.hw[id], 300);
+    if(url){ S.hwThumb[id]=url; made++; }
+  }
+  if(made){ const s=GH.suppress; GH.suppress=true; try{ save(); }catch(e){} GH.suppress=s; }
+  return made;
+}
+
 /* ==================== 启动 ==================== */
 hwEnsure();
 hwBind();
 hwSyncBtns();
+try{ hwRebuildThumbs(); }catch(e){}
+document.addEventListener('visibilitychange', function(){
+  if(document.visibilityState==='hidden' && GH.dirty){ ghSync(true); }
+});
+setTimeout(function(){
+  var c=ghCfg();
+  if(c.auto && c.token && c.repo){ ghSync(true); }
+}, 2500);
 renderHome();
 </script>
 </body>
