@@ -212,6 +212,20 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
 #hwTop{display:flex;align-items:flex-start;gap:8px;padding:2px 2px 6px}
 .hw-x{background:#22252c;color:#e8e8ed;border:0;border-radius:9px;width:34px;height:34px;font-size:15px;flex:0 0 auto}
 .hw-q{flex:1;font-size:13px;color:#9aa0aa;line-height:1.4;max-height:54px;overflow:hidden}
+#hwRef{display:none;background:#141c26;border:1px solid #26384a;border-radius:12px;margin-bottom:8px;overflow:hidden;flex:0 0 auto}
+#hwRef.on{display:block}
+#hwRef .r-bar{display:flex;align-items:center;gap:8px;padding:8px 12px;font-size:11.5px;color:#7ea6c9;
+  background:#17212c;border-bottom:1px solid #24384a}
+#hwRef .r-bar span{flex:1;font-weight:600;letter-spacing:.3px}
+#hwRef .r-bar button{background:#22303d;color:#9dc4de;border:0;border-radius:7px;padding:4px 9px;font-size:11px}
+#hwRef .r-body{max-height:30vh;overflow:auto;padding:11px 13px;font-size:13.5px;line-height:1.8;color:#dfe3e8;
+  -webkit-overflow-scrolling:touch}
+#hwRef .r-body ul{margin:6px 0 0 18px;padding:0}
+#hwRef.min .r-body{display:none}
+#hwRef.min{border-color:#1d2b38}
+.hwcopy{display:block;width:100%;margin-top:13px;padding:11px;border-radius:11px;
+  background:rgba(10,132,255,.08);color:#8ecfff;border:1px dashed #2f4a5e;font-size:13.5px;font-weight:600}
+.hwcopy:active{background:rgba(10,132,255,.18)}
 #hwWrap{flex:1;position:relative;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 0 0 1px #2a2d35 inset}
 #hwCv{display:block;width:100%;height:100%;touch-action:none;-webkit-user-select:none;user-select:none}
 .hw-tools{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;padding:8px 2px 4px}
@@ -543,6 +557,11 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
     <button class="hw-x" onclick="hwClose()">✕</button>
     <div class="hw-q" id="hwQ"></div>
   </div>
+  <div id="hwRef">
+    <div class="r-bar"><span>📖 参考 · 边看边抄</span>
+      <button id="hwRefBtn" onclick="hwToggleRef()">收起 ▴</button></div>
+    <div class="r-body" id="hwRefBody"></div>
+  </div>
   <div id="hwWrap"><canvas id="hwCv"></canvas></div>
   <div class="hw-tools">
     <button class="hw-btn" id="hwS1" onclick="hwSetSize(2)">细</button>
@@ -559,7 +578,7 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
   </div>
   <div class="hw-foot">
     <button class="hw-btn ghost" onclick="hwClose()">关闭</button>
-    <button class="hw-btn blue" onclick="hwSaveFlip()">💾 保存并看答案</button>
+    <button class="hw-btn blue" id="hwSaveBtn" onclick="hwSaveFlip()">💾 保存并看答案</button>
   </div>
   <div class="hw-tip">支持手写笔压感（越用力越粗）· 手掌误触就开「仅笔」</div>
 </div>
@@ -881,7 +900,7 @@ function renderCard(){
   }
 
   // 普通翻卡
-  act.innerHTML= (HW_TYPES[c.t] ? '<button class="act-btn hwbtn" onclick="openHW()">'+
+  act.innerHTML= (HW_TYPES[c.t] ? '<button class="act-btn hwbtn" onclick="openHW(\'write\')">'+
       ((S.hw&&S.hw[c.id])?'✏️ 我的笔迹':'✏️ 手写作答')+'</button>' : '')+
     '<button class="act-btn unknown" onclick="markCard(-1)">不熟 ❌</button>'+
     '<button class="act-btn" onclick="flipCard()">看答案 💡</button>'+
@@ -909,6 +928,7 @@ function flipCard(){
     }
   }
   if(c.n) h+='<div class="ans-note">💡 '+esc(c.n)+'</div>';
+  if(HW_TYPES[c.t]) h+='<button class="hwcopy" onclick="event.stopPropagation();openHW(\'copy\')">✏️ 抄写一遍（看着答案写，加深记忆）</button>';
   if(S.hw && S.hw[c.id]){
     h+='<div class="hw-mine"><div class="hw-mine-t">✏️ 我的笔迹</div>'+
        ((S.hwThumb&&S.hwThumb[c.id])?'<img class="hw-thumb" src="'+S.hwThumb[c.id]+'" alt="笔迹">':'')+
@@ -1594,11 +1614,28 @@ function hwEnsure(){ if(!S.hw) S.hw={}; if(!S.hwThumb) S.hwThumb={}; if(!S.hwOpt
 function hwOpt(){ hwEnsure(); return S.hwOpt; }
 function hwFind(id){ for(let i=0;i<HUB.cards.length;i++){ if(HUB.cards[i].id===id) return HUB.cards[i]; } return null; }
 
-function openHW(){
+function openHW(mode){
   hwEnsure();
   const c=Q[qi]; if(!c) return;
+  mode = mode || 'write';
   HW.id=c.id; HW.playing=false; HW.cur=null;
   document.getElementById('hwQ').textContent=(c.q||'').slice(0,140);
+
+  // 抄写模式：顶部显示参考答案，可折叠，边看边写
+  const ref=document.getElementById('hwRef'), body=document.getElementById('hwRefBody');
+  if(ref && body){
+    if(mode==='copy'){
+      body.innerHTML=refHtml(c);
+      ref.classList.add('on'); ref.classList.remove('min');
+      document.getElementById('hwRefBtn').textContent='收起 ▴';
+    }else{
+      ref.classList.remove('on'); ref.classList.remove('min');
+      body.innerHTML='';
+    }
+  }
+  const sb=document.getElementById('hwSaveBtn');
+  if(sb) sb.textContent = (mode==='copy') ? '💾 保存笔迹' : '💾 保存并看答案';
+
   document.getElementById('hwMask').classList.add('on');
   hwSyncBtns();
   requestAnimationFrame(function(){
@@ -1608,6 +1645,34 @@ function openHW(){
     hwRedrawAll();
   });
 }
+function hwToggleRef(){
+  const ref=document.getElementById('hwRef'), btn=document.getElementById('hwRefBtn');
+  if(!ref) return;
+  ref.classList.toggle('min');
+  btn.textContent = ref.classList.contains('min') ? '展开 ▾' : '收起 ▴';
+  requestAnimationFrame(function(){ hwFit(); hwRedrawAll(); });
+}
+
+/* 把卡片答案渲染成参考文本（供抄写模式用） */
+function refHtml(c){
+  let h='';
+  if(c.t==='saq' && Array.isArray(c.a)){
+    h+='<div>'+esc(c.a[0])+'</div><ul>';
+    for(let i=1;i<c.a.length;i++) h+='<li>'+esc(c.a[i])+'</li>';
+    h+='</ul>';
+  }else if(c.subs){
+    h+='<div><b>答案：</b>'+c.subs.map(function(x){return esc(x.label)+' = '+esc(x.ans);}).join('　')+'</div>';
+  }else{
+    h+='<div>'+esc(Array.isArray(c.a)?c.a.join('；'):c.a)+'</div>';
+  }
+  if(c.steps){
+    h+='<div style="margin-top:7px;color:#a9b4c0;font-size:12.5px"><b>步骤：</b><br>'+
+      (Array.isArray(c.steps)?c.steps.map(function(x,i){return (i+1)+'. '+esc(x);}).join('<br>'):esc(c.steps))+'</div>';
+  }
+  if(c.n) h+='<div style="margin-top:7px;color:#8fb0c9;font-size:12.5px">💡 '+esc(c.n)+'</div>';
+  return h;
+}
+
 function hwClose(){
   document.getElementById('hwMask').classList.remove('on');
   HW.cur=null; HW.playing=false;
@@ -1781,13 +1846,34 @@ function hwSave(){
   toast('笔迹已保存 ✅');
   return true;
 }
-function hwSaveFlip(){ if(hwSave()){ hwClose(); if(!flipped) flipCard(); } }
+function hwSaveFlip(){
+  if(!hwSave()) return;
+  const c=Q[qi];
+  hwClose();
+  if(!flipped){ flipCard(); return; }
+  hwInjectMine(c);   // 已在看答案：只补一块"我的笔迹"，不整页重绘
+}
+/* 把刚保存的笔迹塞回答案区 */
+function hwInjectMine(c){
+  const box=document.getElementById('flashcard');
+  const a=box.querySelector('.card-a'); if(!a||!c) return;
+  const old=a.querySelector('.hw-mine'); if(old) old.remove();
+  if(!(S.hw && S.hw[c.id])) return;
+  const d=document.createElement('div');
+  d.className='hw-mine';
+  d.innerHTML='<div class="hw-mine-t">✏️ 我的笔迹</div>'+
+    ((S.hwThumb&&S.hwThumb[c.id])?'<img class="hw-thumb" src="'+S.hwThumb[c.id]+'" alt="笔迹">':'')+
+    '<div class="hw-mine-b"><button class="mini-btn" onclick="openHW(\'copy\')">重写 / 回放</button>'+
+    '<button class="mini-btn" onclick="hwDel(\''+c.id+'\')">删除</button></div>';
+  a.appendChild(d);
+}
 function hwDel(id){
   hwEnsure();
+  const wasFlipped = (Q[qi] && Q[qi].id===id) ? flipped : false;
   delete S.hw[id]; if(S.hwThumb) delete S.hwThumb[id];
   save(); toast('已删除');
   if(document.getElementById('hwLibMask').classList.contains('on')) openHWLib();
-  else if(Q[qi] && Q[qi].id===id) renderCard();
+  else if(Q[qi] && Q[qi].id===id){ renderCard(); if(wasFlipped) flipCard(); }
 }
 function hwExport(){
   if(!HW.cv) return;
