@@ -393,6 +393,54 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
 .hq-reveal{width:100%; padding:14px; border-radius:13px; border:1px dashed #4b3d1d;
   background:rgba(232,193,90,.06); color:#f0d69a; font-size:14px; font-weight:700;}
 .hq-info{font-size:11.5px; color:var(--dim); text-align:center; margin-top:12px;}
+
+/* v11-term */
+.tm{color:#8ecfff; border-bottom:1px dashed rgba(142,207,255,.55); cursor:pointer; padding:0 1px;}
+.tm:active{background:rgba(10,132,255,.2)}
+#tmMask{position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:400; display:none;
+  align-items:flex-end; justify-content:center; backdrop-filter:blur(2px);}
+#tmMask.on{display:flex}
+#tmBox{width:100%; max-width:560px; background:#181d24; border-radius:20px 20px 0 0;
+  border-top:1px solid #2c3441; padding:16px 18px calc(20px + env(safe-area-inset-bottom));
+  max-height:76vh; overflow:auto; animation:tmUp .22s ease;}
+@keyframes tmUp{from{transform:translateY(30px); opacity:0} to{transform:none; opacity:1}}
+#tmBox .tm-h{display:flex; align-items:center; gap:10px; margin-bottom:10px;}
+#tmBox .tm-h b{flex:1; font-size:18px; color:#fff; letter-spacing:.3px}
+#tmBox .tm-h button{background:#22303d; color:#9dc4de; border:0; border-radius:9px; padding:7px 12px; font-size:12px}
+#tmBox .tm-def{font-size:14.5px; line-height:1.85; color:#dfe3e8;}
+#tmBox .tm-def em{font-style:normal; color:var(--warn); font-weight:700}
+#tmBox .tm-rel{margin-top:12px; padding-top:11px; border-top:1px solid #262d38; font-size:12px; color:var(--dim)}
+#tmBox .tm-rel a{color:#8ecfff; text-decoration:none; margin-right:10px}
+.guess-tip{background:linear-gradient(150deg,#1c2a1c,#17201a); border:1px solid #2f4a33;
+  border-radius:14px; padding:12px 14px; margin-bottom:12px;}
+.guess-tip b{display:block; font-size:14px; color:#b9e6bf; margin-bottom:3px;}
+.guess-tip span{font-size:11.5px; color:#8aa892; line-height:1.6}
+.term-search{width:100%; background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+  padding:12px 14px; color:#fff; font-size:14px; margin-bottom:14px;}
+.term-row{padding:11px 13px; border-radius:12px; background:var(--panel); margin-bottom:8px; cursor:pointer;}
+.term-row:active{background:var(--panel2)}
+.term-row b{font-size:14.5px; color:#8ecfff; font-weight:600; display:block; margin-bottom:3px;}
+.term-row span{font-size:12px; color:var(--sub); line-height:1.65; display:block;
+  overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;}
+.guest-badge{display:inline-block; margin-left:6px; padding:2px 7px; border-radius:6px;
+  background:#2b2412; border:1px solid #4b3d1d; color:#f0d69a; font-size:10px; vertical-align:middle; font-weight:600;}
+
+/* v12-ink */
+.ink-host{position:relative}
+.ink-cv{position:absolute; left:0; top:0; z-index:5; pointer-events:none; border-radius:inherit;}
+#inkBar{position:fixed; right:9px; bottom:calc(80px + env(safe-area-inset-bottom));
+  z-index:130; display:none; flex-direction:column; gap:6px;}
+#inkBar.on{display:flex}
+#inkBar button{width:44px; height:44px; border-radius:13px; border:1px solid #333d4a;
+  background:rgba(26,32,40,.94); color:#cfd6df; font-size:18px; line-height:1;
+  box-shadow:0 4px 14px rgba(0,0,0,.35); backdrop-filter:blur(8px);}
+#inkBar button.on{background:#0a84ff; border-color:#3ba0ff; color:#fff;}
+#inkBar button:active{transform:scale(.94)}
+#inkBar .ink-tip{position:fixed; left:50%; transform:translateX(-50%);
+  bottom:calc(140px + env(safe-area-inset-bottom)); background:rgba(20,26,33,.96);
+  border:1px solid #35414f; border-radius:11px; padding:8px 14px; font-size:12px;
+  color:#b9c2cd; display:none; white-space:nowrap;}
+#inkBar .ink-tip.on{display:block}
 </style>
 </head>
 <body>
@@ -511,7 +559,7 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
       <input type="number" id="goalRev" min="1" max="200" value="20"></div>
   </div>
 
-  <div class="set-item">
+  <div class="set-item" id="ghCard">
     <h3>☁️ 云同步（GitHub 私有仓库）</h3>
     <p>进度和笔迹都存到<b>你自己的 GitHub 私有仓库</b>，平板、手机自动对齐，换设备不用再导来导去。<br>
        第一次用：填令牌 → 点「连接并同步」，仓库不存在会自动创建。</p>
@@ -538,6 +586,13 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
     </div>
     <input type="file" id="impFile" accept=".json,.txt,application/json" style="display:none" onchange="importFile(this)">
     <p id="fileStatus" class="gh-status"></p>
+  </div>
+
+  <div class="set-item" id="guestCard">
+    <h3>🔗 分享给别人（访客模式）</h3>
+    <p>复制这条链接发给别人：对方打开<b>看不到云同步</b>，也没法碰你的令牌，只能刷题、看知识、看钩子。<br>
+       他自己的进度存在他自己的浏览器里，跟你完全隔离。</p>
+    <div class="gh-btns"><button class="mini-btn blue" onclick="copyGuestLink()">复制访客链接</button></div>
   </div>
 
   <div class="set-item">
@@ -589,6 +644,32 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
     <div class="st-title"><b>⚡ 记忆钩子</b><span id="hookSub">—</span></div>
   </div>
   <div id="hookBody"></div>
+</div>
+
+<!-- v12-ink 批注工具条 -->
+<div id="inkBar">
+  <button id="inkToggleBtn" onclick="inkToggle()" title="批注开关">✎</button>
+  <button id="inkPenBtn" onclick="inkSetMode('pen')" title="笔" style="font-size:14px;font-weight:700">笔</button>
+  <button id="inkHlBtn" onclick="inkSetMode('hl')" title="荧光笔" style="font-size:14px;font-weight:700">荧</button>
+  <button id="inkErBtn" onclick="inkSetMode('er')" title="橡皮" style="font-size:14px;font-weight:700">擦</button>
+  <button onclick="inkUndo()" title="撤销">↶</button>
+  <button onclick="inkClear()" title="清空">🗑</button>
+  <div class="ink-tip" id="inkTip">批注模式：直接画，点 ✏️ 退出后可滚动</div>
+</div>
+
+<!-- v11-term 术语弹层 -->
+<div id="tmMask" onclick="if(event.target===this)tmClose()">
+  <div id="tmBox">
+    <div class="tm-h"><b id="tmWord"></b><button onclick="tmClose()">关闭</button></div>
+    <div class="tm-def" id="tmDef"></div>
+    <div class="tm-rel" id="tmRel"></div>
+  </div>
+</div>
+
+<div id="view-term" class="view">
+  <div class="hd"><h2>📖 术语表</h2><div class="hd-sub" id="termCount"></div></div>
+  <input class="term-search" id="termSearch" placeholder="搜术语：别构、Km、倒位、操纵子…" oninput="renderTerm()">
+  <div id="termBody"></div>
 </div>
 
 <!-- ============ 底部导航 ============ -->
@@ -699,16 +780,17 @@ function setCard(id, patch){ S.cards[id] = Object.assign(cst(id), patch, {t:Date
 
 /* 统计 */
 function stats(deckId){
-  let total=0, mastered=0, seen=0, wrong=0;
+  let total=0, mastered=0, seen=0, wrong=0, guessed=0;
   for(const c of HUB.cards){
     if(deckId && c.deck!==deckId) continue;
     total++;
     const st=cst(c.id);
-    if(st.st>0){ mastered++; seen++; }
+    if(st.st===1){ mastered++; seen++; }            // 只有"确定会"才算掌握
+    else if(st.st===2){ seen++; }                    // 模糊：学过但没掌握
     else if(st.st<0){ seen++; wrong++; }
-    else if(st.st===2){ seen++; wrong++; }
+    else if((st.g||0)>0){ seen++; guessed++; }       // 蒙对：接触过，但不掌握
   }
-  return {total, mastered, seen, wrong};
+  return {total, mastered, seen, wrong, guessed};
 }
 
 /* ==================== v10 记忆钩子 ==================== */
@@ -820,7 +902,7 @@ function go(v){
   document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
   const el=document.getElementById('view-'+v); if(el) el.classList.add('active');
   document.getElementById('navHome').classList.toggle('on', v==='home');
-  const nk=document.getElementById('navKnow'); if(nk) nk.classList.toggle('on', v==='know'||v==='kd'||v==='hook');
+  const nk=document.getElementById('navKnow'); if(nk) nk.classList.toggle('on', v==='know'||v==='kd'||v==='hook'||v==='term');
   document.getElementById('navStudy').classList.toggle('on', v==='study');
   const ns=document.getElementById('navStat'); if(ns) ns.classList.toggle('on', v==='stat');
   document.getElementById('navSet').classList.toggle('on', v==='set');
@@ -830,6 +912,8 @@ function go(v){
   if(v==='know') renderKnow();
   if(v==='hook') renderHook();
   if(v==='search') doSearch();
+  if(v==='term') renderTerm();
+  if(v!=='kd' && v!=='study'){ inkDetach(); }
   window.scrollTo(0,0);
 }
 
@@ -1010,7 +1094,7 @@ function renderCard(){
     (TYPE_LABEL[c.t]||c.t)+(c.c?' · '+esc(c.c):'')+'</div>'+
     '<button class="fav-star'+(favOn?' on':'')+'" onclick="event.stopPropagation();toggleFav()">'+
     (favOn?'★':'☆')+'</button></div>';
-  h+='<div class="card-q">'+esc(c.q)+'</div>';
+  h+='<div class="card-q">'+termify(c.q)+'</div>';
 
   // 填空题干显示下划线（已在 q 里包含）
   document.getElementById('flashcard').innerHTML=h;
@@ -1031,7 +1115,7 @@ function renderCard(){
       let oh='';
       const letters='ABCDEFGH';
       (c.o||[]).forEach((o,i)=>{
-        oh+='<button class="opt" data-i="'+i+'"><span class="letter">'+letters[i]+'</span>'+esc(o)+'</button>';
+        oh+='<button class="opt" data-i="'+i+'"><span class="letter">'+letters[i]+'</span>'+termify(o)+'</button>';
       });
       document.getElementById('flashcard').innerHTML=h+'<div class="opts">'+oh+'</div>';
       document.getElementById('flashcard').querySelectorAll('.opt').forEach(el=>{
@@ -1111,18 +1195,29 @@ function pickOpt(i){
     if(j===i && i!==right) el.classList.add('sel-wrong');
   });
   const ok = (i===right);
-  if(ok) lastScore.right++; else lastScore.wrong++;
   const st=cst(c.id);
-  applyScore(c.id, ok);
+  if(ok){
+    lastScore.right++;
+    // 老熟人（已掌握且连续对过 2 次）不再追问，避免刷题被拖慢
+    if(st.st===1 && (st.hit||0)>=2 && !(st.g>0)){
+      applyScore(c.id, true);
+      if(todayCounted){ todayCounted.rev++; S.todayRev=(S.todayRev||0)+1; save(); checkDailyDone(); }
+      setTimeout(()=>{ qi++; renderCard(); }, 550);
+      return;
+    }
+    setTimeout(function(){ askGuess(c, st); }, 220);   // 新题/蒙过的题：问一句真会还是蒙的
+    return;
+  }
+  lastScore.wrong++;
+  applyScore(c.id, false);
   if(todayCounted){
-    if(st.st===0){ todayCounted.new++; S.todayNew=(S.todayNew||0)+1; }
+    if(st.st===0 && !(st.g>0)){ todayCounted.new++; S.todayNew=(S.todayNew||0)+1; }
     else { todayCounted.rev++; S.todayRev=(S.todayRev||0)+1; }
     save();
     checkDailyDone();
   }
-  if(!ok && !retrySet.has(c.id)){ retrySet.add(c.id); Q.push(c); } // 错题重排一次
-  if(!ok){ setTimeout(function(){ showExplain(c); }, 240); return; }   // 答错：停下看讲解
-  setTimeout(()=>{ qi++; renderCard(); }, ok?550:1150);
+  if(!retrySet.has(c.id)){ retrySet.add(c.id); Q.push(c); } // 错题重排一次
+  setTimeout(function(){ showExplain(c); }, 240);           // 答错：停下看讲解
 }
 
 function checkInput(){
@@ -1227,13 +1322,14 @@ function renderDone(){
 
 /* ==================== 设置 ==================== */
 function renderSet(){
+  applyGuestMode();
   document.getElementById('goalNew').value=S.goal.new;
   document.getElementById('goalRev').value=S.goal.rev;
   if(typeof ghFillSet==='function') ghFillSet();
   const all=stats(null);
   document.getElementById('aboutText').innerHTML=
     '题库版本：'+(HUB.generated||'v1')+' · 共 '+HUB.decks.length+' 库 '+all.total+' 张<br>'+
-    '已掌握 '+all.mastered+' 张 · 错题 '+all.wrong+' 张 · 连续打卡 '+(S.streak||0)+' 天';
+    '已掌握 '+all.mastered+' 张 · 错题 '+all.wrong+' 张 · 蒙对未掌握 '+all.guessed+' 张 · 连续打卡 '+(S.streak||0)+' 天';
 }
 document.addEventListener('change', e=>{
   if(e.target.id==='goalNew'){ S.goal.new=Math.max(1,parseInt(e.target.value)||10); save(); toast('已保存'); }
@@ -1325,7 +1421,7 @@ function applyScore(id, ok, fuzzy){
 }
 function dueList(){
   const td=today();
-  return HUB.cards.filter(c=>{ const s=cst(c.id); return s.st!==0 && s.due && s.due<=td; });
+  return HUB.cards.filter(c=>{ const s=cst(c.id); return (s.st!==0 || (s.g||0)>0) && s.due && s.due<=td; });
 }
 function startDue(){
   const q=shuffle(dueList());
@@ -1471,7 +1567,8 @@ function renderKnow(){
     '<div class="ko-legend"><span><em style="background:var(--ok)"></em>已掌握 '+mas+'</span>'+
     '<span><em style="background:var(--warn)"></em>学过未掌握 '+(tot-mas-wrongCard)+'</span>'+
     '<span><em style="background:var(--bad)"></em>错题 '+wrongCard+'</span></div>'+
-    '<button class="ko-hook-btn" onclick="go(\'hook\')">⚡ 打开钩子墙 · '+hookCount()+' 条口诀，覆盖 '+hookCover()+' 张题</button></div>';
+    '<button class="ko-hook-btn" onclick="go(\'hook\')">⚡ 打开钩子墙 · '+hookCount()+' 条口诀，覆盖 '+hookCover()+' 张题</button>'+
+    '<button class="ko-hook-btn" style="background:linear-gradient(135deg,#16232e,#151a20); border-color:#2b4152; color:#8ecfff" onclick="go(\'term\')">📖 打开术语表 · '+TERM_KEYS.length+' 条，看不懂题就先查词</button></div>';
 
   /* 漏洞诊断 */
   var wk = weakList(5);
@@ -1576,6 +1673,7 @@ function openKD(kid){
   document.getElementById('kdBody').innerHTML = h;
   go('kd');
   window.scrollTo(0,0);
+  setTimeout(function(){ inkAttach(document.getElementById('kdBody'), 'kd:'+kid); }, 70);
 }
 
 function startKnow(kid, onlyWrong){
@@ -1652,6 +1750,8 @@ function showExplain(c){
   box.insertAdjacentHTML('beforeend', h);
   document.getElementById('actRow').innerHTML =
     '<button class="act-btn next" onclick="qi++;renderCard()">下一题 →</button>';
+  var kb = box.querySelector('.kn-block');
+  if(kb) setTimeout(function(){ inkAttach(kb, 'card:'+c.id); }, 60);
 }
 
 /* 漏洞报告：一键复制发给 AI */
@@ -1719,6 +1819,9 @@ function renderStat(){
   let h='<div class="stat-grid">';
   h+='<div class="stat-cell"><b>'+all.mastered+'</b><span>已掌握 / 共 '+all.total+' 张</span></div>';
   h+='<div class="stat-cell"><b>'+due+'</b><span>今日待复习</span></div>';
+  if(all.guessed){
+    h+='<div class="stat-cell" onclick="startGuess()" style="cursor:pointer"><b style="color:var(--warn)">'+all.guessed+'</b><span>🎲 蒙对未掌握 · 点我重考</span></div>';
+  }
   h+='<div class="stat-cell"><b>'+all.wrong+'</b><span>错题</span></div>';
   h+='<div class="stat-cell"><b>'+fav+'</b><span>收藏</span></div>';
   h+='<div class="stat-cell"><b>'+(S.streak||0)+'</b><span>连续打卡（天）</span></div>';
@@ -2111,6 +2214,333 @@ function hwExportAll(){
 /* ---- 注入点：卡片上手写按钮 ---- */
 
 
+
+
+/* ==================== v12-ink 讲解批注 ==================== */
+var INK = {key:null, host:null, cv:null, ctx:null, on:false, mode:'pen',
+           onlyPen: (typeof matchMedia==='function' && matchMedia('(pointer: coarse)').matches),
+           strokes:[], cur:null, w:0, h:0, dpr:1};
+var inkTimer = null, inkRO = null;
+
+function inkData(key){
+  return (S.ink && S.ink[key]) ? S.ink[key] : {strokes:[]};
+}
+function inkAttach(host, key){
+  if(!host) return;
+  var old = host.querySelector('.ink-cv'); if(old) old.remove();
+  host.classList.add('ink-host');
+  var cv = document.createElement('canvas');
+  cv.className = 'ink-cv';
+  host.appendChild(cv);
+  INK.host = host; INK.cv = cv; INK.ctx = cv.getContext('2d');
+  INK.key = key; INK.on = false; INK.cur = null;
+  INK.strokes = (inkData(key).strokes || []).slice();
+  cv.style.pointerEvents = 'none';
+  inkBind(cv);
+  inkWatch();
+  inkResize();
+  inkShowBar(true);
+  inkSyncBar();
+}
+function inkBind(cv){
+  cv.addEventListener('pointerdown', inkDown);
+  cv.addEventListener('pointermove', inkMove);
+  cv.addEventListener('pointerup', inkUp);
+  cv.addEventListener('pointercancel', inkUp);
+  cv.addEventListener('pointerleave', function(e){ if(INK.cur) inkUp(e); });
+}
+function inkWatch(){
+  if(inkRO) inkRO.disconnect();
+  if(!INK.host || typeof ResizeObserver === 'undefined') return;
+  inkRO = new ResizeObserver(function(){ inkResize(); });
+  inkRO.observe(INK.host);
+}
+function inkResize(){
+  if(!INK.cv || !INK.host) return;
+  var w = INK.host.clientWidth;
+  var h = Math.max(INK.host.clientHeight, INK.host.scrollHeight);
+  if(!w || !h) return;
+  var dpr = Math.min(window.devicePixelRatio || 1, 2);
+  if(INK.cv.width === Math.round(w*dpr) && INK.cv.height === Math.round(h*dpr)) return;
+  INK.dpr = dpr; INK.w = w; INK.h = h;
+  INK.cv.width = Math.round(w*dpr); INK.cv.height = Math.round(h*dpr);
+  INK.cv.style.width = w + 'px'; INK.cv.style.height = h + 'px';
+  inkRedraw();
+}
+function inkRedraw(){
+  var c = INK.ctx; if(!c) return;
+  c.setTransform(1,0,0,1,0,0);
+  c.clearRect(0,0,INK.cv.width,INK.cv.height);
+  c.scale(INK.dpr, INK.dpr);
+  for(var i=0;i<INK.strokes.length;i++) inkPaint(c, INK.strokes[i], true);
+}
+/* 整条重绘（whole=true）或只画最后一段（增量） */
+function inkPaint(c, s, whole){
+  var p = s.p; if(!p || p.length < 2) return;
+  c.save();
+  c.lineCap = 'round'; c.lineJoin = 'round';
+  c.globalAlpha = (s.a === undefined ? 1 : s.a);
+  c.strokeStyle = s.c || '#ffd166';
+  c.lineWidth = s.w || 3;
+  c.globalCompositeOperation = s.e ? 'destination-out' : 'source-over';
+  if(p.length < 6){
+    c.beginPath();
+    c.arc(p[0]*INK.w, p[1]*INK.h, (s.w||3)/2, 0, Math.PI*2);
+    c.fillStyle = s.c || '#ffd166'; c.fill();
+    c.restore(); return;
+  }
+  c.beginPath();
+  c.moveTo(p[0]*INK.w, p[1]*INK.h);
+  for(var i=3;i<p.length;i+=3) c.lineTo(p[i]*INK.w, p[i+1]*INK.h);
+  c.stroke();
+  c.restore();
+}
+function inkPos(e){
+  var r = INK.cv.getBoundingClientRect();
+  return [(e.clientX - r.left)/r.width, (e.clientY - r.top)/r.height];
+}
+function inkStyle(){
+  if(INK.mode === 'hl') return {c:'#ffe066', w:17, a:0.24, e:0};
+  if(INK.mode === 'er') return {c:'#000', w:22, a:1, e:1};
+  return {c:'#ff5f57', w:3, a:1, e:0};
+}
+function inkDown(e){
+  if(!INK.on) return;
+  if(INK.onlyPen && e.pointerType === 'touch') return;
+  e.preventDefault();
+  try{ INK.cv.setPointerCapture(e.pointerId); }catch(err){}
+  var pos = inkPos(e), st = inkStyle();
+  INK.cur = {c:st.c, w:st.w, a:st.a, e:st.e, p:[pos[0], pos[1], e.pressure||0.5]};
+  INK.strokes.push(INK.cur);
+  var c = INK.ctx;
+  c.save();
+  c.globalAlpha = st.a; c.fillStyle = st.c;
+  c.globalCompositeOperation = st.e ? 'destination-out' : 'source-over';
+  c.beginPath(); c.arc(pos[0]*INK.w, pos[1]*INK.h, st.w/2, 0, Math.PI*2); c.fill();
+  c.restore();
+}
+function inkMove(e){
+  if(!INK.on || !INK.cur) return;
+  if(INK.onlyPen && e.pointerType === 'touch') return;
+  e.preventDefault();
+  var p = INK.cur.p, pos = inkPos(e);
+  var x0 = p[p.length-3], y0 = p[p.length-2];
+  p.push(pos[0], pos[1], e.pressure||0.5);
+  var c = INK.ctx;
+  c.save();
+  c.lineCap='round'; c.lineJoin='round';
+  c.globalAlpha = INK.cur.a; c.strokeStyle = INK.cur.c; c.lineWidth = INK.cur.w;
+  c.globalCompositeOperation = INK.cur.e ? 'destination-out' : 'source-over';
+  c.beginPath(); c.moveTo(x0*INK.w, y0*INK.h); c.lineTo(pos[0]*INK.w, pos[1]*INK.h); c.stroke();
+  c.restore();
+}
+function inkUp(e){
+  if(!INK.cur) return;
+  INK.cur = null;
+  inkQueueSave();
+}
+function inkQueueSave(){
+  if(!INK.key) return;
+  if(inkTimer) clearTimeout(inkTimer);
+  inkTimer = setTimeout(inkSaveNow, 700);
+}
+function inkSaveNow(){
+  if(!INK.key) return;
+  if(inkTimer){ clearTimeout(inkTimer); inkTimer = null; }
+  if(!S.ink) S.ink = {};
+  if(!INK.strokes.length){
+    if(S.ink[INK.key]){ delete S.ink[INK.key]; save(); }
+    return;
+  }
+  S.ink[INK.key] = {v:1, at:Date.now(), strokes: INK.strokes.map(function(s){
+    return {c:s.c, w:s.w, a:s.a, e:s.e,
+      p: s.p.map(function(v){ return Math.round(v*10000)/10000; })};
+  })};
+  save();
+}
+function inkToggle(){
+  if(!INK.cv) return;
+  INK.on = !INK.on;
+  INK.cv.style.pointerEvents = INK.on ? 'auto' : 'none';
+  INK.cv.style.touchAction = INK.on ? (INK.onlyPen ? 'pan-y' : 'none') : 'auto';
+  var tip = document.getElementById('inkTip');
+  if(tip){
+    tip.classList.toggle('on', INK.on && !INK.onlyPen);
+    if(INK.on){ setTimeout(function(){ tip.classList.remove('on'); }, 3200); }
+  }
+  if(!INK.on) inkSaveNow();
+  inkSyncBar();
+}
+function inkSetMode(m){
+  INK.mode = m;
+  if(!INK.on) inkToggle();
+  inkSyncBar();
+  toast(m==='pen' ? '笔：随手划重点' : (m==='hl' ? '荧光笔：半透明划一段' : '橡皮：擦掉笔迹'));
+}
+function inkTogglePenOnly(){
+  INK.onlyPen = !INK.onlyPen;
+  if(INK.on) INK.cv.style.touchAction = INK.onlyPen ? 'pan-y' : 'none';
+  var tip = document.getElementById('inkTip');
+  if(tip) tip.classList.toggle('on', INK.on && !INK.onlyPen);
+  inkSyncBar();
+  toast(INK.onlyPen ? '仅笔模式：手指滚动，手写笔/鼠标画' : '手指也能画了（要滚动先退出）');
+}
+function inkUndo(){
+  if(!INK.strokes.length){ toast('没有可撤销的笔迹'); return; }
+  INK.strokes.pop();
+  inkRedraw(); inkSaveNow();
+}
+function inkClear(){
+  if(!INK.strokes.length) return;
+  if(!confirm('清空这一页的所有批注？')) return;
+  INK.strokes = [];
+  inkRedraw(); inkSaveNow();
+  toast('已清空');
+}
+function inkSyncBar(){
+  var b = document.getElementById('inkBar'); if(!b) return;
+  var t = document.getElementById('inkToggleBtn');
+  if(t) t.classList.toggle('on', INK.on);
+  var p1 = document.getElementById('inkPenBtn'); if(p1) p1.classList.toggle('on', INK.mode==='pen');
+  var p2 = document.getElementById('inkHlBtn'); if(p2) p2.classList.toggle('on', INK.mode==='hl');
+  var p3 = document.getElementById('inkErBtn'); if(p3) p3.classList.toggle('on', INK.mode==='er');
+}
+function inkShowBar(on){
+  var b = document.getElementById('inkBar'); if(!b) return;
+  b.classList.toggle('on', !!on);
+  if(!on){ INK.host=null; INK.cv=null; INK.ctx=null; INK.key=null; INK.on=false; }
+}
+function inkDetach(){
+  inkSaveNow();
+  inkShowBar(false);
+}
+
+/* ==================== v11-term 术语点查 / 蒙对判定 / 访客模式 ==================== */
+var GUEST = /[?&]guest=1/.test(location.search);
+var TERMS = {"肽平面":"肽键的 C—N 键有双键性质，六个原子（Cα-C-O-N-H-Cα）共处一个平面，不能自由旋转。考点：肽平面内旋转受限，只有 Cα 两侧的键能转。","二硫键":"两个半胱氨酸的 —SH 被氧化连成的 S—S 键。在体外能稳定三级结构，还原剂（β-巯基乙醇）一加就断。","α螺旋":"蛋白质最常见的二级结构：右手螺旋，每圈 3.6 个残基、螺距 0.54 nm、每个残基上升 0.15 nm。氢键在 i 与 i+4 之间。","β折叠":"多肽链伸展成锯齿状、相邻链间形成氢键的片层结构。链间距约 0.47 nm，每残基上升 0.35 nm。分平行和反平行，反平行更稳定。","β转角":"让多肽链拐弯的 4 个残基结构，常见于球状蛋白表面，甘氨酸和脯氨酸出现频率高。","超二级结构":"二级结构之间的组合，如 βαβ、螺旋-转角-螺旋。它比二级结构高一级、比结构域低一级。","结构域":"球状蛋白中能独立折叠、往往承担一项独立功能的区域。一个大蛋白常有多个结构域。","亚基":"寡聚蛋白中每条独立的多肽链。四级结构讲的是亚基之间怎么排布，不是亚基内部怎么折。","变性":"理化学因素破坏空间结构，但不断裂肽键。表现：溶解度下降、黏度下降、A260 升高、活性丧失；去除因素可复性。","复性":"变性程度不深时，去掉变性因素后蛋白自发恢复原构象（Anfinsen 核糖核酸酶实验）。说明一级结构决定高级结构。","盐析":"加高浓度中性盐（硫酸铵）夺走水化层、中和电荷，让蛋白沉淀。可逆，不破坏结构，用于粗分离。","等电点":"蛋白净电荷为零时的 pH，记作 pI。此时溶解度最低、电泳不动。pH>pI 带负电，pH<pI 带正电。","凝胶过滤":"分子筛层析。大分子进不去孔、先出来；小分子钻进孔里、后出来。别记反。","透析":"用半透膜把小分子（盐、小肽）扩散出去，留下大分子。不能用来测分子量。","沉降系数":"超速离心时颗粒的沉降速度指标，单位 S（10⁻¹³ s）。它不是分子量，别拿它当 Da 用。","肽键":"一个氨基酸的羧基与下一个氨基酸的氨基脱水缩合形成的酰胺键，有部分双键性质。","必需氨基酸":"人体不能合成、必须从食物摄取的 8 种：缬、异亮、苯丙、蛋（甲硫）、色、苏、赖、亮。婴儿再加组氨酸。","疏水氨基酸":"侧链非极性的： Gly、Ala、Val、Leu、Ile、Pro、Phe、Met、Trp。它们倾向藏在蛋白内部。","含硫氨基酸":"甲硫氨酸（Met，含 —S—CH₃）和半胱氨酸（Cys，含 —SH）。只有这两个含硫。","芳香族氨基酸":"Phe、Tyr、Trp，280 nm 有紫外吸收，所以测蛋白浓度用 A280。Trp 吸收最强。","茚三酮":"氨基酸的通用显色剂，加热后生成蓝紫色（脯氨酸显黄色）。纸层析/薄层显色常用。","酶促反应":"酶催化的化学反应。特点：高效、专一、条件温和、可调节，比非催化反应快 10⁶ 倍以上。","核酶":"有催化活性的 RNA。证明 RNA 既能存遗传信息又能催化，支持 RNA 世界假说。","活性中心":"酶分子上直接结合底物并催化反应的区域，由几个必需基团构成（结合部位 + 催化部位）。","必需基团":"酶活性必需的那些侧链基团，包括结合基团和催化基团。构象改变后它们相对位置变了，酶就失活。","辅酶":"与酶蛋白结合疏松、可用透析去掉的小分子有机物质，如 NAD⁺、CoA。本质多为维生素衍生物。","辅基":"与酶蛋白共价紧密结合、透析去不掉的小分子，如 FAD、血红素。","米氏方程":"v = Vmax·[S] / (Km + [S])。描述单底物酶促反应速度与底物浓度的关系，曲线是双曲线。","米氏常数":"即 Km，v = ½Vmax 时的底物浓度。Km 越小，酶对底物亲和力越大；Km 是酶的特征常数，与浓度无关。","Vmax":"最大反应速度，所有酶都被底物饱和时的速度。与酶的总浓度成正比。","转换数":"每秒钟每个酶分子催化底物转化的分子数，也叫催化常数 kcat，衡量催化效率。","比活力":"每毫克蛋白酶所含的活力单位数，用来比较不同酶制品的纯度。","酶活力单位":"衡量酶量的指标。国际单位 U：每分钟催化 1 μmol 底物转化的酶量。","竞争性抑制":"抑制剂和底物抢同一个活性中心。表现：Km 变大、Vmax 不变，加大底物浓度可解除。","非竞争性抑制":"抑制剂结合在活性中心以外，底物和抑制剂可同时结合。表现：Km 不变、Vmax 变小。","反竞争性抑制":"抑制剂只与酶-底物复合物结合。表现：Km 变小、Vmax 变小。","不可逆抑制":"抑制剂与酶共价结合、不能透析除去，如有机磷抑制胆碱酯酶、青霉素抑制转肽酶。","别构酶":"多亚基酶，除活性中心外还有别构中心；结合调节物后构象改变，v-[S] 曲线是 S 形而不是双曲线。","别构调节":"小分子（别构效应物）结合在别构中心，改变酶构象从而激活或抑制，是快速调节方式。","协同效应":"一个亚基结合配体后，改变其余亚基的亲和力。正协同使曲线变 S 形，负协同使其更平缓。","诱导契合":"底物接近时，酶的活性中心会改变构象去适配底物（「手」去适应「手套」），比刚性锁钥模型更准确。","催化三联体":"丝氨酸蛋白酶活性中心的三联体 Ser-His-Asp，通过电荷接力让 Ser 的羟基变成强亲核体。","最适pH":"酶活性最高时的 pH。过酸过碱会改变基团解离状态或使酶变性。胃蛋白酶偏酸，胰蛋白酶偏碱。","酶原激活":"无活性的酶前体被切掉一段肽后变成有活性的酶，如胰蛋白酶原→胰蛋白酶、胃蛋白酶原→胃蛋白酶。","核苷酸":"核苷 + 磷酸。核苷 = 碱基 + 戊糖。DNA 的糖是脱氧核糖（2′-H），RNA 是核糖（2′-OH）。","磷酸二酯键":"一个核苷酸的 3′-OH 与下一个的 5′-磷酸形成的键，是核酸骨架的连接方式，方向 5′→3′。","Chargaff定律":"双链 DNA 中 A=T、G=C，所以 (A+G)=(T+C)、(A+T)/(G+C) 随物种而异，可作物种标记。","Tm值":"解链温度，DNA 双链一半解开时的温度。GC 含量越高 Tm 越高，与分子长短关系不大。","增色效应":"DNA 变性后双链解开，碱基暴露，260 nm 吸光度升高。复性后回落（减色效应）。","超螺旋":"双链 DNA 在空间上再拧几圈形成的螺旋。负超螺旋有利于解链，拓扑异构酶负责调整。","核小体":"染色质的基本单位：146 bp DNA 缠在组蛋白八聚体（H2A/H2B/H3/H4 各两分子）上 1.75 圈。","组蛋白":"富含赖氨酸和精氨酸的碱性蛋白，与 DNA 结合。H1 连接核小体，其余四种构成八聚体。","半保留复制":"每条子链都保留一条母链，形成两个杂合双链。Meselson-Stahl 用 ¹⁵N 密度梯度离心证明。","复制叉":"DNA 解链后形成的 Y 形结构，两条链分别作模板，一条连续（前导链）、一条不连续（后随链）。","冈崎片段":"后随链上不连续合成的短片段（原核约 1000-2000 nt），由 DNA 连接酶连成长链。","引物酶":"合成一小段 RNA 引物，为 DNA 聚合酶提供 3′-OH 起点。DNA 聚合酶不能从头起始。","端粒酶":"一种逆转录酶，自带 RNA 模板，给真核线性染色体 3′ 端补重复序列，解决末端缩短问题。","Klenow片段":"大肠杆菌 DNA 聚合酶 I 被切掉 5′→3′ 外切活性后剩的大片段，用于补平、测序。","切除修复":"切掉损伤的一段，用另一条链作模板补上，再由连接酶封口。包括碱基切除（BER）和核苷酸切除（NER）。","光复活":"光复活酶利用可见光能量直接拆掉紫外造成的嘧啶二聚体，是原核特有的修复方式。","错配修复":"复制后识别并纠正错配碱基，靠甲基化标记哪条是新链，把新链上的错配换掉。","SOS反应":"DNA 严重损伤时诱导出的应急修复系统，容易出错（易错修复），伴随诱变。","转录":"以 DNA 一条链为模板、由 RNA 聚合酶合成 RNA 的过程。原核一个酶全包，真核分 I/II/III。","启动子":"RNA 聚合酶识别并结合、启动转录的 DNA 序列。原核有 -10 区（TATAAT）和 -35 区。","终止子":"转录终止信号。不依赖 ρ 因子的靠发夹结构 + 一串 U；依赖 ρ 因子的靠 ρ 蛋白追上来解链。","操纵子":"原核基因表达的调控单元 = 启动子 + 操纵基因 + 一串结构基因。一个开关管一组基因。","操纵基因":"阻遏蛋白结合的 DNA 序列，位于启动子附近。阻遏蛋白一结合，RNA 聚合酶就过不去。","阻遏蛋白":"结合操纵基因、挡住转录的蛋白。乳糖操纵子里是 Lac I 产物，有乳糖时被诱导物拉走。","衰减子":"色氨酸操纵子里的额外调控：转录刚起步就靠翻译速度决定是否提前终止，属精细微调。","增强子":"真核中远距离起作用的调控序列，方向位置都可变，靠转录因子拉近启动子起作用。","外显子":"基因中保留在成熟 mRNA 里的序列。注意：外显子不等于「编码区」，两端还有 UTR。","内含子":"转录后被剪接掉的序列。真核基因普遍有，原核大多没有。","剪接":"把内含子切掉、外显子连起来。靠 5′GU、3′AG 剪接位点和剪接体完成，可变剪接能一个基因出多种蛋白。","帽子结构":"真核 mRNA 5′ 端的 7-甲基鸟苷帽（m⁷G），保护 mRNA、帮助核糖体识别。","polyA尾":"真核 mRNA 3′ 端的一串腺苷酸，增加稳定性、便于出核和翻译。原核没有。","逆转录":"以 RNA 为模板合成 DNA，由逆转录酶催化。中心法则的补充，也是 cDNA 合成的原理。","中心法则":"DNA→DNA（复制）、DNA→RNA（转录）、RNA→蛋白（翻译）。例外：RNA→DNA（逆转录）、RNA→RNA（RNA 复制）。","遗传密码":"mRNA 上每 3 个碱基决定一个氨基酸。64 个密码子：61 个编码、3 个终止（UAA/UAG/UGA）。AUG 兼起始。","简并性":"一个氨基酸可由多个密码子编码。减少突变危害，同义突变往往不改变氨基酸。","摆动假说":"tRNA 反密码子第一位与密码子第三位配对不严格，所以一个 tRNA 能认多个密码子。","SD序列":"原核 mRNA 起始密码子上游的富嘌呤序列，与 16S rRNA 配对，定位起始位置。","核糖体":"翻译机器，原核 70S（50S+30S），真核 80S（60S+40S）。肽酰转移酶活性在 rRNA 上，是核酶。","tRNA":"搬运氨基酸的适配器，三叶草二级结构、倒 L 三级结构，3′ 端 CCA 挂氨基酸。","信号肽":"新生肽 N 端的一段疏水序列，引导蛋白进入内质网，之后被切掉。","糖酵解":"葡萄糖→2 丙酮酸，共 10 步，净得 2 ATP + 2 NADH。三个限速酶：己糖激酶、磷酸果糖激酶-1、丙酮酸激酶。","底物水平磷酸化":"代谢物之间直接转移磷酸基团生成 ATP，不经过呼吸链。糖酵解里有两处。","三羧酸循环":"乙酰CoA 与草酰乙酸缩合成柠檬酸，转一圈又回到草酰乙酸。一轮得 3 NADH + 1 FADH₂ + 1 GTP，放出 2 CO₂。","回补反应":"补充 TCA 中间产物被抽走后的空缺，最主要的是丙酮酸羧化酶生成草酰乙酸。","丙酮酸脱氢酶复合体":"把丙酮酸氧化脱羧成乙酰CoA 的多酶复合体，需要 TPP、硫辛酸、CoA、FAD、NAD⁺ 五种辅因子。","糖异生":"由非糖物质（乳酸、甘油、生糖氨基酸）合成葡萄糖。三个绕不过去的步骤各有替代酶。","磷酸戊糖途径":"产生 NADPH 和 5-磷酸核糖，不产 ATP。限速酶是 6-磷酸葡萄糖脱氢酶（G6PD）。","乳酸发酵":"丙酮酸被乳酸脱氢酶还原成乳酸，目的是再生 NAD⁺，让糖酵解能继续。","糖原分解":"糖原磷酸化酶从非还原端切下 1-磷酸葡萄糖，肌肉缺葡萄糖-6-磷酸酶，所以不能直接补血糖。","氧化磷酸化":"NADH/FADH₂ 经呼吸链把电子交给氧，同时把能量转成 ATP 的过程，是细胞 ATP 的主要来源。","呼吸链":"线粒体内膜上四个复合体组成的电子传递链，把 NADH 的电子逐级传给 O₂，同时把 H⁺ 泵到膜间隙。","化学渗透学说":"电子传递泵出的 H⁺ 形成跨膜电化学梯度，H⁺ 回流时驱动 ATP 合酶合成 ATP。Mitchell 提出。","ATP合酶":"F₀F₁ 复合体，F₀ 是 H⁺ 通道、F₁ 负责催化。H⁺ 流回基质时带动转子旋转，构象变化把 ADP+Pi 变成 ATP。","P/O比":"每对电子经呼吸链传递时生成的 ATP 数。按教材口径：NADH 为 2.5，FADH₂ 为 1.5。","解偶联剂":"让 H⁺ 绕过 ATP 合酶回流，电子照传、ATP 不产，能量变成热。如 2,4-二硝基苯酚（DNP）。","穿梭系统":"把胞质 NADH 的还原当量运进线粒体的方式。甘油-3-磷酸穿梭得 1.5 ATP 当量，苹果酸-天冬氨酸穿梭得 2.5。","β氧化":"脂肪酸在 β 碳上被反复氧化切下乙酰CoA，每轮四步：脱氢、加水、再脱氢、硫解，得 1 FADH₂ + 1 NADH + 1 乙酰CoA。","肉碱穿梭":"长链脂酰CoA 不能直接进线粒体，要转成脂酰肉碱由转运体带进去，进去后再变回脂酰CoA。","酮体":"乙酰乙酸、β-羟丁酸、丙酮，肝内生成、肝外利用（肝缺利用酮体的酶）。饥饿时给大脑供能。","丙二酰CoA":"脂肪酸合成的第一个中间物，同时抑制肉碱转移酶 I，阻止新合成的脂肪酸被立刻氧化掉。","乙酰CoA羧化酶":"脂肪酸合成的限速酶，把乙酰CoA 羧化成丙二酰CoA。柠檬酸激活、软脂酰CoA 抑制。","乙醛酸循环":"植物和细菌特有，绕开 TCA 的两个脱羧步骤，把脂肪酸变成糖。关键酶：异柠檬酸裂解酶、苹果酸合酶。","生糖氨基酸":"能净生成葡萄糖的氨基酸，多数氨基酸属此类。亮氨酸和赖氨酸是纯生酮的。","转氨基作用":"氨基酸把氨基交给 α-酮酸，生成新的氨基酸和新的 α-酮酸。辅酶是磷酸吡哆醛（VB₆）。","氧化脱氨基":"谷氨酸脱氢酶把谷氨酸变成 α-酮戊二酸 + NH₃，是唯一重要的氧化脱氨基反应。","尿素循环":"把有毒的 NH₃ 变成无毒的尿素，在肝里进行。限速酶是氨甲酰磷酸合成酶 I，Asp 提供第二个氮。","一碳单位":"由一个碳原子组成的基团（甲基、亚甲基、甲酰基等），由四氢叶酸（THF）携带，参与核苷酸合成。","SAM":"S-腺苷甲硫氨酸，体内最主要的甲基供体，参与 DNA 甲基化、肌酸合成等。","痛风":"尿酸生成过多或排出不畅，尿酸盐结晶沉积在关节。嘌呤分解终产物是尿酸，别和尿素搞混。","等位基因":"同源染色体同一位置上控制同一性状的不同形式，如 A 和 a。","基因型":"个体的基因组合（AA、Aa、aa），是内在的。","表现型":"基因型与环境共同作用表现出的性状，是外在的。","相对性状":"同一性状的不同表现类型，如豌豆的高茎和矮茎。别理解成「两个性状」。","测交":"用隐性纯合体与待测个体杂交，后代性状比例直接反映待测个体产生的配子比例。","回交":"与亲本之一杂交。若与隐性亲本回交则等同于测交。","分离定律":"一对等位基因在减数分裂时彼此分开、进入不同配子。实质是等位基因的分离。","自由组合定律":"两对及以上等位基因位于非同源染色体上时，各自独立分离、自由组合。","完全显性":"杂合体表现与显性纯合体完全相同。","不完全显性":"杂合体表现介于两亲本之间（如粉红花），F₂ 表现型比例 = 基因型比例 1:2:1。","共显性":"杂合体同时表现两个亲本的性状（如 AB 血型），不是混合。","复等位基因":"一个基因座上存在两个以上等位形式，如 ABO 血型的 I^A、I^B、i。","致死基因":"某些基因型个体不能存活，导致后代比例偏离孟德尔比例（如 2:1 代替 3:1）。","上位作用":"一对基因掩盖另一对非等位基因的表现。分显性上位 12:3:1、隐性上位 9:3:4。","积加作用":"两个显性基因各自给一种表型、同时存在又是第三种，F₂ 为 9:6:1。","抑制作用":"一对显性基因抑制另一对基因的表达，F₂ 为 13:3。","连锁":"位于同一条染色体上的基因倾向于一起遗传。","交换":"减数分裂时同源染色体非姐妹染色单体间互换片段，打破连锁。","重组率":"重组型配子占总配子的比例，反映基因间距离。","图距":"以重组率表示的基因间距离，单位 cM（厘摩）。1 cM = 1% 重组率。","三点测交":"用三对基因的测交同时确定顺序和距离，双交换类型最少的两个基因在中间。","干涉":"一次交换抑制邻近区域再次交换的现象，干涉系数 = 1 − 并发系数。","性连锁":"基因位于性染色体上，遗传与性别相关。X 连锁隐性遗传表现为交叉遗传（外祖父→外孙）。","交叉遗传":"X 连锁隐性基因由母亲传给儿子，表现为男性患者多、隔代遗传。","母系遗传":"由线粒体基因决定的性状，只随母亲传给所有子女，不符合孟德尔比例。","染色体畸变":"染色体结构或数目异常。结构包括缺失、重复、倒位、易位；数目包括整倍体和非整倍体改变。","缺失":"染色体片段丢失。杂合缺失会出现假显性现象（同源染色体上的隐性等位基因表现出来）。","倒位":"染色体片段 180° 反转。杂合倒位联会时形成倒位环，重组会被大大抑制。","易位":"非同源染色体之间交换片段。罗伯逊易位是两条近端着丝粒染色体在着丝粒处融合。","倒位环":"倒位杂合体在减数分裂联会时，为让同源区段配对而拱出的环状结构，是识别倒位的标志。","多倍体":"体细胞含三个及以上染色体组。同源多倍体来自同一物种，异源多倍体来自不同物种杂交加倍（如小麦）。","非整倍体":"染色体数目增减一至几条，如三体（2n+1）、单体（2n−1）、缺体（2n−2）、四体（2n+2）。","三体":"某一号染色体多一条（2n+1）。21 三体即唐氏综合征，患者智力低下、特殊面容。","基因突变":"DNA 序列的可遗传改变。分碱基替换（转换/颠换）和移码（增删非 3 倍数碱基）。","转换":"嘌呤换嘌呤、嘧啶换嘧啶的碱基替换。","颠换":"嘌呤与嘧啶之间的替换。","移码突变":"插入或缺失非 3 整数倍碱基，导致读码框改变，后果通常比替换严重。","同义突变":"碱基改变但编码的氨基酸不变（密码子简并性），表型通常无变化。","错义突变":"碱基改变导致氨基酸替换，可能影响蛋白功能（如镰状细胞贫血）。","无义突变":"密码子变成终止密码子，蛋白提前截短。","诱变剂":"提高突变率的因素。5-溴尿嘧啶引起转换，亚硝酸脱氨，紫外产生嘧啶二聚体。","转座子":"能在基因组内移动位置的 DNA 序列。McClintock 在玉米中发现的 Ac-Ds 系统是经典例子。","转化":"细菌直接摄取环境中的游离 DNA 并整合到基因组。Griffith 肺炎球菌实验、Avery 实验证明 DNA 是遗传物质。","接合":"细菌通过性菌毛直接传递 DNA，供体是 F⁺ 或 Hfr 菌株。","普遍转导":"噬菌体误装宿主任意 DNA 片段并转移给下一个细菌，可转移任何基因。","局限转导":"温和噬菌体从特定整合位点切出时带走邻近基因，只能转移特定几个基因。","F因子":"细菌的致育因子，是能自主复制的质粒。整合到染色体上后成为 Hfr 菌株，会高频转移染色体基因。","影印培养":"Lederberg 设计的实验：把平板上的菌落原样印到含药平板上，证明抗性突变是自发的，不是药物诱导的。","质粒":"染色体外能自主复制的环状 DNA，可携带抗性基因、F 因子等。","限制酶":"识别特定序列并切割 DNA 的核酸内切酶，是基因工程的「剪刀」。常用酶产生黏性末端。","PCR":"聚合酶链式反应，用变性-退火-延伸三步循环扩增 DNA。需要模板、引物、dNTP、Taq 酶。","Sanger测序":"双脱氧链终止法。ddNTP 掺入后不能继续延伸，得到长短不一的片段，电泳读序。","Southern印迹":"检测 DNA：DNA-Southern。RNA 用 Northern，蛋白用 Western。S/N/W 与 D/R/P 正好反过来。","Hardy-Weinberg平衡":"大群体、随机交配、无突变无选择无迁移时，基因频率和基因型频率代代不变。p²+2pq+q²=1。","遗传率":"遗传方差占总方差的比例。广义含全部遗传方差，狭义只含加性方差，育种上只看狭义。","近交系数":"个体两个等位基因来自同一祖先同一基因的概率，衡量近交程度。","杂种优势":"杂交后代在生长势、抗性等方面超过双亲的现象，F₂ 开始衰退。","数量性状":"受多基因控制、表现连续变异的性状（身高、产量），受环境影响大。","遗传漂变":"小群体中基因频率的随机波动，可能导致基因丢失或固定。","细胞质遗传":"由细胞质基因（线粒体、叶绿体）决定的遗传，特点是母系遗传、不遵循孟德尔比例。","基因组印记":"同一基因来自父方或母方时表达情况不同，与甲基化修饰有关。","定语从句":"修饰名词的从句，由关系代词（which/that/who/whose）或关系副词（when/where/why）引导，紧跟在先行词后。","同位语从句":"解释说明前面抽象名词（fact/news/idea/belief）具体内容的从句，用 that 引导且 that 不作成分。","非谓语动词":"不定式（to do）、动名词（doing）、分词（doing/done）不能在句中单独作谓语，但可作主语、宾语、定语、状语。","倒装句":"为强调或语法需要把谓语（或助动词）提到主语前。Only + 状语置于句首要部分倒装。","虚拟语气":"表示与事实相反的假设。与过去相反用 had done，与现在相反用 did/were，与将来相反用 were to do。"};
+var TERM_KEYS = Object.keys(TERMS).sort(function(a,b){ return b.length - a.length; });
+var TERM_RE = new RegExp('(' + TERM_KEYS.map(function(k){
+  return k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}).join('|') + ')', 'g');
+
+/* 把文本里的术语包成可点标签（逐段转义，避免污染 HTML） */
+function termify(txt){
+  if(txt===null || txt===undefined) return '';
+  var s = String(txt), out = '', last = 0, m;
+  TERM_RE.lastIndex = 0;
+  while((m = TERM_RE.exec(s)) !== null){
+    out += esc(s.slice(last, m.index));
+    var w = m[1];
+    out += '<span class="tm" onclick="event.stopPropagation();tmOpen(\'' + w + '\')">' + esc(w) + '</span>';
+    last = m.index + w.length;
+  }
+  out += esc(s.slice(last));
+  return out;
+}
+function tmOpen(w){
+  var d = TERMS[w]; if(!d) return;
+  document.getElementById('tmWord').textContent = w;
+  document.getElementById('tmDef').innerHTML = d.replace(/考点[:：]/g, '<em>考点：</em>');
+  // 关联知识点
+  var rel = [];
+  knowAll().forEach(function(k){
+    if((k.keys && k.keys.indexOf(w) >= 0) || (k.n && k.n.indexOf(w) >= 0) ||
+       (k.core && k.core.indexOf(w) >= 0)) rel.push(k);
+  });
+  var rh = '';
+  if(rel.length){
+    rh = '相关知识点：';
+    rel.slice(0,3).forEach(function(k){
+      rh += '<a href="javascript:;" onclick="tmClose();openKD(\'' + k.id + '\')">' + esc(k.n) + '</a>';
+    });
+  }else{
+    rh = '共 ' + TERM_KEYS.length + ' 条术语，设置页可查全表';
+  }
+  document.getElementById('tmRel').innerHTML = rh;
+  document.getElementById('tmMask').classList.add('on');
+}
+function tmClose(){ document.getElementById('tmMask').classList.remove('on'); }
+
+function renderTerm(){
+  var q = (document.getElementById('termSearch').value || '').trim();
+  var keys = TERM_KEYS.slice();
+  if(q) keys = keys.filter(function(k){ return k.indexOf(q) >= 0 || TERMS[k].indexOf(q) >= 0; });
+  document.getElementById('termCount').textContent = '共 ' + TERM_KEYS.length + ' 条 · 题干里的蓝字都能点';
+  var h = '';
+  if(!keys.length){ h = '<div class="weak-none">没找到，换个词试试</div>'; }
+  keys.forEach(function(k){
+    var d = TERMS[k];
+    h += '<div class="term-row" onclick="tmOpen(\'' + k + '\')"><b>' + esc(k) + '</b><span>' + esc(d) + '</span></div>';
+  });
+  document.getElementById('termBody').innerHTML = h;
+}
+
+/* ---- 蒙对判定：答对但不确定，不算掌握 ---- */
+function applyGuess(id){
+  var prev = cst(id);
+  setCard(id, {
+    st: 0,                        // 不算掌握
+    hit: prev.hit || 0,           // 连续答对计数不涨
+    g: (prev.g || 0) + 1,         // 蒙的次数
+    lv: 0,                        // 打回最底层
+    due: today(),                 // 今天就重考
+    fav: prev.fav || 0
+  });
+}
+function guessList(){
+  return HUB.cards.filter(function(c){ var s = cst(c.id); return (s.g || 0) > 0 && !(s.st > 0); });
+}
+function startGuess(){
+  var q = shuffle(guessList());
+  if(!q.length){ toast('没有蒙对的题，干净 👍'); return; }
+  startSession(q, '蒙对未掌握', 'guess');
+}
+function askGuess(c, prevSt){
+  showExplain(c);
+  var tip = document.createElement('div');
+  tip.className = 'guess-tip';
+  tip.innerHTML = '<b>这题对了 —— 但你是真会，还是蒙的？</b>' +
+    '<span>选「蒙的」不算掌握，今天会再考你一次；这道题只有在真会时才计入进度。</span>';
+  var fc = document.getElementById('flashcard');
+  fc.insertBefore(tip, fc.firstChild);
+  document.getElementById('actRow').innerHTML =
+    '<button class="act-btn unknown" onclick="answerAs(\'guess\')">🎲 蒙的</button>' +
+    '<button class="act-btn known" onclick="answerAs(\'know\')">✅ 真会</button>';
+}
+function answerAs(kind){
+  var c = Q[qi]; if(!c) return;
+  var st = cst(c.id);
+  if(kind === 'know') applyScore(c.id, true);
+  else applyGuess(c.id);
+  if(todayCounted){
+    if(st.st === 0 && !(st.g > 0)){ todayCounted.new++; S.todayNew = (S.todayNew || 0) + 1; }
+    else { todayCounted.rev++; S.todayRev = (S.todayRev || 0) + 1; }
+    save(); checkDailyDone();
+  }
+  if(kind === 'guess') toast('记下了：这题算蒙的，今天会再考你');
+  qi++; renderCard();
+}
+
+/* ---- 访客模式 ---- */
+function copyGuestLink(){
+  var u = location.origin + location.pathname + '?guest=1';
+  var ta = document.createElement('textarea');
+  ta.value = u; document.body.appendChild(ta); ta.select();
+  var ok = false;
+  try{ ok = document.execCommand('copy'); }catch(e){}
+  document.body.removeChild(ta);
+  if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(u);
+  toast('访客链接已复制：对方打开看不到云同步');
+}
+function applyGuestMode(){
+  if(!GUEST) return;
+  var gc = document.getElementById('ghCard'); if(gc) gc.style.display = 'none';
+  var t = document.querySelector('.app-title, #appTitle, header h1');
+  if(t && !t.querySelector('.guest-badge')){
+    t.insertAdjacentHTML('beforeend', '<span class="guest-badge">访客</span>');
+  }
+}
+
 /* ==================== v7 云同步（GitHub 私有仓库） ==================== */
 const GH_CFG_KEY='xzt_gh_cfg';
 const GH={busy:false, timer:null, dirty:false, suppress:false, lastErr:''};
@@ -2175,7 +2605,8 @@ function ghPack(){
     cards:S.cards||{}, daily:S.daily||{}, streak:S.streak||0,
     lastDate:S.lastDate||null, lastCheckin:S.lastCheckin||null,
     goal:S.goal||{new:10,rev:20}, todayNew:S.todayNew||0, todayRev:S.todayRev||0,
-    hw:S.hw||{}, hwOpt:S.hwOpt||{onlyPen:0}
+    hw:S.hw||{}, hwOpt:S.hwOpt||{onlyPen:0},
+    ink:S.ink||{}
   };
 }
 function ghMerge(remote){
@@ -2201,6 +2632,14 @@ function ghMerge(remote){
   const rd=remote.daily||{};
   for(const k in rd){
     if(!S.daily[k] || (rd[k]==='done' && S.daily[k]!=='done')){ S.daily[k]=rd[k]; changed++; }
+  }
+  const ri=remote.ink||{};
+  if(!S.ink) S.ink={};
+  for(const ik in ri){
+    const b=ri[ik];
+    if(!b || !b.strokes || !b.strokes.length) continue;
+    const a=S.ink[ik];
+    if(!a || (b.at||0) > (a.at||0)){ S.ink[ik]=b; changed++; }
   }
   const st2=Math.max(S.streak||0, remote.streak||0);
   if(st2>(S.streak||0)){ S.streak=st2; changed++; }
@@ -2405,11 +2844,11 @@ hwBind();
 hwSyncBtns();
 try{ hwRebuildThumbs(); }catch(e){}
 document.addEventListener('visibilitychange', function(){
-  if(document.visibilityState==='hidden' && GH.dirty){ ghSync(true); }
+  if(document.visibilityState==='hidden' && GH.dirty && !GUEST){ ghSync(true); }
 });
 setTimeout(function(){
   var c=ghCfg();
-  if(c.auto && c.token && c.repo){ ghSync(true); }
+  if(!GUEST && c.auto && c.token && c.repo){ ghSync(true); }
 }, 2500);
 renderHome();
 </script>
