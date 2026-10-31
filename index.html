@@ -755,7 +755,7 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
   <button id="inkErBtn" onclick="inkSetMode('er')" title="橡皮" style="font-size:14px;font-weight:700">擦</button>
   <button onclick="inkUndo()" title="撤销">↶</button>
   <button onclick="inkClear()" title="清空">🗑</button>
-  <div class="ink-tip" id="inkTip">批注模式：直接画，点 ✏️ 退出后可滚动</div>
+  <div class="ink-tip" id="inkTip">批注模式：手指只画不翻页，点 ✏️ 退出后恢复滑动</div>
 </div>
 
 <!-- v11-term 术语弹层 -->
@@ -1695,15 +1695,46 @@ function resetProg(){
   save(); renderSet(); toast('已清空');
 }
 
-/* ==================== 手势滑动切卡 ==================== */
-let tx=0;
-document.addEventListener('touchstart', e=>{ tx=e.touches[0].clientX; }, {passive:true});
-document.addEventListener('touchend', e=>{
-  const dx=e.changedTouches[0].clientX-tx;
-  if(Math.abs(dx)>70 && document.getElementById('view-study').classList.contains('active')){
-    if(dx<0){ if(qi<Q.length-1){qi++; renderCard();} }
-    else { if(qi>0){qi--; renderCard();} }
+/* ==================== 手势滑动切卡（v19：收紧判定，避开手写/批注） ==================== */
+let tx=0, ty=0, tT0=0, tSkip=false, tMulti=false;
+const SW_MIN=95, SW_SLOPE=0.55, SW_MS=650;   // 最小横向位移 / 最大斜率(越小越要求水平) / 最长用时
+
+/* 这些情况下绝不翻页：手写板开着 / 正在画 / 批注模式 / 起点落在画布或输入框 */
+function swipeBlocked(target){
+  const mask=document.getElementById('hwMask');
+  if(mask && mask.classList.contains('on')) return true;
+  if(typeof HW!=='undefined' && (HW.cur || HW.playing)) return true;
+  if(typeof INK!=='undefined' && INK && (INK.on || INK.cur)) return true;
+  let el=target;
+  for(let i=0; el && el.nodeType===1 && i<14; i++){
+    const tg=el.tagName;
+    if(tg==='CANVAS'||tg==='INPUT'||tg==='TEXTAREA'||tg==='SELECT') return true;
+    if(el.classList && (el.classList.contains('ink-host')||el.classList.contains('ink-cv')||el.classList.contains('no-swipe'))) return true;
+    el=el.parentNode;
   }
+  return false;
+}
+document.addEventListener('touchstart', function(e){
+  if(e.touches.length>1){ tMulti=true; return; }     // 双指=缩放/误触，整串手势都不判
+  const t=e.touches[0];
+  tx=t.clientX; ty=t.clientY; tT0=performance.now();
+  tSkip = swipeBlocked(e.target);
+}, {passive:true});
+document.addEventListener('touchend', function(e){
+  if(e.touches && e.touches.length>0) return;          // 还有手指没离开，等最后一根
+  const multi=tMulti; tMulti=false;
+  if(multi) return;                                   // 多指手势不算翻页
+  if(tSkip){ tSkip=false; return; }
+  if(!e.changedTouches || !e.changedTouches.length) return;
+  const t=e.changedTouches[0];
+  const dx=t.clientX-tx, dy=t.clientY-ty, dt=performance.now()-tT0;
+  if(dt>SW_MS) return;                                // 慢慢拖，多半在画/选字
+  if(Math.abs(dx)<SW_MIN) return;                     // 划得太短
+  if(Math.abs(dy)>Math.abs(dx)*SW_SLOPE) return;      // 斜着划不算，必须是横着推
+  if(!document.getElementById('view-study').classList.contains('active')) return;
+  if(swipeBlocked(e.target)) return;
+  if(dx<0){ if(qi<Q.length-1){qi++; renderCard();} }
+  else { if(qi>0){qi--; renderCard();} }
 }, {passive:true});
 
 
@@ -2331,6 +2362,10 @@ function hwStart(e){
 function hwEnd(){ if(HW.cur){ if(HW.cur.pts.length) HW.strokes.push(HW.cur); HW.cur=null; } }
 function hwBind(){
   const cv=document.getElementById('hwCv'); if(!cv) return;
+  /* v19：画布上的触摸一律不冒泡到 document，防止被当成翻页手势 */
+  ['touchstart','touchmove','touchend','touchcancel'].forEach(function(t){
+    cv.addEventListener(t, function(e){ e.stopPropagation(); }, {passive:true});
+  });
   cv.addEventListener('pointerdown', function(e){
     if(hwOpt().onlyPen && e.pointerType==='touch') return;
     if(e.pointerType==='pen' && !hwOpt().penHint){ hwOpt().penHint=1; toast('检测到手写笔，压感已开启 ✏️'); }
@@ -2532,7 +2567,7 @@ function hwExportAll(){
 /* ==================== v12-ink 讲解批注 ==================== */
 var INK = {key:null, host:null, cv:null, ctx:null, on:false, mode:'pen',
            onlyPen: (typeof matchMedia==='function' && matchMedia('(pointer: coarse)').matches),
-           strokes:[], cur:null, w:0, h:0, dpr:1};
+           strokes:[], cur:null, w:0, h:0, dpr:1, penLive:false, penTimer:null};
 var inkTimer = null, inkRO = null;
 
 function inkData(key){
@@ -2556,6 +2591,16 @@ function inkAttach(host, key){
   inkSyncBar();
 }
 function inkBind(cv){
+  /* v19：批注画布上的滑动只属于笔，不当翻页/滚动 */
+  ['touchstart','touchend','touchcancel'].forEach(function(t){
+    cv.addEventListener(t, function(e){ if(INK.on) e.stopPropagation(); }, {passive:true});
+  });
+  /* 笔正在写时，手指/手掌的触摸全部吃掉：既不滚页也不翻页（palm rejection） */
+  cv.addEventListener('touchmove', function(e){
+    if(!INK.on) return;
+    e.stopPropagation();
+    if(INK.cur || INK.penLive) e.preventDefault();
+  }, {passive:false});
   cv.addEventListener('pointerdown', inkDown);
   cv.addEventListener('pointermove', inkMove);
   cv.addEventListener('pointerup', inkUp);
@@ -2619,6 +2664,7 @@ function inkStyle(){
 }
 function inkDown(e){
   if(!INK.on) return;
+  if(e.pointerType === 'pen') INK.penLive = true;
   if(INK.onlyPen && e.pointerType === 'touch') return;
   e.preventDefault();
   try{ INK.cv.setPointerCapture(e.pointerId); }catch(err){}
@@ -2648,6 +2694,10 @@ function inkMove(e){
   c.restore();
 }
 function inkUp(e){
+  if(e && e.pointerType === 'pen' && INK.penLive){
+    if(INK.penTimer) clearTimeout(INK.penTimer);
+    INK.penTimer = setTimeout(function(){ INK.penLive = false; }, 600);
+  }
   if(!INK.cur) return;
   INK.cur = null;
   inkQueueSave();
@@ -2681,7 +2731,11 @@ function inkToggle(){
     tip.classList.toggle('on', INK.on && !INK.onlyPen);
     if(INK.on){ setTimeout(function(){ tip.classList.remove('on'); }, 3200); }
   }
-  if(!INK.on) inkSaveNow();
+  if(!INK.on){
+    INK.penLive = false;
+    if(INK.penTimer){ clearTimeout(INK.penTimer); INK.penTimer = null; }
+    inkSaveNow();
+  }
   inkSyncBar();
 }
 function inkSetMode(m){
