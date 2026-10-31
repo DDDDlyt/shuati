@@ -2676,7 +2676,9 @@ async function ghOnce(path, opts, token){
   if(typeof AbortController==='function'){
     ctrl=new AbortController();
     init.signal=ctrl.signal;
-    timer=setTimeout(function(){ try{ ctrl.abort(); }catch(e){} }, 20000);
+    const big = opts && opts.body ? String(opts.body).length : 0;
+    const to = big > 200000 ? 90000 : 20000;
+    timer=setTimeout(function(){ try{ ctrl.abort(); }catch(e){} }, to);
   }
   let r=null;
   try{
@@ -2823,14 +2825,13 @@ async function ghSync(silent, mode){
         const f=await ghReq(path+'?t='+Date.now());
         if(!f||!f.sha) throw Object.assign(new Error('云端返回空'), {net:true});
         sha=f.sha;
-        try{ remote=JSON.parse(b64dec(f.content||'')); }
-        catch(pe){ remote=null; }   // 云端文件坏了就当没同步过，别整个流程挂掉
+        remote=ghDecode(f.content||'');   // 云端文件读不出来就当没同步过，别整个流程挂掉
       }catch(e){ if(e.status!==404) throw e; }
     }
     const changed = remote ? ghMerge(remote) : 0;
     if(mode!=='pull'){
       const payload=ghPack();
-      const body={message:'sync '+(new Date().toISOString()), content:b64enc(JSON.stringify(payload))};
+      const body={message:'sync '+(new Date().toISOString()), content:ghEncode(payload)};
       if(sha) body.sha=sha;
       await ghReq(path, {method:'PUT', body:JSON.stringify(body)});
     }
@@ -2968,6 +2969,28 @@ function b64decBytes(b64){
   const out=new Uint8Array(bin.length);
   for(let i=0;i<bin.length;i++) out[i]=bin.charCodeAt(i);
   return out;
+}
+
+/* 云端文件格式：gzip 后加 3 字节头 GZ1，再 base64。老版本明文 JSON 也能读 */
+function ghEncode(obj){
+  const json=JSON.stringify(obj);
+  let gz=null;
+  try{ gz=window.pako ? window.pako.gzip(new TextEncoder().encode(json)) : null; }catch(e){}
+  if(!gz) return b64enc(json);            // 极端情况退回明文
+  const out=new Uint8Array(3+gz.length);
+  out[0]=0x47; out[1]=0x5a; out[2]=0x31;  // 'GZ1'
+  out.set(gz,3);
+  return b64encBytes(out);
+}
+function ghDecode(b64){
+  let bytes;
+  try{ bytes=b64decBytes(b64); }catch(e){ return null; }
+  if(bytes.length>10 && bytes[0]===0x47 && bytes[1]===0x5a && bytes[2]===0x31){
+    let txt=null;
+    try{ txt=new TextDecoder().decode(window.pako.ungzip(bytes.subarray(3))); }catch(e){ return null; }
+    try{ return JSON.parse(txt); }catch(e){ return null; }
+  }
+  try{ return JSON.parse(new TextDecoder().decode(bytes)); }catch(e){ return null; }
 }
 /* 打包成文本：支持 gzip 就压（前缀 GZ:），否则原文 base64（前缀 JS:） */
 /* 兼容老内核：没有 CompressionStream 时（微信 X5）临时加载自带 pako */
