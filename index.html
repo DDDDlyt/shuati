@@ -255,6 +255,25 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
 .hw-mine-b{display:flex;gap:8px;margin-top:7px}
 .hw-pen{color:#ffd60a}
 
+/* ===== v14 文本互传 ===== */
+.mt-hint{font-size:12.5px;color:#8b93a1;line-height:1.65;margin:0}
+#pcMask{position:fixed; inset:0; background:rgba(0,0,0,.62); z-index:520; display:none;
+  align-items:flex-end; justify-content:center; backdrop-filter:blur(2px)}
+#pcMask.on{display:flex}
+#pcBox{width:100%; max-width:560px; background:#181d24; border-radius:20px 20px 0 0;
+  border-top:1px solid #2c3441; padding:16px 18px calc(18px + env(safe-area-inset-bottom));
+  max-height:88vh; display:flex; flex-direction:column; animation:tmUp .22s ease}
+#pcBox .pc-h{display:flex; align-items:center; gap:10px; margin-bottom:8px}
+#pcBox .pc-h b{flex:1; font-size:17px; color:#fff}
+#pcBox .pc-h button{background:#22303d; color:#9dc4de; border:0; border-radius:9px; padding:7px 12px; font-size:12px}
+#pcBox .pc-tip{font-size:12.5px; line-height:1.7; color:#9aa0aa; margin:0 0 10px}
+#pcArea{width:100%; flex:1; min-height:150px; max-height:44vh; background:#0f1216; color:#cfd6de;
+  border:1px solid #2c3441; border-radius:12px; padding:11px 12px; font-size:12px; line-height:1.5;
+  font-family:ui-monospace,Menlo,Consolas,monospace; resize:none; word-break:break-all; -webkit-user-select:all; user-select:all}
+#pcBox .pc-foot{display:flex; gap:9px; margin-top:11px}
+#pcBox .pc-foot button{flex:1}
+#pcBox .pc-note{font-size:11.5px; line-height:1.6; color:#6b7280; margin:9px 0 0}
+
 /* ===== v13 存储位置说明 ===== */
 .store-grid{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;margin-top:10px;
   background:#171a20;border-radius:12px;padding:11px 13px;font-size:12.5px;line-height:1.5}
@@ -603,9 +622,14 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
 
   <div class="set-item">
     <h3>📁 手动互传（不联网也能用）</h3>
-    <p>导出成一个文件发到微信/QQ 给自己，另一台设备点「选择文件导入」，自动合并。</p>
+    <p class="mt-hint">微信用这个 → 点「复制数据」，长按全选复制，粘到微信聊天（可以发给「文件传输助手」），到另一台设备打开本页点「粘贴导入」。</p>
     <div class="gh-btns">
-      <button class="mini-btn blue" onclick="exportFile()">导出文件</button>
+      <button class="mini-btn blue" onclick="exportClip()">📋 复制数据</button>
+      <button class="mini-btn blue" onclick="importClip()">📥 粘贴导入</button>
+    </div>
+    <p class="mt-hint" style="margin-top:14px">浏览器里（Chrome / Safari）可以用文件，更方便：</p>
+    <div class="gh-btns" style="margin-top:7px">
+      <button class="mini-btn" onclick="exportFile()">导出文件</button>
       <button class="mini-btn" onclick="pickImport()">选择文件导入</button>
     </div>
     <input type="file" id="impFile" accept=".json,.txt,application/json" style="display:none" onchange="importFile(this)">
@@ -687,6 +711,19 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
     <div class="tm-h"><b id="tmWord"></b><button onclick="tmClose()">关闭</button></div>
     <div class="tm-def" id="tmDef"></div>
     <div class="tm-rel" id="tmRel"></div>
+  </div>
+</div>
+
+<div id="pcMask">
+  <div id="pcBox">
+    <div class="pc-h"><b id="pcTitle">复制数据</b><button onclick="pcClose()">关闭</button></div>
+    <p class="pc-tip" id="pcTip"></p>
+    <textarea id="pcArea" spellcheck="false" autocomplete="off" autocapitalize="off"></textarea>
+    <div class="pc-foot">
+      <button class="mini-btn" id="pcSel" onclick="pcSelectAll()">全选</button>
+      <button class="mini-btn blue" id="pcOk" onclick="pcConfirm()">导入</button>
+    </div>
+    <p class="pc-note" id="pcNote"></p>
   </div>
 </div>
 
@@ -2869,6 +2906,134 @@ function ghFillSet(){
 }
 
 /* ---- 文件互传 ---- */
+/* ---- v14 文本互传（微信里没有下载权限，走剪贴板） ---- */
+function b64encBytes(bytes){
+  let bin=''; const CH=0x8000;
+  for(let i=0;i<bytes.length;i+=CH) bin+=String.fromCharCode.apply(null, bytes.subarray(i,i+CH));
+  return btoa(bin);
+}
+function b64decBytes(b64){
+  const bin=atob(String(b64||'').replace(/\s/g,''));
+  const out=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) out[i]=bin.charCodeAt(i);
+  return out;
+}
+/* 打包成文本：支持 gzip 就压（前缀 GZ:），否则原文 base64（前缀 JS:） */
+async function packText(){
+  const json=JSON.stringify(ghPack());
+  const raw=new TextEncoder().encode(json);
+  if(typeof CompressionStream==='function'){
+    try{
+      const cs=new CompressionStream('gzip');
+      const w=cs.writable.getWriter();
+      w.write(raw); w.close();
+      const buf=await new Response(cs.readable).arrayBuffer();
+      return 'GZ:'+b64encBytes(new Uint8Array(buf));
+    }catch(e){}
+  }
+  return 'JS:'+b64encBytes(raw);
+}
+/* 解包：兼容 GZ: / JS: / 纯 JSON */
+async function unpackText(s){
+  s=String(s||'').trim();
+  if(!s) throw new Error('内容为空');
+  if(s.indexOf('GZ:')===0){
+    if(typeof DecompressionStream!=='function') throw new Error('这个浏览器不支持解压，换一个设备导入');
+    const bytes=b64decBytes(s.slice(3));
+    const ds=new DecompressionStream('gzip');
+    const w=ds.writable.getWriter();
+    w.write(bytes); w.close();
+    const txt=await new Response(ds.readable).text();
+    return JSON.parse(txt);
+  }
+  if(s.indexOf('JS:')===0){
+    const txt=new TextDecoder().decode(b64decBytes(s.slice(3)));
+    try{ return JSON.parse(txt); }
+    catch(e){ throw new Error('这段文本解不开，可能复制时缺了一半'); }
+  }
+  try{ return JSON.parse(s); }   // 也吃老的 .json 文件内容
+  catch(e){ throw new Error('这不是刷题数据（应该是 GZ: 或 JS: 开头的一段，或者 .json 文件内容）'); }
+}
+var PC={mode:'out'};
+async function exportClip(){
+  PC.mode='out';
+  const mask=document.getElementById('pcMask');
+  document.getElementById('pcTitle').textContent='📋 复制数据';
+  document.getElementById('pcTip').textContent=
+    '下面就是你的全部进度。长按全选 → 复制 → 粘到微信（可以发给自己或「文件传输助手」）。到另一台设备打开本页，点「粘贴导入」贴回去。';
+  document.getElementById('pcOk').style.display='none';
+  document.getElementById('pcSel').style.display='';
+  document.getElementById('pcNote').textContent='正在打包…';
+  mask.classList.add('on');
+  let txt='';
+  try{ txt=await packText(); }
+  catch(e){ document.getElementById('pcNote').textContent='打包失败：'+(e.message||''); return; }
+  const area=document.getElementById('pcArea');
+  area.value=txt;
+  area.readOnly=true;
+  const kb=Math.max(1,Math.round(txt.length/1024));
+  // 优先直接写剪贴板（微信里可能被拦，所以下面还有手动复制这条路）
+  let copied=false;
+  try{
+    await navigator.clipboard.writeText(txt);
+    copied=true;
+  }catch(e){}
+  pcSelectAll();
+  let msg = copied
+    ? '✅ 已复制到剪贴板（'+kb+' KB），直接去微信粘贴就行。若没粘上，就长按上面的框手动全选复制。'
+    : '内容已全选，长按上面的框 → 复制（'+kb+' KB）。';
+  if(txt.length > 120000){
+    msg += '　⚠️ 数据比较大，粘贴可能有点慢。要是卡得难受，改用上面的「云同步」：两台设备各填一次令牌就行。';
+  }
+  document.getElementById('pcNote').textContent=msg;
+  if(copied) toast('已复制 ✅');
+}
+function importClip(){
+  PC.mode='in';
+  const mask=document.getElementById('pcMask');
+  document.getElementById('pcTitle').textContent='📥 粘贴导入';
+  document.getElementById('pcTip').textContent=
+    '把另一台设备复制的那段文本粘到下面，点「导入」。会合并不覆盖——两边各自刷过的记录都会保留。';
+  document.getElementById('pcOk').style.display='';
+  document.getElementById('pcSel').style.display='none';
+  document.getElementById('pcNote').textContent='也可以粘老的 .json 文件内容，一样能认。';
+  const area=document.getElementById('pcArea');
+  area.value=''; area.readOnly=false;
+  mask.classList.add('on');
+  setTimeout(function(){ try{ area.focus(); }catch(e){} }, 260);
+}
+function pcSelectAll(){
+  const area=document.getElementById('pcArea');
+  try{ area.focus(); area.setSelectionRange(0, area.value.length); }catch(e){}
+  try{ area.select(); }catch(e){}
+}
+async function pcConfirm(){
+  if(PC.mode!=='in') return;
+  const area=document.getElementById('pcArea');
+  const note=document.getElementById('pcNote');
+  const txt=area.value;
+  if(!String(txt||'').trim()){ note.textContent='框里是空的，先把文本粘进来。'; return; }
+  note.textContent='正在导入…';
+  try{
+    const data=await unpackText(txt);
+    if(!data || typeof data!=='object' || (!data.cards && !data.daily && !data.hw && !data.ink))
+      throw new Error('这段内容里没有可识别的进度');
+    const n=ghMerge(data);
+    save();
+    const el=document.getElementById('fileStatus');
+    if(el) el.textContent='✅ 已从文本导入，合并 '+n+' 条记录';
+    toast('导入成功，合并 '+n+' 条 ✅');
+    pcClose();
+    renderSet && renderSet();
+  }catch(e){
+    note.textContent='❌ 导入失败：'+(e.message||'内容格式不对')+'，检查有没有复制完整。';
+  }
+}
+function pcClose(){
+  document.getElementById('pcMask').classList.remove('on');
+  const area=document.getElementById('pcArea');
+  area.value=''; area.readOnly=false;
+}
 function exportFile(){
   try{
     const blob=new Blob([JSON.stringify(ghPack())],{type:'application/json'});
