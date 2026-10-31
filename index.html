@@ -1075,7 +1075,7 @@ function go(v){
   if(v==='search') doSearch();
   if(v==='term') renderTerm();
   if(v==='read'){ READ.ch=null; READ.from=null; renderRead(); }   // 从导航进来总是先看章节目录
-  if(v!=='kd' && v!=='study'){ inkDetach(); }
+  if(v!=='kd' && v!=='study' && v!=='read'){ inkDetach(); }
   window.scrollTo(0,0);
 }
 
@@ -2017,6 +2017,7 @@ function renderRead(){
   rdEnsure();
   if(!READ.subj) READ.subj=(KNOW.subjects[0]||{}).id;
   if(READ.ch){ rdChapter(READ.ch); return; }
+  if(typeof INK!=='undefined' && INK.key) inkDetach();   // 回目录：收起批注条并保存
 
   var sj=null;
   (KNOW.subjects||[]).forEach(function(x){ if(x.id===READ.subj) sj=x; });
@@ -2067,6 +2068,9 @@ function rdChapter(chid){
   var sj=o.sj, ch=o.ch, pos=o.pos;
   var cards=chCards(ch);
 
+  /* 切章前先把上一章的批注落盘（v21：精讲页支持勾画，按章保存） */
+  if(typeof INK!=='undefined' && INK.key) inkSaveNow();
+
   document.getElementById('rdTitle').textContent=ch.n;
   document.getElementById('rdSub').textContent=sj.n+' · 第 '+pos+' 章';
 
@@ -2102,6 +2106,11 @@ function rdChapter(chid){
   var backY=0;
   if(READ.resume){ backY=(S.rpos && S.rpos[chid])||0; READ.resume=false; }
   window.scrollTo(0, backY);
+  /* v21：这一章可以勾画——批注按章保存，跟云同步走 */
+  setTimeout(function(){
+    var host=document.getElementById('rdBody');
+    if(host) inkAttach(host, 'read:'+chid);
+  }, 60);
 }
 function startChapter(chid){
   var o=rdKnow(chid); if(!o) return;
