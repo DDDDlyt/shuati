@@ -48,10 +48,12 @@ button{font-family:inherit; cursor:pointer; border:none; outline:none;}
 .streak-card b{font-size:22px; font-weight:800;}
 .streak-card span{font-size:11px; color:var(--sub); text-align:center;}
 /* 今日任务 */
+/* v20 注：配额已删，这里是"下一步做什么"卡 */
 .task-card{background:var(--panel); border-radius:18px; padding:16px; margin-bottom:14px;}
 .task-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;}
 .task-head h2{margin:0; font-size:16px; font-weight:700;}
 .task-head .date{font-size:11px; color:var(--sub);}
+.task-why{font-size:12px; color:var(--sub); line-height:1.55; margin:-4px 0 11px;}
 .task-row{display:flex; gap:10px; margin-bottom:12px;}
 .task-item{flex:1; background:var(--panel2); border-radius:12px; padding:10px 12px;}
 .task-item .t-lbl{font-size:11px; color:var(--sub); margin-bottom:4px;}
@@ -378,6 +380,16 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
   overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;}
 .weak-item .w-num{font-size:11px; color:var(--sub); flex-shrink:0; text-align:right;}
 .weak-none{font-size:12.5px; color:var(--ok);}
+/* v20 专攻清单 */
+.weak-box.drill{background:linear-gradient(160deg,#171d2a,#191a20); border-color:#26364c;}
+.drill-row .w-why{color:#8fa5b8;}
+.drill-right{display:flex; align-items:center; gap:9px; flex-shrink:0;}
+.drill-right b{font-size:13px; font-weight:700; min-width:38px; text-align:right;}
+.drill-btn{padding:5px 12px; border-radius:9px; border:1px solid #33608f; background:#0f2438;
+  color:#7cc4ff; font-size:12px; font-weight:700;}
+.drill-btn:active{background:#16395a;}
+.drill-more{width:100%; margin-top:9px; padding:10px; border-radius:11px; background:#1f2530;
+  color:var(--sub); font-size:12px; border:1px solid #2b3441;}
 
 /* 知识点详情 */
 .kd-hero{background:var(--panel); border-radius:16px; padding:16px; margin-bottom:14px;}
@@ -542,10 +554,9 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
       </div>
       <div class="lbl" id="ringLbl">0 / 0 张</div>
     </div>
-    <div class="streak-card">
-      <div class="fire" id="fireIcon">🔥</div>
-      <b id="streakNum">0</b>
-      <span>连续打卡<br>天数</span>
+    <div class="streak-card" onclick="startSmart()" style="cursor:pointer">
+      <b id="dueNum">0</b>
+      <span>张今天<br>该复习</span>
     </div>
   </div>
 
@@ -558,27 +569,15 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
 
   <div class="task-card">
     <div class="task-head">
-      <h2>🎯 今日任务</h2>
+      <h2 id="taskTitle">🔁 该复习了</h2>
       <div class="date" id="todayDate"></div>
     </div>
-    <div class="task-row">
-      <div class="task-item">
-        <div class="t-lbl">📖 新题</div>
-        <div class="t-num"><span id="newDone">0</span> <i>/ <span id="newGoal">10</span> 张</i></div>
-        <div class="bar"><i class="blue" id="newBar" style="width:0%"></i></div>
-      </div>
-      <div class="task-item">
-        <div class="t-lbl">🔁 复习</div>
-        <div class="t-num"><span id="revDone">0</span> <i>/ <span id="revGoal">20</span> 张</i></div>
-        <div class="bar"><i class="warn" id="revBar" style="width:0%"></i></div>
-      </div>
-    </div>
-    <button class="big-btn" onclick="startDaily()">开始今日任务</button>
+    <div class="task-why" id="taskWhy">按遗忘曲线，这些卡今天到期。答完自动排下一次。</div>
+    <button class="big-btn" id="taskMainBtn" onclick="startSmart()">开始</button>
     <div class="btn-row">
       <button class="big-btn ghost" onclick="startWrong()">错题重刷</button>
       <button class="big-btn ghost" onclick="startRandom()">随机 20 题</button>
       <button class="big-btn ghost" onclick="startFav()">⭐ 收藏</button>
-      <button class="big-btn ghost" onclick="startDue()">🔁 到期</button>
     </div>
   </div>
 
@@ -624,15 +623,6 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
 <!-- ============ 设置 ============ -->
 <div id="view-set" class="view">
   <div class="top"><h1>⚙️ 设置</h1><div class="sub">目标、进度同步、关于</div></div>
-
-  <div class="set-item">
-    <h3>每日目标</h3>
-    <p>调整「今日任务」的新题与复习数量。改完自动保存。</p>
-    <div class="set-row"><label>每天新题（张）</label>
-      <input type="number" id="goalNew" min="1" max="100" value="10"></div>
-    <div class="set-row" style="margin-top:9px"><label>每天复习（张）</label>
-      <input type="number" id="goalRev" min="1" max="200" value="20"></div>
-  </div>
 
   <div class="set-item" id="storeCard">
     <h3>📦 你的进度存在哪</h3>
@@ -698,7 +688,7 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
 
   <div class="set-item">
     <h3>危险操作</h3>
-    <p>清空本设备全部学习记录（认识/不认识/打卡历史），不可恢复。</p>
+    <p>清空本设备全部学习记录（认识/不认识/学习历史），不可恢复。</p>
     <button class="mini-btn red" onclick="resetProg()">清空全部进度</button>
   </div>
 
@@ -1047,9 +1037,9 @@ function renderHome(){
   const C=2*Math.PI*45;
   document.getElementById('ringProg').style.strokeDashoffset = C*(1-pct/100);
 
-  document.getElementById('streakNum').textContent = S.streak||0;
   let dueCnt=0;
   for(const c of HUB.cards){ const s=cst(c.id); if(s.st!==0 && s.due && s.due<=today()) dueCnt++; }
+  const dueEl=document.getElementById('dueNum'); if(dueEl) dueEl.textContent=dueCnt;
   document.getElementById('homeSub').textContent =
     '共 '+HUB.decks.length+' 个题库 · '+all.total+' 张卡 · 错题 '+all.wrong+' 张'+
     (dueCnt? ' · 待复习 '+dueCnt+' 张' : '');
@@ -1058,18 +1048,22 @@ function renderHome(){
   document.getElementById('todayDate').textContent =
     (d.getMonth()+1)+'月'+d.getDate()+'日';
 
-  // 今日任务（新一天重置计数）
-  if(S.lastDate !== today()){
-    S.todayNew=0; S.todayRev=0; S.lastDate=today();
-    save();
+  /* v20：不再有每日配额，主按钮永远指向「现在最该做的事」 */
+  const freshN=HUB.cards.filter(c=>{ const s=cst(c.id); return s.st===0 && !(s.g>0); }).length;
+  let ttl='🔁 该复习了', why='按遗忘曲线，这些卡今天到期。答完自动排下一次。', btn='开始复习 '+dueCnt+' 张';
+  if(!dueCnt && freshN){
+    ttl='📖 接着往下刷';
+    why='今天没有到期的卡，直接推进没碰过的题。';
+    btn='开始 '+Math.min(freshN,20)+' 张新题';
+  }else if(!dueCnt && !freshN){
+    ttl='🎲 全都过了一遍';
+    why='没有到期卡，也没有没碰过的题。随机抽一组保持手感。';
+    btn='随机 20 题';
   }
-  const ng=S.goal.new, rg=S.goal.rev;
-  document.getElementById('newDone').textContent=S.todayNew||0;
-  document.getElementById('revDone').textContent=S.todayRev||0;
-  document.getElementById('newGoal').textContent=ng;
-  document.getElementById('revGoal').textContent=rg;
-  document.getElementById('newBar').style.width=Math.min(100,(S.todayNew||0)/ng*100)+'%';
-  document.getElementById('revBar').style.width=Math.min(100,(S.todayRev||0)/rg*100)+'%';
+  if(all.wrong) why += '　另有 '+all.wrong+' 张错题待重刷。';
+  document.getElementById('taskTitle').textContent=ttl;
+  document.getElementById('taskWhy').textContent=why;
+  document.getElementById('taskMainBtn').textContent=btn;
 
   // 题库列表
   const subjColor={生化:'#34c759', 遗传:'#bf5af2', 数学:'#ff9f0a', 英语:'#0a84ff'};
@@ -1598,21 +1592,21 @@ function markCard(st, unverified){
   qi++; renderCard();
 }
 
-function checkDailyDone(){
-  if(S.todayNew>=S.goal.new && S.todayRev>=S.goal.rev && S.daily[today()]!=='done'){
-    S.daily[today()]='done';
-    // streak：昨天也打卡则+1，否则从1计
-    const y=new Date(); y.setDate(y.getDate()-1);
-    const yk=y.getFullYear()+'-'+String(y.getMonth()+1).padStart(2,'0')+'-'+String(y.getDate()).padStart(2,'0');
-    if(S.lastCheckin===yk){ S.streak=(S.streak||0)+1; }
-    else { S.streak=1; }
-    S.lastCheckin=today();
-    save();
-    toast('🎉 今日任务完成！连续打卡 '+S.streak+' 天');
-    const fi=document.getElementById('fireIcon');
-    fi.classList.add('fire-pop'); setTimeout(()=>fi.classList.remove('fire-pop'),500);
-  }
+/* v20：不再用「配额达标」算打卡。当天有任何一次作答，就算学过一天 */
+function markStudied(){
+  const t=today();
+  if(S.lastCheckin===t) return;
+  const y=new Date(); y.setDate(y.getDate()-1);
+  const yk=y.getFullYear()+'-'+String(y.getMonth()+1).padStart(2,'0')+'-'+String(y.getDate()).padStart(2,'0');
+  S.streak = (S.lastCheckin===yk) ? (S.streak||0)+1 : 1;
+  S.lastCheckin=t;
+  if(!S.daily) S.daily={};
+  S.daily[t]='done';
+  S.lastDate=t;
+  save();
 }
+/* 旧调用点兼容（现在等同于 markStudied） */
+function checkDailyDone(){ markStudied(); }
 
 function renderDone(){
   const ok=lastScore.right, ng=lastScore.wrong;
@@ -1621,9 +1615,7 @@ function renderDone(){
   document.getElementById('flashcard').innerHTML=
     '<div class="done-box"><div class="big">'+(rate>=80?'🎉':rate>=60?'👍':'💪')+'</div>'+
     '<h2>本轮完成</h2>'+
-    '<p>共 '+total+' 张 · 对 '+ok+' · 错 '+ng+' · 正确率 '+rate+'%'+
-    (S.todayNew||S.todayRev? '<br>今日：新题 '+(S.todayNew||0)+' / '+S.goal.new+' · 复习 '+(S.todayRev||0)+' / '+S.goal.rev : '')+
-    '</p>'+
+    '<p>共 '+total+' 张 · 对 '+ok+' · 错 '+ng+' · 正确率 '+rate+'%</p>'+
     '<button class="big-btn" onclick="go(\'home\')">回首页</button>'+
     '<div class="btn-row"><button class="big-btn ghost" onclick="exitStudy();startWrong()">再刷错题</button>'+
     '<button class="big-btn ghost" onclick="exitStudy();startRandom()">再来一组</button></div></div>';
@@ -1634,18 +1626,12 @@ function renderDone(){
 /* ==================== 设置 ==================== */
 function renderSet(){
   applyGuestMode();
-  document.getElementById('goalNew').value=S.goal.new;
-  document.getElementById('goalRev').value=S.goal.rev;
   if(typeof ghFillSet==='function') ghFillSet();
   const all=stats(null);
   document.getElementById('aboutText').innerHTML=
     '题库版本：'+(HUB.generated||'v1')+' · 共 '+HUB.decks.length+' 库 '+all.total+' 张<br>'+
-    '已掌握 '+all.mastered+' 张 · 错题 '+all.wrong+' 张 · 蒙对未掌握 '+all.guessed+' 张 · 连续打卡 '+(S.streak||0)+' 天';
+    '已掌握 '+all.mastered+' 张 · 错题 '+all.wrong+' 张 · 蒙对未掌握 '+all.guessed+' 张 · 连续学习 '+(S.streak||0)+' 天';
 }
-document.addEventListener('change', e=>{
-  if(e.target.id==='goalNew'){ S.goal.new=Math.max(1,parseInt(e.target.value)||10); save(); toast('已保存'); }
-  if(e.target.id==='goalRev'){ S.goal.rev=Math.max(1,parseInt(e.target.value)||20); save(); toast('已保存'); }
-});
 
 function exportProg(){
   const data={v:1, cards:S.cards, daily:S.daily, streak:S.streak, lastDate:S.lastDate,
@@ -1762,6 +1748,7 @@ function applyScore(id, ok, fuzzy, unverified){
     due: nextDue(lv),
     fav: prev.fav||0
   });
+  markStudied();
 }
 function dueList(){
   const td=today();
@@ -1771,6 +1758,35 @@ function startDue(){
   const q=shuffle(dueList());
   if(!q.length){ toast('今天没有到期的卡 👍'); return; }
   startSession(q,'今日到期复习','due');
+}
+/* v20：首页唯一主按钮 —— 到期 → 新题 → 随机，永远有下一步 */
+function startSmart(){
+  const td=today();
+  const due=HUB.cards.filter(c=>{ const s=cst(c.id); return s.st!==0 && s.due && s.due<=td; });
+  if(due.length){
+    due.sort(function(a,b){ return String(cst(a.id).due||'').localeCompare(String(cst(b.id).due||'')); });
+    const q=due.slice(0,40);
+    startSession(q,'今日到期 · '+q.length+' 张','due'); return;
+  }
+  const fresh=HUB.cards.filter(c=>{ const s=cst(c.id); return s.st===0 && !(s.g>0); });
+  if(fresh.length){
+    const q=fresh.slice(0,20);
+    startSession(q,'新题 · '+q.length+' 张','new'); return;
+  }
+  startRandom();
+}
+/* v20：从知识点专攻清单直接开刷 */
+function startKnow(kid){
+  const k=knowById(kid); if(!k) return;
+  const all=knowCards(kid).slice();
+  if(!all.length){ toast('这个知识点还没挂题'); return; }
+  all.sort(function(a,b){
+    const sa=cst(a.id), sb=cst(b.id);
+    const ra=(sa.st<0?0:sa.st===0?1:2), rb=(sb.st<0?0:sb.st===0?1:2);
+    return ra-rb;
+  });
+  const q=all.slice(0,30);   // 一次 30 张，够练一个点又不至于刷不完
+  startSession(q, '专攻 · '+k.n+'（'+q.length+'/'+all.length+' 张）', 'know');
 }
 function startFav(){
   const q=HUB.cards.filter(c=>cst(c.id).fav);
@@ -1894,6 +1910,53 @@ function weakList(n){
   return arr.slice(0, n||5);
 }
 
+/* v20：知识点专攻排序 —— 不是只看错题，还要看「到期」和「学了没掌握」 */
+function drillList(){
+  var arr = [];
+  knowAll().forEach(function(k){
+    var s = knowStat(k.id);
+    var due = 0;
+    knowCards(k.id).forEach(function(c){
+      var cs = cst(c.id);
+      if(cs.st!==0 && cs.due && cs.due<=today()) due++;
+    });
+    var p = s.t ? Math.round(s.mas/s.t*100) : 0;
+    arr.push({
+      k:k, s:s, p:p, due:due, started: s.seen>0,
+      score: s.wrong*3 + (s.seen-s.mas)*1.2 + due*2
+    });
+  });
+  arr.sort(function(a,b){
+    if(a.started !== b.started) return a.started ? -1 : 1;   // 学过的排前面
+    if(b.score !== a.score) return b.score - a.score;
+    return a.p - b.p;
+  });
+  return arr;
+}
+function drillHtml(arr){
+  var h = '';
+  arr.forEach(function(x){
+    var why = [];
+    if(x.s.wrong) why.push('错 '+x.s.wrong+' 张');
+    if(x.due > x.s.wrong) why.push('到期 '+x.due+' 张');   // 只写"错"覆盖不到的部分，避免重复
+    if(!x.started) why.push('还没开始');
+    else if(x.s.mas < x.s.t) why.push('掌握 '+x.s.mas+'/'+x.s.t);
+    if(!why.length) why.push('已掌握 '+x.s.mas+'/'+x.s.t);
+    h += '<div class="weak-item drill-row" onclick="openKD(\''+x.k.id+'\')">'+
+      '<div class="w-n">'+esc(x.k.n)+'<div class="w-why">'+why.join(' · ')+'</div></div>'+
+      '<div class="drill-right"><b style="color:'+knColor(x.p)+'">'+x.p+'%</b>'+
+      '<button class="drill-btn" onclick="event.stopPropagation();startKnow(\''+x.k.id+'\')">刷</button></div></div>';
+  });
+  return h;
+}
+function drillToggle(){
+  var el = document.getElementById('drillCold'), btn = document.getElementById('drillMoreBtn');
+  if(!el) return;
+  var open = el.style.display === 'none';
+  el.style.display = open ? 'block' : 'none';
+  if(btn) btn.textContent = open ? '收起 ▴' : ('展开还没碰过的 '+btn.getAttribute('data-n')+' 个 ▾');
+}
+
 function renderKnow(){
   var all = knowAll();
   var linked = HUB.cards.filter(function(c){ return c.k && c.k.length; });
@@ -1914,20 +1977,22 @@ function renderKnow(){
     '<button class="ko-hook-btn" onclick="go(\'hook\')">⚡ 打开钩子墙 · '+hookCount()+' 条口诀，覆盖 '+hookCover()+' 张题</button>'+
     '<button class="ko-hook-btn" style="background:linear-gradient(135deg,#16232e,#151a20); border-color:#2b4152; color:#8ecfff" onclick="go(\'term\')">📖 打开术语表 · '+TERM_KEYS.length+' 条，看不懂题就先查词</button></div>';
 
-  /* 漏洞诊断 */
-  var wk = weakList(5);
-  h += '<div class="weak-box"><div class="weak-h">⚠️ 漏洞诊断</div>';
-  if(!wk.length){
-    h += '<div class="weak-none">还没有足够的答题记录。先刷 20 题左右，这里会自动挑出你最虚的块，并告诉你错在哪。</div>';
+  /* v20：专攻清单 —— 39 个知识点全部排序，不是只挑 5 个 */
+  var dl = drillList();
+  var hot = dl.filter(function(x){ return x.started; });
+  var cold = dl.filter(function(x){ return !x.started; });
+  h += '<div class="weak-box drill"><div class="weak-h">🎯 专攻清单</div>';
+  h += '<div class="weak-sub">按「错题 + 到期 + 没掌握的量」从高到低排。<b>点名字看讲解，点「刷」直接做这个知识点的题。</b></div>';
+  if(!hot.length){
+    h += '<div class="weak-none">还没有答题记录，下面全是「没开始」。随便挑一个开刷就行，刷完这里会自动排序。</div>';
   }else{
-    h += '<div class="weak-sub">按「错题数 + 学过但没掌握」排序，点进去直接看讲解</div>';
-    wk.forEach(function(x){
-      var why = (x.k.traps && x.k.traps[0]) ? x.k.traps[0] : knPlain(x.k.core).slice(0,42);
-      h += '<div class="weak-item" onclick="openKD(\''+x.k.id+'\')">'+
-        '<div class="w-n">'+esc(x.k.n)+
-          '<div class="w-why">'+esc(knPlain(why).slice(0,56))+'</div></div>'+
-        '<div class="w-num">错 '+x.s.wrong+'<br>学过 '+x.s.seen+'/'+x.s.t+'</div></div>';
-    });
+    h += drillHtml(hot);
+  }
+  if(cold.length){
+    var openCold = hot.length ? 'none' : 'block';       // 一条记录都没有时，直接摊开
+    h += '<div id="drillCold" style="display:'+openCold+'">'+drillHtml(cold)+'</div>'+
+      '<button class="drill-more" id="drillMoreBtn" data-n="'+cold.length+'" onclick="drillToggle()">'+
+      (hot.length ? ('展开还没碰过的 '+cold.length+' 个 ▾') : '收起 ▴')+'</button>';
   }
   h += '</div>';
 
@@ -2168,12 +2233,12 @@ function renderStat(){
   }
   h+='<div class="stat-cell"><b>'+all.wrong+'</b><span>错题</span></div>';
   h+='<div class="stat-cell"><b>'+fav+'</b><span>收藏</span></div>';
-  h+='<div class="stat-cell"><b>'+(S.streak||0)+'</b><span>连续打卡（天）</span></div>';
+  h+='<div class="stat-cell"><b>'+(S.streak||0)+'</b><span>连续学习（天）</span></div>';
   h+='<div class="stat-cell"><b>'+rate+'%</b><span>看过的卡掌握率</span></div>';
   h+='<div class="stat-cell"><b>'+Object.keys(S.hw||{}).length+'</b><span>✏️ 手写笔迹（份）</span></div>';
   h+='</div>';
 
-  h+='<div class="sec-title">🗓 最近 7 天打卡</div><div class="heat">';
+  h+='<div class="sec-title">🗓 最近 7 天有学习</div><div class="heat">';
   for(let i=6;i>=0;i--){
     const d=new Date(); d.setDate(d.getDate()-i);
     const key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
