@@ -255,6 +255,14 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
 .hw-mine-b{display:flex;gap:8px;margin-top:7px}
 .hw-pen{color:#ffd60a}
 
+/* ===== v13 存储位置说明 ===== */
+.store-grid{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;margin-top:10px;
+  background:#171a20;border-radius:12px;padding:11px 13px;font-size:12.5px;line-height:1.5}
+.store-grid span:nth-child(odd){color:#e8eaed}
+.store-grid span:nth-child(even){color:#8b93a1;text-align:right}
+.store-warn{margin-top:9px;font-size:12px;color:#ff9f0a;line-height:1.55;
+  background:rgba(255,159,10,.08);border-left:3px solid #ff9f0a;border-radius:0 8px 8px 0;padding:8px 11px}
+
 /* ===== v7 云同步 ===== */
 .gh-btns{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
 .gh-status{margin-top:9px;font-size:12px;color:#8b93a1;line-height:1.5;word-break:break-all}
@@ -557,6 +565,22 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
       <input type="number" id="goalNew" min="1" max="100" value="10"></div>
     <div class="set-row" style="margin-top:9px"><label>每天复习（张）</label>
       <input type="number" id="goalRev" min="1" max="200" value="20"></div>
+  </div>
+
+  <div class="set-item" id="storeCard">
+    <h3>📦 你的进度存在哪</h3>
+    <p>进度和笔迹只存在<b>打开它的这个浏览器</b>里，所以：</p>
+    <div class="store-grid">
+      <span>微信里打开的</span><span>微信内置浏览器</span>
+      <span>Chrome 标签页</span><span>Chrome 自己的空间</span>
+      <span>添加到主屏幕的 App</span><span>又一个独立空间</span>
+      <span>电脑上打开</span><span>电脑浏览器</span>
+    </div>
+    <p style="margin-top:8px">这四格<b>互不相通</b>。换一个地方打开，看起来就是「记录全没了」——其实没丢，还在原来那个里面。</p>
+    <p style="margin-top:6px"><b>让它们对齐只有两条路：</b><br>
+       ① 每个地方都填一次令牌、点「连接并同步」（一次性，之后自动对齐）；<br>
+       ② 或者用下面「导出文件 → 选择文件导入」手动搬一次（会合并，不覆盖）。</p>
+    <p class="store-warn">⚠️ 微信内置浏览器清缓存、手机清存储时，那份本地数据会被真删掉。常同步才保险。</p>
   </div>
 
   <div class="set-item" id="ghCard">
@@ -2540,6 +2564,7 @@ function copyGuestLink(){
 function applyGuestMode(){
   if(!GUEST) return;
   var gc = document.getElementById('ghCard'); if(gc) gc.style.display = 'none';
+  var sc = document.getElementById('storeCard'); if(sc) sc.style.display = 'none';
   var t = document.querySelector('.app-title, #appTitle, header h1');
   if(t && !t.querySelector('.guest-badge')){
     t.insertAdjacentHTML('beforeend', '<span class="guest-badge">访客</span>');
