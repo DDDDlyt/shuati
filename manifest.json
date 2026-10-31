@@ -1,7 +1,7 @@
 {
   "name": "刷题总台",
   "short_name": "刷题",
-  "description": "生物化学 + 遗传学题库，9 个题库 890 张卡片，随时随地刷",
+  "description": "生物化学 + 遗传学 + 英语题库，16 个题库 1662 张卡，离线可刷",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
