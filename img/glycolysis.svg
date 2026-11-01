@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560" font-family="PingFang SC,Microsoft YaHei,sans-serif">
+<rect width="900" height="560" fill="#ffffff"/>
+<defs><marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#5a6472"/></marker></defs>
+<g font-size="15" fill="#1c2733" text-anchor="middle" font-weight="600">
+  <rect x="30" y="30" width="110" height="46" rx="10" fill="#eaf3fb" stroke="#3a76a8" stroke-width="1.6"/><text x="85" y="59">葡萄糖</text>
+  <rect x="215" y="30" width="110" height="46" rx="10" fill="#eaf3fb" stroke="#3a76a8"/><text x="270" y="59">6-磷酸葡萄糖</text>
+  <rect x="400" y="30" width="110" height="46" rx="10" fill="#eaf3fb" stroke="#3a76a8"/><text x="455" y="59">6-磷酸果糖</text>
+  <rect x="585" y="30" width="140" height="46" rx="10" fill="#fdf1e3" stroke="#c07b2d"/><text x="655" y="59">1,6-二磷酸果糖</text>
+  <rect x="585" y="150" width="140" height="46" rx="10" fill="#fdf1e3" stroke="#c07b2d"/><text x="655" y="179">磷酸二羟丙酮</text>
+  <rect x="735" y="150" width="140" height="46" rx="10" fill="#e9f7ef" stroke="#2e8b57"/><text x="805" y="179">3-磷酸甘油醛</text>
+  <rect x="735" y="260" width="140" height="46" rx="10" fill="#e9f7ef" stroke="#2e8b57"/><text x="805" y="289">1,3-二磷酸甘油酸</text>
+  <rect x="735" y="370" width="140" height="46" rx="10" fill="#e9f7ef" stroke="#2e8b57"/><text x="805" y="399">3-磷酸甘油酸</text>
+  <rect x="735" y="480" width="140" height="46" rx="10" fill="#e9f7ef" stroke="#2e8b57"/><text x="805" y="509">磷酸烯醇式丙酮酸</text>
+  <rect x="420" y="480" width="130" height="46" rx="10" fill="#fbeaea" stroke="#b03a3a"/><text x="485" y="509">丙酮酸</text>
+</g>
+<g stroke="#5a6472" stroke-width="1.6" marker-end="url(#a)" fill="none">
+  <line x1="140" y1="53" x2="213" y2="53"/><line x1="325" y1="53" x2="398" y2="53"/><line x1="510" y1="53" x2="583" y2="53"/>
+  <line x1="655" y1="76" x2="655" y2="148"/>
+  <line x1="725" y1="173" x2="733" y2="173"/><line x1="805" y1="196" x2="805" y2="258"/><line x1="805" y1="306" x2="805" y2="368"/><line x1="805" y1="416" x2="805" y2="478"/>
+  <line x1="733" y1="503" x2="552" y2="503"/>
+</g>
+<g font-size="12.5" fill="#7a6a3a">
+  <text x="176" y="44">己糖激酶</text><text x="176" y="76">−ATP</text>
+  <text x="361" y="44">磷酸己糖异构酶</text>
+  <text x="546" y="44">磷酸果糖激酶−1</text><text x="546" y="76">−ATP（限速）</text>
+  <text x="630" y="120">醛缩酶（可逆）</text>
+  <text x="748" y="236" text-anchor="start">＋NADH</text><text x="748" y="252" font-size="11.5">3-磷酸甘油醛脱氢酶</text>
+  <text x="748" y="346" text-anchor="start">磷酸甘油酸激酶</text><text x="748" y="362" font-size="11.5">＋ATP</text>
+  <text x="748" y="458" text-anchor="start">烯醇化酶</text>
+  <text x="565" y="490">丙酮酸激酶　＋ATP</text>
+</g>
+<text x="30" y="540" font-size="13" fill="#8a94a2">糖酵解（细胞质）：1 葡萄糖 → 2 丙酮酸，净得 2 ATP + 2 NADH；限速酶：磷酸果糖激酶-1</text>
+</svg>
