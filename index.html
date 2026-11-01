@@ -1653,10 +1653,12 @@ function startSession(q, title, kind){
 
 function exitStudy(){ go('home'); }
 
+let OPT_MAP=null; // 刷题模式选择题乱序映射：显示位置 -> 原始索引（防背位置）
 function renderCard(){
   if(qi>=Q.length){ renderDone(); return; }
   const c=Q[qi];
   flipped=false;
+  OPT_MAP=null;
   mode = (c.t==='mc'||c.t==='tf') ? 'quiz' : 'card';
   document.getElementById('studyMode').textContent = mode==='quiz'?'答题':'卡片';
   document.getElementById('studyPos').textContent = (qi+1)+'/'+Q.length;
@@ -1698,8 +1700,11 @@ h+=(c.img?'<div class="card-img" onclick="event.stopPropagation();imgFull(this.q
     }else{
       let oh='';
       const letters='ABCDEFGH';
-      (c.o||[]).forEach((o,i)=>{
-        oh+='<button class="opt" data-i="'+i+'"><span class="letter">'+letters[i]+'</span>'+termify(o)+'</button>';
+      // 选项乱序：每次进这张卡顺序都不同，防止背位置
+      OPT_MAP=(c.o||[]).map((_,i)=>i);
+      for(let i=OPT_MAP.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[OPT_MAP[i],OPT_MAP[j]]=[OPT_MAP[j],OPT_MAP[i]];}
+      OPT_MAP.forEach((oi,i)=>{
+        oh+='<button class="opt" data-i="'+i+'"><span class="letter">'+letters[i]+'</span>'+termify(c.o[oi])+'</button>';
       });
       document.getElementById('flashcard').innerHTML=h+'<div class="opts">'+oh+'</div>';
       document.getElementById('flashcard').querySelectorAll('.opt').forEach(el=>{
@@ -1975,7 +1980,8 @@ function checkFill(){
 
 function pickOpt(i){
   const c=Q[qi];
-  const right = c.t==='tf' ? (String(c.a).indexOf('对')===0 ? 0 : 1) : c.a;
+  const raw = c.t==='tf' ? (String(c.a).indexOf('对')===0 ? 0 : 1) : c.a;
+  const right = OPT_MAP ? OPT_MAP.indexOf(raw) : raw; // 乱序后按显示位置判定
   const opts=document.getElementById('flashcard').querySelectorAll('.opt');
   opts.forEach((el,j)=>{
     el.onclick=null;
@@ -2838,8 +2844,9 @@ function showExplain(c){
   var h = '';
   if(c.t==='mc' || c.t==='tf'){
     var letters='ABCDEFGH';
-    var right = c.t==='tf' ? (String(c.a).indexOf('对')===0 ? 0 : 1) : c.a;
-    var ansTxt = c.t==='tf' ? (right===0?'对':'错') : (letters[right]+'. '+esc((c.o||[])[right]||''));
+    var raw = c.t==='tf' ? (String(c.a).indexOf('对')===0 ? 0 : 1) : c.a;
+    var disp = OPT_MAP ? OPT_MAP.indexOf(raw) : raw;
+    var ansTxt = c.t==='tf' ? (raw===0?'对':'错') : (letters[disp]+'. '+esc((c.o||[])[raw]||''));
     h += '<div class="card-a"><div class="ans-label">正确答案</div><div class="ans-main">'+ansTxt+'</div>';
     if(c.n) h += '<div class="ans-note">💡 '+esc(c.n)+'</div>';
     h += hookHtml(c);
