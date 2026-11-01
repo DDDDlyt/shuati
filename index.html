@@ -1417,6 +1417,12 @@ function renderHome(){
   const subjColor={生化:'#34c759', 遗传:'#bf5af2', 数学:'#ff9f0a', 英语:'#0a84ff'};
   const iconMap={'生化':'🧬','遗传':'🧪','数学':'📐','英语':'🔤'};
   let html='';
+  /* v31：学长笔记入口 */
+  html+='<div class="deck-item" onclick="location.href=\'./notes-biochem.html\'">'
+    +'<div class="deck-icon" style="background:#ffd60a22">📖</div>'
+    +'<div class="deck-info"><div class="d-name">学长笔记 · 生物化学（精校版）</div>'
+    +'<div class="d-meta">手写笔记 68 页全转录 · 788 处已校对</div></div>'
+    +'<div class="deck-go">▶</div></div>';
   for(const dk of HUB.decks){
     const s=stats(dk.id);
     const p=s.total?Math.round(s.mastered/s.total*100):0;
