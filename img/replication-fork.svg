@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 510" font-family="PingFang SC,Microsoft YaHei,sans-serif">
+<rect width="900" height="520" fill="#ffffff"/>
+<defs><marker id="c" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#5a6472"/></marker></defs>
+<!-- 母链双螺旋（左）与复制叉（中） -->
+<g stroke="#3a76a8" stroke-width="4" fill="none" stroke-linecap="round">
+  <path d="M 60 260 C 100 240, 140 280, 180 260 C 220 240, 260 280, 300 260"/>
+  <path d="M 60 300 C 100 320, 140 280, 180 300 C 220 320, 260 280, 300 300"/>
+</g>
+<text x="110" y="230" font-size="13" fill="#3a76a8">母链双螺旋</text>
+<!-- 叉口 -->
+<g stroke="#5a6472" stroke-width="2" fill="none">
+  <line x1="320" y1="255" x2="560" y2="140" stroke="#b03a3a" stroke-width="5"/>
+  <line x1="320" y1="305" x2="560" y2="420" stroke="#2e8b57" stroke-width="5"/>
+</g>
+<circle cx="330" cy="280" r="26" fill="#fdf1e3" stroke="#c07b2d" stroke-width="2"/>
+<text x="330" y="286" font-size="11.5" text-anchor="middle" fill="#7a5b1e">解旋酶</text>
+<!-- 前导链 -->
+<path d="M 380 210 L 640 90" stroke="#2e8b57" stroke-width="5" fill="none"/>
+<text x="470" y="130" font-size="13.5" fill="#2e8b57" font-weight="700">前导链（连续合成 5'→3'）</text>
+<!-- 后随链冈崎片段 -->
+<g stroke="#b03a3a" stroke-width="5" fill="none">
+  <path d="M 400 366 L 462 394"/><path d="M 484 404 L 546 432"/><path d="M 568 442 L 630 470"/>
+</g>
+<g font-size="12" fill="#b03a3a">
+  <text x="392" y="388">冈崎片段①</text><text x="490" y="426">②</text><text x="576" y="464">③</text>
+</g>
+<text x="430" y="344" font-size="13.5" fill="#b03a3a" font-weight="700">后随链（不连续合成）</text>
+<!-- 引物与pol -->
+<circle cx="620" cy="150" r="24" fill="#eaf3fb" stroke="#3a76a8" stroke-width="2"/>
+<text x="620" y="155" font-size="11" text-anchor="middle" fill="#2a5d84">DNA pol</text>
+<!-- 方向箭头 -->
+<g stroke="#5a6472" stroke-width="1.6" marker-end="url(#c)" fill="none">
+  <line x1="330" y1="70" x2="660" y2="70"/>
+</g>
+<text x="470" y="60" font-size="12.5" fill="#5a6472" text-anchor="middle">复制方向</text>
+<text x="30" y="474" font-size="12.5" fill="#8a94a2">DNA 复制叉：半保留复制 · 前导链连续 · 后随链不连续（冈崎片段）· 都只能 5'→3' 延伸 · 需要 RNA 引物</text>
+</svg>
