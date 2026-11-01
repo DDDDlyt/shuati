@@ -1212,6 +1212,11 @@ function esc(s){
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
     .replace(/\n/g,'<br>');
 }
+function escA(s){  /* 属性上下文转义：引号也处理，用于任何来自云端/本机的数据拼进 HTML 属性 */
+  return String(s==null?'':s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
 function toast(msg,ms){
   const t=document.getElementById('toast');
   t.textContent=msg; t.classList.add('show');
@@ -1679,7 +1684,7 @@ function flipCard(fromRecall){
   if(HW_TYPES[c.t]) h+='<button class="hwcopy" onclick="event.stopPropagation();openHW(\'copy\')">✏️ 抄写一遍（看着答案写，加深记忆）</button>';
   if(S.hw && S.hw[c.id]){
     h+='<div class="hw-mine"><div class="hw-mine-t">✏️ 我的笔迹</div>'+
-       ((S.hwThumb&&S.hwThumb[c.id])?'<img class="hw-thumb" style="cursor:zoom-in" onclick="event.stopPropagation();imgFull(this.src,\'手写笔迹 · 点开可缩放\')" src="'+S.hwThumb[c.id]+'" alt="笔迹">':'')+
+       ((S.hwThumb&&S.hwThumb[c.id])?'<img class="hw-thumb" style="cursor:zoom-in" onclick="event.stopPropagation();imgFull(this.src,\'手写笔迹 · 点开可缩放\')" src="'+escA(S.hwThumb[c.id])+'" alt="笔迹">':'')+
        '<div class="hw-mine-b"><button class="mini-btn" onclick="openHW()">重写 / 回放</button>'+
        '<button class="mini-btn" onclick="hwDel(\'' + c.id + '\')">删除</button></div></div>';
   }
@@ -3172,7 +3177,7 @@ function hwInjectMine(c){
   const d=document.createElement('div');
   d.className='hw-mine';
   d.innerHTML='<div class="hw-mine-t">✏️ 我的笔迹</div>'+
-    ((S.hwThumb&&S.hwThumb[c.id])?'<img class="hw-thumb" style="cursor:zoom-in" onclick="event.stopPropagation();imgFull(this.src,\'手写笔迹 · 点开可缩放\')" src="'+S.hwThumb[c.id]+'" alt="笔迹">':'')+
+    ((S.hwThumb&&S.hwThumb[c.id])?'<img class="hw-thumb" style="cursor:zoom-in" onclick="event.stopPropagation();imgFull(this.src,\'手写笔迹 · 点开可缩放\')" src="'+escA(S.hwThumb[c.id])+'" alt="笔迹">':'')+
     '<div class="hw-mine-b"><button class="mini-btn" onclick="openHW(\'copy\')">重写 / 回放</button>'+
     '<button class="mini-btn" onclick="hwDel(\''+c.id+'\')">删除</button></div>';
   a.appendChild(d);
@@ -3213,7 +3218,7 @@ function openHWLib(){
       const title=c? (c.q||'').slice(0,26) : id;
       h+='<div class="hw-cell" onclick="hwLibOpen(\''+id+'\')">'+
          '<span class="hw-del" onclick="event.stopPropagation();hwDel(\''+id+'\')">删除</span>'+
-         (th?'<img style="cursor:zoom-in" onclick="event.stopPropagation();imgFull(this.src,\''+esc(title)+' · 手写笔迹\')" src="'+th+'" alt="">':'<div class="hw-noimg">无预览</div>')+
+         (th?'<img style="cursor:zoom-in" onclick="event.stopPropagation();imgFull(this.src,\''+esc(title)+' · 手写笔迹\')" src="'+escA(th)+'" alt="">':'<div class="hw-noimg">无预览</div>')+
          '<div class="hw-cell-t">'+esc(title)+'</div></div>';
     }
     g.innerHTML=h;
