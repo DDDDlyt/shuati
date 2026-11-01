@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>六级听力 · 真题板块刷</title>
+<style>
+:root{
+  --bg:#0f1115; --panel:#1a1d24; --panel2:#22262e; --line:#2c313a;
+  --txt:#e8eaed; --sub:#9aa0a6; --dim:#6b7280;
+  --ok:#34c759; --bad:#ff453a; --warn:#ff9f0a; --blue:#0a84ff; --purple:#bf5af2; --teal:#64d2ff;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+body{margin:0; background:var(--bg); color:var(--txt); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif; padding-bottom:90px;}
+a{color:var(--blue); text-decoration:none;}
+.top{position:sticky; top:0; z-index:20; background:rgba(15,17,21,.94); backdrop-filter:blur(8px); border-bottom:1px solid var(--line); padding:10px 14px 8px;}
+.top h1{font-size:16px; margin:0 0 8px; display:flex; align-items:center; gap:8px;}
+.top h1 .tag{font-size:10px; background:var(--purple); color:#fff; padding:2px 7px; border-radius:6px; font-weight:700;}
+.tabs{display:flex; gap:8px;}
+.tab{flex:1; text-align:center; padding:9px 4px; border-radius:11px; background:var(--panel); color:var(--sub); font-size:13px; font-weight:600; border:1px solid transparent; cursor:pointer;}
+.tab.on{background:var(--panel2); color:var(--txt); border-color:var(--purple);}
+.pbar{height:5px; background:var(--line); border-radius:4px; margin-top:9px; overflow:hidden;}
+.pbar>i{display:block; height:100%; background:linear-gradient(90deg,var(--purple),var(--blue)); width:0;}
+.pmeta{font-size:11px; color:var(--sub); margin-top:5px; display:flex; justify-content:space-between;}
+.audio-wrap{padding:12px 14px 4px;}
+audio{width:100%; height:38px;}
+.hint{font-size:11px; color:var(--dim); margin:4px 2px 0;}
+.wrap{padding:6px 14px 0;}
+.qcard{background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:16px 15px; margin-bottom:12px;}
+.qno{font-size:12px; color:var(--purple); font-weight:800; letter-spacing:1px; margin-bottom:8px;}
+.stem{font-size:16px; line-height:1.55; font-weight:600; margin-bottom:14px;}
+.stem .en{display:block;}
+.stem .cn{display:block; font-size:13px; color:var(--sub); margin-top:4px; font-weight:400;}
+.opt{display:flex; align-items:flex-start; gap:10px; padding:12px 13px; margin-bottom:9px; background:var(--panel2); border:1.5px solid var(--line); border-radius:12px; cursor:pointer; font-size:14.5px; line-height:1.5; transition:.15s;}
+.opt:active{transform:scale(.985);}
+.opt .lt{flex:none; width:24px; height:24px; border-radius:7px; background:var(--line); color:var(--txt); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:13px;}
+.opt.sel-r{border-color:var(--ok); background:rgba(52,199,89,.12);}
+.opt.sel-r .lt{background:var(--ok); color:#06210f;}
+.opt.sel-w{border-color:var(--bad); background:rgba(255,69,58,.12);}
+.opt.sel-w .lt{background:var(--bad); color:#2a0805;}
+.opt.dim{opacity:.45;}
+.fb{margin-top:6px; font-size:13px; line-height:1.6; display:none;}
+.fb.show{display:block;}
+.fb .cor{color:var(--ok); font-weight:700;}
+.fb .wrg{color:var(--bad); font-weight:700;}
+.nav{display:flex; gap:10px; margin-top:6px;}
+.btn{flex:1; text-align:center; padding:12px; border-radius:12px; font-size:14px; font-weight:700; border:none; cursor:pointer;}
+.btn.pri{background:var(--purple); color:#fff;}
+.btn.sec{background:var(--panel2); color:var(--txt); border:1px solid var(--line);}
+.tbtn{display:inline-block; margin:4px 0 12px; padding:8px 14px; border-radius:10px; background:var(--panel2); color:var(--teal); font-size:13px; font-weight:600; border:1px solid var(--line); cursor:pointer;}
+.transcript{display:none; background:#10131a; border:1px solid var(--line); border-radius:12px; padding:14px; font-size:13px; line-height:1.85; color:var(--sub); white-space:pre-wrap; word-break:break-word; margin-bottom:12px;}
+.transcript.show{display:block;}
+.done{text-align:center; padding:40px 20px;}
+.done .big{font-size:40px; margin-bottom:10px;}
+.done .t{font-size:18px; font-weight:800; margin-bottom:6px;}
+.list{display:flex; flex-wrap:wrap; gap:8px; margin:10px 0 4px;}
+.lchip{width:38px; height:38px; border-radius:10px; background:var(--panel2); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; color:var(--sub); cursor:pointer;}
+.lchip.ok{border-color:var(--ok); color:var(--ok);}
+.lchip.no{border-color:var(--bad); color:var(--bad);}
+.lchip.cur{border-color:var(--purple); color:var(--purple);}
+.foot{text-align:center; font-size:11px; color:var(--dim); padding:14px;}
+</style>
+</head>
+<body>
+<div class="top">
+  <h1>🎧 六级听力 <span class="tag" id="examTag"></span></h1>
+  <div class="tabs" id="tabs"></div>
+  <div class="pbar"><i id="pbar"></i></div>
+  <div class="pmeta"><span id="pmLeft"></span><span id="pmRight"></span></div>
+</div>
+<div class="audio-wrap">
+  <audio id="au" controls preload="metadata" src="audio/2019.12-cet6-s1.mp3"></audio>
+  <div class="hint">整套录音约 28 分钟，含全部三段。按板块顺序听：先听本板块对应段落，再答题；可拖动进度条定位。</div>
+</div>
+<div class="wrap">
+  <button class="tbtn" id="transBtn">📜 显示听力原文</button>
+  <div class="transcript" id="transcript"></div>
+  <div id="qarea"></div>
+  <div id="doneArea"></div>
+</div>
+<div class="foot">真题来自公开历年卷 · 选项随机打乱防背位置 · 进度自动保存</div>
+<script>
+const LISTEN = {"exam": "2019年12月 六级 第1套", "audio": "2019.12-cet6-s1.mp3", "sections": [{"key": "A", "name": "长对话", "transcript": "Conversation 1 \nM: Today our guest is Rosie Melinda who works as a features editor for Fashion magazine. Hi Rosie, you're a features editor at one of the most widely read women's magazines in the U.K. What kind of responsibilities does that job entail? \nW: We spend our days looking at ideas from journalists, writing copy for the magazine and website and editing. We do random things like asking people in the street questions and testing sports clothing. We also do less tangible things like understanding what our readers want. It's certainly varied and sometimes bizarre. \nM: During your working day what kind of work might you typically do? \nW: My day mainly incorporates responding to emails, writing and editing stories and coming up with new feature ideas. \nM: How does the job of features editor differ from that of fashion editor or other editorial positions? \nW: The feature's team deals with articles such as careers, reports, confidence and confessions. Everything except to fashion and beauty. \nM: A lot of people believe that working at a magazine is a glamorous job. Is this an accurate representation of what you do? \nW: I'd say it's glamorous to an extent, but not in the way it's portrayed in films. We do have our moments such as interviewing celebrities and attending parties which is a huge thrill. Ultimately though, we're the same as our readers. But working in a job we're all very lucky to have. \nM: Did you have to overcome any difficulties to reach this point in your career? How did you manage to do this? \nW: I had to be really persistent and it was very hard work. After three years of working in a petrol station and doing unpaid work I still hadn't managed to get an entry level job. I was lucky that my last desperate attempt led to a job. I told myself that all experiences make you a better journalist in the long run and luckily, I was right. \nQuestions 1 to 4 are based on the conversation you have just heard. \nQuestion 1: What is the woman's profession? \nQuestion 2: What is one of the woman's main responsibilities? \nQuestion 3: What do many people think about the woman's job? \nQuestion 4: What helped the woman to get her current position? \n 1. \nA) Magazine reporter. \nB) Fashion designer. \nC) Website designer. \nD) Features editor. \n 2. \nA) Designing sports clothing. \nB) Consulting fashion experts. \nC) Answering daily emails. \nD) Interviewing job-seekers. \n 3. \nA) It is challenging. \nB) It is fascinating. \nC) It is tiresome. \nD) It is fashionable. \n 4. \nA) Her persistence. \nB) Her experience. \nC) Her competence. \nD) Her confidence. \n Conversation 2 \nW: Are you watching any good shows these days? \nM: Actually, yes. I'm watching a great satire called Frankie. I think you'd like it. \nW: Really? What's it about? \nM: It's about a real guy named Frankie. He is a famous comedian in New York and shows a mixture of comedy and drama loosely depicting his life. \nW: I'm sorry, do you mean to say, it's a real-life series about a real person? It's non-fiction, isn't it? \nM: No … Not really, no. It's fiction, as what happens in every episode is made up. However the lead role is a comedian by the name of Frankie, and he plays himself. So Frankie in both real life and in the TV show lives in New York City, is a comic, is divorced, and has two little daughters. All those things are true, but aside from him, all his friends and family are played by actors. And the plots and the events that take place are also invented. \nW: Oh, I think I see now. That sounds like a very original concept. \nM: Yes, it is. In fact, the whole show is written, directed, edited and produced by him, and is very funny and has won many awards. \nW: That's cool. I will try to download it. I'm watching a comedy called The Big Bang Theory. It's a huge hit around the world. \nM: Oh yes. I've heard of it, but never actually watched it. \nW: Well, then you should check it out. It's also very funny. It's about four male scientists and a female waitress. The men are very socially awkward but very bright. And this is contrasted by the lady's social skills and common sense. The show has been running for over ten years, and some of the actors are practically global super stars. Now that they are such famous celebrities. \nQuestions 5 to 8 are based on the conversation you have just heard. \nQuestion 5: What does the man think of the satire Frankie he recently watched? \nQuestion 6: What does the man say especial about the satire Frankie? \nQuestion 7: What does the woman say she is going to do with the satire Frankie? \nQuestion 8: What does the woman say about the comedy The Big Bang Theory? \n 5. \nA) It is enjoyable. \nB) It is educational. \nC) It is divorced from real life. \nD) It is adapted from a drama. \n 6. \nA) All the roles are played by famous actors and actress. \nB) It is based on the real-life experiences of some celebrities. \nC) Its plots and events reveal a lot about Frankie's actual life. \nD) It is written, directed, edited and produced by Frankie himself. \n 7. \nA) Go to the theater and enjoy it. \nB) Recommend it to her friends. \nC) Watch it with the man. \nD) Download and watch it. \n 8. \nA) It has drawn criticisms from scientists. \nB) It has been showing for over a decade. \nC) It is a ridiculous piece of satire. \nD) It is against common sense. \n Section B \nDirection: In this section, you will hear two passages. At the end of each passage, you will hear three or four questions. Both the passage and the questions will be spoken only once. After you hear a question, you must choose the best answer from the four choices marked A), B), C) and D). Then mark the corresponding letter on Answer Sheet 1 with a single line through the centre.", "questions": [{"n": 1, "q": "What is the woman's profession?", "opts": ["Magazine reporter", "Fashion designer", "Website designer", "Features editor"], "ans": "D"}, {"n": 2, "q": "What is one of the woman's main responsibilities?", "opts": ["Designing sports clothing", "Consulting fashion experts", "Answering daily emails", "Interviewing job-seekers"], "ans": "C"}, {"n": 3, "q": "What do many people think about the woman's job?", "opts": ["It is challenging.", "It is fascinating.", "It is tiresome.", "It is fashionable."], "ans": "B"}, {"n": 4, "q": "What helped the woman to get her current position?", "opts": ["Her persistence", "Her experience", "Her competence", "Her confidence"], "ans": "A"}, {"n": 5, "q": "What does the man think of the satire Frankie he recently watched?", "opts": ["It is enjoyable.", "It is educational.", "It is divorced from real life.", "It is adapted from a drama."], "ans": "A"}, {"n": 6, "q": "What does the man say especial about the satire Frankie?", "opts": ["All the roles are played by famous actors and actresses.", "It is based on the real-life experiences of some celebrities.", "Its plots and events reveal a lot about Frankie’s actual life.", "It is written, directed, edited and produced by Frankie himself"], "ans": "D"}, {"n": 7, "q": "What does the woman say she is going to do with the satire Frankie?", "opts": ["Go to the theater and enjoy it.", "Recommend it to her friends.", "Watch it with the man.", "Download and watch it."], "ans": "D"}, {"n": 8, "q": "What does the woman say about the comedy The Big Bang Theory?", "opts": ["It has drawn criticisms from scientists.", "It has been showing for over a decade.", "It is a ridiculous piece of satire.", "It is against common sense."], "ans": "B"}]}, {"key": "B", "name": "听力篇章", "transcript": "Passage 1 \nRelated to the 'use-it-or-lose-it law' is the 'keep-moving principle'. We learned about stagnation from nature. A river that stops moving gets smelly. The same thing happens to people who stop moving, either mentally or physically. Those who play contact sports know that the player who usually gets hurt the most is the one who is standing still. Of course, you'll need some time to catch your breath every so often, but the essential massage is keep moving, extending and learning. Ships last a lot longer when they go to sea than when they stay in the harbor. The same is true for the airplanes. You don't preserve an airplane by keeping it on the ground, you preserve it by keeping it in service. We also get to live a long healthy life by staying in service. Longevity statistics reveal that the average person doesn't last very long after retirement. The more we'll hear is don't retire. If a fellow says “I'm 94 years old and I worked all my life”, we need to realize, that is how he got to be 94, by staying involved. George Bernard Shaw won a Nobel Prize when he was nearly 70. Benjamin Franklin produced some of his best writings at the age of 84, and Pablo Picasso put brush to canvas right through his eighties. Isn't the issue how old we think we are? A bonus with the 'keep-moving principle' is that while we keep moving, we don't have a chance to worry. Hence we avoid the dreaded paralyses by analysis. \nQuestions 9 to 11 are based on the passage you have just heard. \nQuestion 9: What does the speaker say about players of contact sports? \nQuestion 10: What do longevity statistics reveal about the average person? \nQuestion 11: What bonus does the keep moving principle bring us according to the speaker? \n 9. \nA) They are likely to get hurt when moving too fast. \nB) They believe in team spirit. \nC) They need to keep moving to avoid getting hurt. \nD) They have to learn how to avoid body contact. \n 10. \nA) They do not have many years to live after retirement. \nB) They tend to live longer with early retirement. \nC) They do not start enjoying life until full retirement. \nD) They keep themselves busy even after retirement. \n 11. \nA) It prevents us from worrying. \nB) It slows down our aging process. \nC) It enables us to accomplish in life. \nD) It provides us with more chances to learn. \n Passage 2 \nIn 2014, one in sixteen Americans visited the hospital emergency room for home injuries. One of the main causes of these accidents? A wandering mind! By one estimate, people daydream through nearly half of their waking hours. Psychologists have recently focused on the tendency to think about something other than the task one is doing. For one experiment, researchers developed an app to analyze the relationship between daydreaming and happiness. They found that the average person's mind wandered most frequently about 65% of the time during personal activities, such as brushing their teeth and combing their hair. Respondents' minds tended to wander more when they felt upset rather than happy. They were more likely to wander toward pleasant topics than unpleasant ones. How do daydreams affect daydreamers? A wandering mind leaves us vulnerable when driving. In one study, researchers interview 955 people involved in traffic accidents, the majority of them reported having daydream just before the accident. Yet other research suggests that daydreaming has benefits. Researches have found that it gives us a chance to think about our goals and it also seems to increase creativity. In one experiment, 145 undergraduates completed four unusual uses tasks, each requiring them to list as many uses as possible for everyday object. After the first pair of tasks was completed, one group of participants was assigned an undemanding activity intended to cause their minds to wander. When all the participants proceeded to the second pair of tasks, the daydreamers performed 40% better than the others. \nQuestions 12 to 15 are based on the passage you have just heard. \nQuestion 12: What does the passage say about people's mind? \nQuestion 13: For what purpose did the researchers develop the new app? \nQuestion 14: How does daydreaming benefit people according to some researchers? \nQuestion 15: What was the finding of the experiment with 145 undergraduates? \n 12. \nA) It tends to dwell upon their joyous experiences. \nB) It wanders for almost half of their waking time. \nC) It has trouble concentrating alter a brain injury. \nD) It tends to be affected by their negative feelings. \n 13. \nA) To find how happiness relates to daydreaming. \nB) To observe how one's mind affects one's behavior. \nC) To see why daydreaming impacts what one is doing. \nD) To study the relation between health and daydreaming. \n 14. \nA) It helps them make good decisions. \nB) It helps them tap their potentials. \nC) It contributes to their creativity. \nD) It contributes to their thinking. \n 15. \nA) Subjects with clear goals in mind outperformed those without clear goals. \nB) The difference in performance between the two groups was insignificant. \nC) Non-daydreamers were more confused on their tasks than daydreamers. \nD) Daydreamers did better than non-daydreamers in task performance. \n Section C \nDirection: In this section, you will hear three recordings of lectures or talks followed by three or four questions. The recordings will be played only once. After you hear a question, you must choose the best answer from the four choices marked A), B), C) and D). Then mark the corresponding letter on Answer Sheet 1 with a single line through the centre.", "questions": [{"n": 9, "q": "What does the speaker say about players of contact sports?", "opts": ["They are likely to get injured when moving too fast.", "They believe in team spirit for good performance.", "They need to keep moving to avoid getting hurt.", "They have to learn how to avoid body contact."], "ans": "C"}, {"n": 10, "q": "What do longevity statistics reveal about the average person?", "opts": ["They do not have many years to live after retirement.", "They tend to live a longer life with early retirement.", "They do not start enjoying life until full retirement.", "They keep themselves busy even after retirement."], "ans": "A"}, {"n": 11, "q": "What bonus does the keep moving principle bring us according to the speaker?", "opts": ["It prevents us from worrying.", "It slows down our aging process.", "It enables us to accomplish more in life.", "It provides us with more chances to learn."], "ans": "A"}, {"n": 12, "q": "What does the passage say about people's mind?", "opts": ["It tends to dwell upon their joyous experiences.", "It wanders for almost half of their waking time.", "It has trouble concentrating after a brain injury.", "It tends to be affected by their negative feelings."], "ans": "B"}, {"n": 13, "q": "For what purpose did the researchers develop the new app?", "opts": ["To find how happiness relates to daydreaming.", "To observe how one’s mind affects one’s behavior.", "To see why daydreaming impacts what one is doing.", "To study the relation between health and daydreaming."], "ans": "A"}, {"n": 14, "q": "How does daydreaming benefit people according to some researchers?", "opts": ["It helps them make good decisions.", "It helps them tap their potentials.", "It contributes to their creativity.", "It contributes to clear thinking"], "ans": "C"}, {"n": 15, "q": "What was the finding of the experiment with 145 undergraduates?", "opts": ["Subjects with clear goals in mind outperformed those without clear goals.", "The difference in performance between the two groups was insignificant.", "Non-daydreamers were more focused on their tasks than daydreamers.", "Daydreamers did better than non-daydreamers in task performance."], "ans": "D"}]}, {"key": "C", "name": "讲座报道", "transcript": "Recording 1 \nDating from as far back as the 12th century, they are claimed to be the rarest historic buildings in western Europe. These buildings offer vital insight into Scandinavia's Viking past. But now, with only 30 wooden churches remaining and their condition deteriorating, experts are working to preserve the structures for future generations. \nSome of these spectacular churches are no more than small buildings, barely 4 meters wide and 6 meters tall. Others are much larger structures. They soar up to 40 meters into the cold air. Most consist of timber frames that rest on stone blocks. This means that they have no foundations. Although many of the churches appear from the outside to be complex structures, they normally feature only a single storey but numerous different roof levels. \nStaff from the Norwegian government have carried out conservation work on 10 of the churches over the past two years. Most of these churches date from between the 12th and 14th centuries. Other churches were conserved in previous years. So far, specialists have worked to add preservative materials to the churches' exteriors. They also replaced rotting roots and halted the sinking of the churches into the ground. In two cases, huge machines have been used to lift the buildings up to 30 centimeters into the air. This was accomplished so that the team could examine and repair the churches' original medieval stone blocks. The team plans to return to around a dozen of the buildings to assess progress and consider further action. \nThe earliest free-standing wooden church was probably built in Norway in around 1080. However, the largest known wooden churches were built from the 1130s onwards. This period was one of inter-elite rivalry, in which nobles sought to increase their influence by funding the construction of churches and other buildings. The reason for constructing the buildings from wood is probably that ideally proportioned straight and slender timber was available in large quantities in Scandinavia's vast pine forests. As wood was so plentiful, it was cheaper to use than the stone used in the buildings of other European cultures. The area's ship building tradition, partly established by the Vikings, also meant that sophisticated carpentry was a major aspect of the local culture. The complex style of the medieval wooden church carvings and the skills used to make them almost certainly to derive from the ancient Viking tradition. \nQuestions 16 to 18 are based on the recording you have just heard. \nQuestion 16: What does the speaker say about the Viking wooden churches? \nQuestion 17: What is special about most of the Viking wooden churches? \nQuestion 18: Why were the Viking churches constructed from wood? \n 16. \nA) They are the oldest buildings In Europe. \nB) They are part of the Christian tradition. \nC) They are renovated lo attract tourists. \nD) They are in worsening condilion. \n 17. \nA) They have a historry of 14 centuries. \nB) They are 40 metres tall on average. \nC) They are without foundations. \nD) They consist of several storeys. \n 18. \nA) Wood was harmonious with nature. \nB) Wooden buildings kept the cold out. \nC) Timber was abundant in Scandinavia. \nD) The Vikings liked wooden structures. \n Recording 2 \nIn last week's lecture, we discussed the characteristics of the newly born offspring of several mammals. You probably remember that human infants are less developed physically than other mammals of the same age. But in today's lecture, we'll look at three very interesting studies that hint at surprising abilities of human babies. \nIn the first study, three-year-olds watch two videos shown side by side. Each featuring a different researcher, one of whom they'd met once two years earlier. The children spend longer watching the video showing the researcher they hadn't met. This is consistent with young children's usual tendency to look longer at things that aren't familiar. And really this is amazing. It suggests the children remember the researcher they've met just one time when they were only one-year-olds. Of course, as most of us forget memories from our first few years as we grow older, this early long-turn memories will likely be lost in subsequent years. \nOur second study is about music, for this study researchers play music to babies through speakers located on either side of a human face. They waited until the babies got bored and inverted their gaze from the face. And then they change the mood in the music either from sad to happy or the other way around. This mood switch made no difference to the three-month-olds; but for the nine-month-olds, it was enough to renew their interest and they started looking again in the direction of the face. This suggests that babies of that age can tell the difference between a happy melody and a sad tune. \nOur final study is from 1980, but it's still relevant today. In fact, it's one of the most famous pieces of research about infant emotion ever published. The study involved ordinary adults watching video clips of babies nine months or younger. In the video clips, the babies made various facial expressions in response to real life events including playful interactions and painful ones. The adult observers were able to reliably discern an assortment of emotions on the babies faces. These emotions included interest, joy, surprise, sadness, anger, disgust, contempt, and fear. \nNext week, we'll be looking at this last study more closely. In fact, we will be viewing some of the video clips from that study. And together, see how well we do in discerning the babies' emotions. \nQuestions 19 to 21 are based on the recording you have just heard. \nQuestion 19: What are the three interesting studies about? \nQuestion 20: What does the second study find about nine-month-old babies? \nQuestion 21: What is the 1980 study about? \n 19. \nA) Similarities between human babies and baby animals. \nB) Cognitive features of different newly born mammals. \nC) Adults' influence on children. \nD) Abilities of human babies. \n 20. \nA) They can distinguish a happy tune from a sad one. \nB) They love happy melodies more lhan sad ones. \nC) They fall asleep easily while listening to music. \nD) They are already sensitive lo beats and rhythms. \n 21. \nA) Infants' facial expressions. \nB) Babies' emotions. \nC) Babies' interaction with adults. \nD) Infants' behaviors. \n Recording 3 \nToday I'd like to talk about the dangers of being too collaborative. Being a good team player is a central skill in our modern workplace. The ability to work well with others and collaborate on projects is a sought-after ability in nearly every position. However, placing too much emphasis on being a good team player can negatively affect your career growth. Don't be overly focused on gaining consensus. Don't be too concerned with the opinions of others. This can hinder your ability to make decisions, speak up and gain recognition for your individual skills and strengths. Some people are too subordinate to others' opinions, too focused on decision consensus, too silent about their own point of view, too agreeable to take things on when they don't have time or energy. This leads to building a brand of underconfident, submissive, low-impact non-leaders and hampers their growth and career advancement. \nCollaboration certainly makes your individual competencies and contributions more difficult for outsiders to identify. Collaborative projects mean you're sharing the spotlight with others. Outsiders may then find it difficult to determine your contributions and strengths. This may end up costing you opportunities for promotions or pay raises. You certainly shouldn't ditch teamwork, but how can you avoid the hazards of being an over-collaborator? \nWorking in a team can have huge benefits. Your team may have repeated successes and often gain recognition. You then have more opportunities to expand your professional network than if you worked alone. However, finding a balance between team efforts and individual projects that give you independent recognition is important for making a name for yourself and providing opportunities for advancement. \nBe selective in who you work with. This will maximize the benefits and minimize the downsides of being a team player. Collaborate with people who have complementary expertise. Select projects where there's potential for mutual benefit. Perhaps you're bringing your unique knowledge and gaining access to someone else's professional network, or maybe you're able to learn a new skill by working with someone. Seek out your teammates purposefully rather than jumping on every new group project opportunity. When we're too collaborative, we want everyone to agree with a decision before we proceed. This can create unnecessary delays as you hold meetings trying to achieve consensus. It's fine to be collaborative when seeking input. But put a deadline on the input stage and arrive at a decision, even if it's a decision that doesn't have consensus. \nQuestions 22 to 25 are based on the recording you have just heard. \nQuestion 22: What does the speaker say about being over collaborative? \nQuestion 23: What does the speaker say about people engaged in collaborative projects? \nQuestion 24: How do people benefit from working in a team? \nQuestion 25: Why is it undesirable to spend too much time trying to reach consensus? \n 22. \nA) It may harm the culture of today's workplace. \nB) It may hinder individual career advancement. \nC) It may result in unwillingness to take risks. \nD) It may put too much pressure on team members. \n 23. \nA) They can hardly give expression lo their original views. \nB) They can become less motivated to do projects of their own. \nC) They may find it hard to get their contributions recognized. \nD) They may eventually lose their confidence and creativity. \n 24. \nA) They can enlarge their professional circle. \nB) They can get chances to engage in research. \nC) They can make the best use of their expertise. \nD) They can complete the project more easily. \n 25. \nA) It may cause lots of arguments in a team. \nB) It may prevent making a timely decision. \nC) It may give rise to a lot of unnecessary expenses. \nD) It may deprive a team of business opportunities. \n 关注微信公众号”立金云英语听力”，助您提高英语听力水平 \n 5xue \n 要发表评论，您必须先 登录 。 \n 近期文章 \n 跑步记录（2026年10月） \n 2026年部分马拉松赛事信息 \n 跑步记录（2026年9月） \n 刚刚的脚步 \n 2027年部分马拉松赛事信息 \n 近期评论 文章归档 \n 2026年十月 \n 2026年九月 \n 2026年八月 \n 2026年七月 \n 2026年六月 \n 2026年二月 \n 2025年十二月 \n 2025年十一月 \n 2025年十月 \n 2025年九月 \n 2025年八月 \n 2025年七月 \n 2025年六月 \n 2025年五月 \n 2025年四月 \n 2025年三月 \n 2025年二月 \n 2025年一月 \n 2024年十二月 \n 2024年十一月 \n 2024年十月 \n 2024年九月 \n 2024年六月 \n 2024年四月 \n 2024年一月 \n 2023年十一月 \n 2023年十月 \n 2023年九月 \n 2023年八月 \n 2023年七月 \n 2023年六月 \n 2023年五月 \n 2023年四月 \n 2023年三月 \n 2023年二月 \n 2023年一月 \n 2022年十二月 \n 2022年十一月 \n 2022年九月 \n 2022年六月 \n 2022年四月 \n 2022年三月 \n 2022年二月 \n 2022年一月 \n 2021年十二月 \n 2021年十一月 \n 2021年十月 \n 2021年九月 \n 2021年八月 \n 2021年七月 \n 2021年六月 \n 2021年五月 \n 2021年四月 \n 2021年三月 \n 2021年二月 \n 2021年一月 \n 2020年十二月 \n 2020年四月 \n 2019年四月 \n 2018年四月 \n 2017年四月 \n 2017年三月 \n 功能 \n 登录 \n 文章 RSS \n 评论 RSS \n WordPress.org \n Copyright © 2020-2026 5xue.cc, All Rights Reserved 网站备案号： 京ICP备15046010号-2", "questions": [{"n": 16, "q": "What does the speaker say about the Viking wooden churches?", "opts": ["They are the oldest buildings in Europe.", "They are part of the Christian tradition.", "They are renovated to attract tourists.", "They are in worsening condition."], "ans": "D"}, {"n": 17, "q": "What is special about most of the Viking wooden churches?", "opts": ["They have a history of 14 centuries.", "They are 40 metres tall on average.", "They are without foundations.", "They consist of several storeys."], "ans": "C"}, {"n": 18, "q": "Why were the Viking churches constructed from wood?", "opts": ["Wood was harmonious with nature.", "Wooden buildings kept the cold out.", "Timber was abundant in Scandinavia.", "The Vikings liked wooden structures."], "ans": "C"}, {"n": 19, "q": "What are the three interesting studies about?", "opts": ["Similarities between human babies and baby animals.", "Cognitive features of different newly born mammals.", "Adults influence on children.", "Abilities of human babies."], "ans": "D"}, {"n": 20, "q": "What does the second study find about nine-month-old babies?", "opts": ["They can distinguish a happy tune from a sad one.", "They love happy melodies more than sad ones.", "They fall asleep easily while listening to music.", "They are already sensitive to beats and rhythms."], "ans": "A"}, {"n": 21, "q": "What is the 1980 study about?", "opts": ["Infants’ facial expressions.", "Babies’ emotions.", "Babies’ interaction with adult.", "Infants’ behaviors."], "ans": "B"}, {"n": 22, "q": "What does the speaker say about being over collaborative?", "opts": ["It may harm the culture of today’s workplace.", "It may hinder individual career advancement.", "It may result in unwillingness to take risks.", "It may put too much pressure on team members."], "ans": "B"}, {"n": 23, "q": "What does the speaker say about people engaged in collaborative projects?", "opts": ["They can hardly give expression to their original views.", "They can become less motivated to do projects of their own.", "They may find it hard to get their contributions recognized.", "They may eventually lose their confidence and creativity"], "ans": "C"}, {"n": 24, "q": "How do people benefit from working in a team?", "opts": ["They can enlarge their professional circle.", "They can get chances to engage in research.", "They can make the best use of their expertise.", "They can complete the project more easily."], "ans": "A"}, {"n": 25, "q": "Why is it undesirable to spend too much time trying to reach consensus?", "opts": ["It may cause lots of arguments in a team.", "It may prevent making a timely decision.", "It may give rise to a lot of unnecessary expenses.", "It may deprive a team of business opportunities."], "ans": "B"}]}]};
+const STORE = 'cet6_listen_' + LISTEN.exam;
+let prog = JSON.parse(localStorage.getItem(STORE) || '{}');        // {qid:{ok:bool, picked:int}} 作答记录
+let shuf = JSON.parse(localStorage.getItem(STORE+'_shuf') || '{}'); // {qid:[origIdx...]} 选项乱序映射
+let secIdx = 0, qIdx = 0;
+const secEl = document.getElementById('tabs');
+const qarea = document.getElementById('qarea');
+const doneArea = document.getElementById('doneArea');
+
+document.getElementById('examTag').textContent = LISTEN.exam.replace(' 六级','');
+const AU = document.getElementById('au');
+
+function curSec(){ return LISTEN.sections[secIdx]; }
+function qid(q){ return curSec().key + q.n; }
+
+function buildTabs(){
+  secEl.innerHTML = '';
+  LISTEN.sections.forEach((s,i)=>{
+    const d=document.createElement('div');
+    d.className='tab'+(i===secIdx?' on':'');
+    const tot=s.questions.length;
+    const done=s.questions.filter(q=>prog[qid(q)]).length;
+    d.innerHTML = s.name + '<br><span style="font-size:10px">'+done+'/'+tot+'</span>';
+    d.onclick=()=>{ secIdx=i; qIdx=0; render(); };
+    secEl.appendChild(d);
+  });
+}
+
+function render(){
+  buildTabs();
+  const s=curSec();
+  document.getElementById('transcript').textContent = s.transcript;
+  document.getElementById('transcript').classList.remove('show');
+  document.getElementById('transBtn').textContent='📜 显示听力原文';
+  const qs=s.questions;
+  if(qIdx>=qs.length){ renderDone(); return; }
+  renderQ(s, qs[qIdx]);
+  updateProgress();
+}
+
+function ensureShuffle(q){
+  const id=qid(q);
+  if(!shuf[id]){
+    const arr=[0,1,2,3];
+    for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}
+    shuf[id]=arr;
+    localStorage.setItem(STORE+'_shuf', JSON.stringify(shuf));
+  }
+  return shuf[id];
+}
+
+function isAnswered(q){ const p=prog[qid(q)]; return !!(p && p.picked!==undefined); }
+
+function renderQ(s,q){
+  const id=qid(q);
+  const sh=ensureShuffle(q);
+  const ci='ABCD'.indexOf(q.ans);            // 正确项在原数组下标
+  const correctPos=sh.indexOf(ci);
+  const answered=isAnswered(q);
+  const p=prog[id];
+  const ok=p?p.ok:false;
+  const letters='ABCD';
+  let html='<div class="qcard">';
+  html+='<div class="qno">第 '+q.n+' 题 · '+s.name+'</div>';
+  html+='<div class="stem"><span class="en">'+esc(q.q||'(听音频作答)')+'</span></div>';
+  html+='<div id="opts">';
+  sh.forEach((orig,pos)=>{
+    let cls='opt';
+    let lt=letters[pos];
+    if(answered){
+      if(pos===correctPos) cls+=' sel-r';
+      else if(ok===false && pos===p.picked) cls+=' sel-w';
+      else cls+=' dim';
+    }
+    html+='<div class="'+cls+'" data-pos="'+pos+'"><span class="lt">'+lt+'</span><span>'+esc(q.opts[orig])+'</span></div>';
+  });
+  html+='</div>';
+  // 反馈
+  let fb='';
+  if(answered){
+    if(ok) fb='<div class="fb show"><span class="cor">✓ 答对</span>　正确答案 '+letters[correctPos]+') '+esc(q.opts[ci])+'</div>';
+    else fb='<div class="fb show"><span class="wrg">✗ 答错</span>　正确答案 '+letters[correctPos]+') '+esc(q.opts[ci])+'（你选了 '+letters[p.picked]+'）</div>';
+  }
+  html+=fb;
+  html+='<div class="nav">';
+  html+='<button class="btn sec" id="prevBtn">上一题</button>';
+  if(!answered) html+='<button class="btn pri" id="pickHint">选一项后揭晓</button>';
+  else {
+    html+='<button class="btn sec" id="redoBtn">重做本题</button>';
+    html+='<button class="btn pri" id="nextBtn">'+(qIdx+1>=s.questions.length?'本板块完成 →':'下一题 →')+'</button>';
+  }
+  html+='</div>';
+  html+='</div>';
+  qarea.innerHTML=html;
+  doneArea.innerHTML='';
+  // 绑定
+  if(!answered){
+    qarea.querySelectorAll('.opt').forEach(el=>{
+      el.onclick=()=>{
+        const pos=+el.dataset.pos;
+        prog[id]={ok:(pos===correctPos), picked:pos};
+        localStorage.setItem(STORE, JSON.stringify(prog));
+        render();
+      };
+    });
+  } else {
+    const nb=document.getElementById('nextBtn');
+    if(nb) nb.onclick=()=>{ qIdx++; render(); };
+    const rb=document.getElementById('redoBtn');
+    if(rb) rb.onclick=()=>{ delete prog[id]; localStorage.setItem(STORE, JSON.stringify(prog)); render(); };
+  }
+  const pb=document.getElementById('prevBtn');
+  if(pb) pb.onclick=()=>{ if(qIdx>0){qIdx--; render();} };
+}
+
+function renderDone(){
+  const s=curSec();
+  const tot=s.questions.length;
+  const done=s.questions.filter(q=>prog[qid(q)]).length;
+  const ok=s.questions.filter(q=>prog[qid(q)]&&prog[qid(q)].ok).length;
+  qarea.innerHTML='';
+  let chips='<div class="list">';
+  s.questions.forEach((q,i)=>{
+    const p=prog[qid(q)];
+    let c='lchip cur'; if(p){c='lchip '+(p.ok?'ok':'no');}
+    chips+='<div class="'+c+'" data-i="'+i+'">'+q.n+'</div>';
+  });
+  chips+='</div>';
+  doneArea.innerHTML='<div class="done"><div class="big">'+(done===tot?'🎉':'📊')+'</div>'
+    +'<div class="t">本板块 '+ok+'/'+tot+' 答对</div>'
+    +'<div style="color:var(--sub);font-size:13px;margin:6px 0 14px">'+(done===tot?'全部完成！换下个板块继续 →':'点击下方题号可重做')+'</div>'
+    +chips+'</div>';
+  doneArea.querySelectorAll('.lchip').forEach(el=>{
+    el.onclick=()=>{ qIdx=+el.dataset.i; render(); };
+  });
+  updateProgress();
+}
+
+function updateProgress(){
+  const s=curSec();
+  const tot=s.questions.length;
+  const done=s.questions.filter(q=>prog[qid(q)]).length;
+  const ok=s.questions.filter(q=>prog[qid(q)]&&prog[qid(q)].ok).length;
+  document.getElementById('pbar').style.width=(done/tot*100)+'%';
+  document.getElementById('pmLeft').textContent='已答 '+done+'/'+tot;
+  document.getElementById('pmRight').textContent='答对 '+ok;
+}
+
+document.getElementById('transBtn').onclick=()=>{
+  const t=document.getElementById('transcript');
+  t.classList.toggle('show');
+  document.getElementById('transBtn').textContent = t.classList.contains('show')?'📜 隐藏听力原文':'📜 显示听力原文';
+};
+
+function esc(s){return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+
+render();
+</script>
+</body>
+</html>
