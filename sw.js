@@ -1,5 +1,5 @@
 /* 刷题总台 Service Worker：离线也能刷题 */
-const CACHE = 'shuati-v31';
+const CACHE = 'shuati-v32';
 const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './pako.min.js', './img/glycolysis.svg', './img/tca.svg', './img/replication-fork.svg', './notes-biochem.html'];
 
 self.addEventListener('install', e => {
