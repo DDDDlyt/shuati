@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 620" font-family="PingFang SC,Microsoft YaHei,sans-serif">
+<rect width="900" height="620" fill="#ffffff"/>
+<defs><marker id="b" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#5a6472"/></marker></defs>
+<g font-size="15" fill="#1c2733" text-anchor="middle" font-weight="600">
+  <rect x="360" y="40" width="180" height="48" rx="10" fill="#fbeaea" stroke="#b03a3a"/><text x="450" y="70">乙酰辅酶A</text>
+  <rect x="120" y="150" width="150" height="48" rx="10" fill="#eaf3fb" stroke="#3a76a8"/><text x="195" y="180">草酰乙酸（4C）</text>
+  <rect x="390" y="150" width="130" height="48" rx="10" fill="#eaf3fb" stroke="#3a76a8"/><text x="455" y="180">柠檬酸（6C）</text>
+  <rect x="620" y="150" width="130" height="48" rx="10" fill="#eaf3fb" stroke="#3a76a8"/><text x="685" y="180">异柠檬酸</text>
+  <rect x="620" y="280" width="150" height="48" rx="10" fill="#fdf1e3" stroke="#c07b2d"/><text x="695" y="310">α-酮戊二酸（5C）</text>
+  <rect x="600" y="410" width="150" height="48" rx="10" fill="#fdf1e3" stroke="#c07b2d"/><text x="675" y="440">琥珀酰辅酶A（4C）</text>
+  <rect x="390" y="410" width="120" height="48" rx="10" fill="#e9f7ef" stroke="#2e8b57"/><text x="450" y="440">琥珀酸</text>
+  <rect x="230" y="410" width="110" height="48" rx="10" fill="#e9f7ef" stroke="#2e8b57"/><text x="285" y="440">延胡索酸</text>
+  <rect x="80" y="410" width="100" height="48" rx="10" fill="#e9f7ef" stroke="#2e8b57"/><text x="130" y="440">苹果酸</text>
+</g>
+<g stroke="#5a6472" stroke-width="1.6" marker-end="url(#b)" fill="none">
+  <line x1="380" y1="88" x2="230" y2="148"/>
+  <line x1="270" y1="174" x2="388" y2="174"/>
+  <line x1="520" y1="174" x2="618" y2="174"/>
+  <line x1="685" y1="198" x2="690" y2="278"/>
+  <line x1="688" y1="328" x2="678" y2="408"/>
+  <line x1="598" y1="434" x2="512" y2="434"/>
+  <line x1="388" y1="434" x2="342" y2="434"/>
+  <line x1="228" y1="434" x2="182" y2="434"/>
+  <path d="M 128 408 C 120 260, 130 200, 178 172" />
+</g>
+<g font-size="12.5" fill="#7a6a3a">
+  <text x="252" y="128">柠檬酸合酶</text>
+  <text x="534" y="162">顺乌头酸酶</text>
+  <text x="712" y="232">异柠檬酸脱氢酶</text><text x="712" y="250">＋NADH ＋CO₂（限速）</text>
+  <text x="700" y="368">α-酮戊二酸脱氢酶复合体</text><text x="700" y="386">＋NADH ＋CO₂</text>
+  <text x="466" y="470">琥珀酰CoA合成酶 ＋GTP</text>
+  <text x="268" y="470">琥珀酸脱氢酶 ＋FADH₂</text>
+  <text x="150" y="470">延胡索酸酶</text>
+  <text x="80" y="286">苹果酸脱氢酶</text><text x="80" y="304">＋NADH</text>
+</g>
+<text x="30" y="560" font-size="13" fill="#8a94a2">三羧酸循环（线粒体基质）：1 乙酰CoA → 2 CO₂，得 3 NADH + 1 FADH₂ + 1 GTP</text>
+<text x="30" y="584" font-size="13" fill="#8a94a2">关键不可逆酶（考点）：柠檬酸合酶 · 异柠檬酸脱氢酶 · α-酮戊二酸脱氢酶复合体</text>
+</svg>
