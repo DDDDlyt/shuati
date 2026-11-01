@@ -70,7 +70,7 @@ audio{width:100%; height:38px;}
 </div>
 <div class="audio-wrap">
   <audio id="au" controls preload="metadata" src="audio/2019.12-cet6-s1.mp3"></audio>
-  <div class="hint">整套录音约 28 分钟，含全部三段。按板块顺序听：先听本板块对应段落，再答题；可拖动进度条定位。</div>
+  <div class="hint" id="audioHint">整套录音约 28 分钟，含全部三段。拖动进度条定位本板块对应段落，听后答题。</div>
 </div>
 <div class="wrap">
   <button class="tbtn" id="transBtn">📜 显示听力原文</button>
@@ -91,6 +91,8 @@ const doneArea = document.getElementById('doneArea');
 
 document.getElementById('examTag').textContent = LISTEN.exam.replace(' 六级','');
 const AU = document.getElementById('au');
+// 各板块在整套录音中的大致时间位置（用于引导拖动进度条）
+const SEC_TIME = {A:'约 0:00–8:30', B:'约 8:30–16:30', C:'约 16:30–28:00'};
 
 function curSec(){ return LISTEN.sections[secIdx]; }
 function qid(q){ return curSec().key + q.n; }
@@ -114,6 +116,7 @@ function render(){
   document.getElementById('transcript').textContent = s.transcript;
   document.getElementById('transcript').classList.remove('show');
   document.getElementById('transBtn').textContent='📜 显示听力原文';
+  document.getElementById('audioHint').textContent='本板块音频位置：'+(SEC_TIME[s.key]||'整套录音')+'。拖动进度条定位该段，听后答题（整套约 28 分钟）。';
   const qs=s.questions;
   if(qIdx>=qs.length){ renderDone(); return; }
   renderQ(s, qs[qIdx]);
