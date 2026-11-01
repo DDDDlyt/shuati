@@ -730,9 +730,29 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
   #view-wb .wb-a span{border:1px solid #000;}
   #view-wb .wb-a{color:#000 !important;}
 }
+
+/* v33 */
+@keyframes gateShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+#gate.shake input{animation:gateShake .28s}
+.sub-item{display:flex;align-items:center;gap:9px;padding:8px 10px;background:#22262e;border:1px solid #2c313a;border-radius:9px;margin-top:8px;font-size:13.5px}
+.sub-item .sub-n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sub-item .sub-d{color:#9aa3ad;font-size:12px;flex:0 0 auto}
 </style>
 </head>
 <body>
+
+<!-- v33 访问口令门 -->
+<div id="gate" style="display:none;position:fixed;inset:0;z-index:10000;background:#0f1115;display:none;align-items:center;justify-content:center;padding:24px">
+  <div style="width:100%;max-width:340px;text-align:center">
+    <div style="font-size:44px;margin-bottom:10px">🔒</div>
+    <div style="font-size:19px;font-weight:600;color:#e8eaee;margin-bottom:6px">私人题库</div>
+    <div style="font-size:13.5px;color:#9aa3ad;margin-bottom:18px">这是站长的私人刷题台，输访问口令进入<br>没有口令？找站长要</div>
+    <input id="gatePw" type="password" inputmode="text" placeholder="访问口令" autocomplete="off"
+      style="width:100%;box-sizing:border-box;padding:12px 14px;font-size:16px;border-radius:10px;border:1px solid #2c313a;background:#1a1d24;color:#e8eaee;outline:none;text-align:center">
+    <button onclick="gateTry()" style="width:100%;margin-top:12px;padding:12px;border:0;border-radius:10px;background:#5fb0ff;color:#0f1115;font-size:15.5px;font-weight:600">进入</button>
+    <div id="gateErr" style="height:20px;margin-top:10px;font-size:13px;color:#ff6b6b"></div>
+  </div>
+</div>
 
 <!-- ============ 首页 ============ -->
 <div id="view-home" class="view active">
@@ -863,7 +883,32 @@ create policy "own_state" on public.shuati_state
   for all to authenticated
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
-grant all on public.shuati_state to authenticated;</pre>
+grant all on public.shuati_state to authenticated;
+
+create table if not exists public.submissions (
+  id uuid primary key default gen_random_uuid(),
+  uploader uuid not null references auth.users(id) on delete cascade,
+  uploader_email text,
+  fname text not null,
+  ftype text,
+  fsize int,
+  note text,
+  content text,
+  created_at timestamptz not null default now()
+);
+alter table public.submissions enable row level security;
+drop policy if exists "sub_insert" on public.submissions;
+create policy "sub_insert" on public.submissions
+  for insert to authenticated
+  with check (auth.uid() = uploader);
+drop policy if exists "sub_read_own" on public.submissions;
+create policy "sub_read_own" on public.submissions
+  for select to authenticated
+  using (auth.uid() = uploader);
+drop policy if exists "sub_del_own" on public.submissions;
+create policy "sub_del_own" on public.submissions
+  for delete to authenticated
+  using (auth.uid() = uploader);</pre>
         <p class="acc-tip">上面框里可以左右滑，看不全不影响，点下面直接复制。</p>
         <button class="mini-btn" onclick="copySql()">📋 复制这段 SQL</button>
         <div class="set-row" style="margin-top:12px"><label>地址</label><input id="accUrl" placeholder="https://xxxx.supabase.co"></div>
@@ -893,6 +938,31 @@ grant all on public.shuati_state to authenticated;</pre>
 
     <p id="accMsg" class="gh-status">未登录</p>
     <button class="acc-adv" onclick="toggleGhCard()">⚙️ 备用：GitHub 私有仓库（旧的令牌方式，能用账号就别管它）</button>
+  </div>
+
+  <div class="set-item" id="subCard">
+    <h3>📮 投稿箱（笔记 / 卷子 → 站长）</h3>
+    <p>你手上有笔记、卷子、PPT 想给站长换……咳，贡献？从这传。文件存在站长自己的数据库里，<b>其他用户看不到</b>。</p>
+    <div id="subOff" style="display:none">
+      <p class="gh-status">先在上面注册/登录账号，再来投稿——这样站长知道是谁投的。</p>
+    </div>
+    <div id="subOn" style="display:none">
+      <div class="set-row"><label>文件</label>
+        <button class="mini-btn" onclick="document.getElementById('subFile').click()">📎 选文件（≤4MB）</button>
+        <input type="file" id="subFile" style="display:none" onchange="subPick(this)">
+      </div>
+      <p class="gh-status" id="subFileInfo">还没选文件（支持照片、PDF、Word、压缩包等）</p>
+      <div class="set-row" style="margin-top:9px"><label>备注</label>
+        <input id="subNote" placeholder="选填：这是什么资料、想换什么" maxlength="100">
+      </div>
+      <div class="gh-btns">
+        <button class="mini-btn blue" onclick="subSend()">📤 投给站长</button>
+      </div>
+      <div id="subListWrap">
+        <p class="gh-status" style="margin-top:10px">我投过的：</p>
+        <div id="subList"><p class="gh-status">加载中…</p></div>
+      </div>
+    </div>
   </div>
 
   <div class="set-item">
@@ -1427,6 +1497,12 @@ function renderHome(){
     +'<div class="deck-icon" style="background:#ffd60a22">📖</div>'
     +'<div class="deck-info"><div class="d-name">学长笔记 · 生物化学（精校版）</div>'
     +'<div class="d-meta">手写笔记 68 页全转录 · 788 处已校对</div></div>'
+    +'<div class="deck-go">▶</div></div>';
+  /* v33：投稿箱入口 */
+  html+='<div class="deck-item" onclick="subGo()">'
+    +'<div class="deck-icon" style="background:#5fb0ff22">📮</div>'
+    +'<div class="deck-info"><div class="d-name">投稿箱 · 有笔记/卷子给站长？</div>'
+    +'<div class="d-meta">登录后点这里上传，只有站长能收</div></div>'
     +'<div class="deck-go">▶</div></div>';
   for(const dk of HUB.decks){
     const s=stats(dk.id);
@@ -2004,6 +2080,7 @@ function renderSet(){
   applyGuestMode();
   if(typeof renderAcc==='function') renderAcc();
   if(typeof ghFillSet==='function') ghFillSet();
+  if(typeof subRefreshUI==='function') subRefreshUI();   /* v33 投稿箱登录态 */
   const all=stats(null);
   const tr=document.getElementById('ttsRateRow');
   if(tr){
@@ -5544,6 +5621,201 @@ renderHome();
 if('serviceWorker' in navigator && location.protocol==='https:'){
   navigator.serviceWorker.register('./sw.js').catch(function(){});
 }
+
+
+/* ================= v33 访问口令门 + 投稿箱 ================= */
+var GATE_SHA='56dde44c56968d7a2b678c2c100795e95ac68d5b2802ff1a192b3858ff566a6a'; /* sha256("xnu2026")——改口令找站长换 */
+var GATE_CB=null;
+function sha256hex(s){
+  var K=[0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
+  var H=[0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19];
+  var msg=unescape(encodeURIComponent(s));
+  var l=msg.length, words=new Array(((l+8>>6)+1)*16).fill(0);
+  for(var i=0;i<l;i++) words[i>>2]|=(msg.charCodeAt(i)&0xff)<<(24-(i&3)*8);
+  words[l>>2]|=0x80<<(24-(l&3)*8);
+  words[words.length-1]=l*8;
+  function rr(x,n){return (x>>>n)|(x<<(32-n));}
+  for(var j=0;j<words.length;j+=16){
+    var w=words.slice(j,j+16);
+    for(var i=16;i<64;i++){
+      var a15=w[i-15],a2=w[i-2];
+      var s0=rr(a15,7)^rr(a15,18)^(a15>>>3);
+      var s1=rr(a2,17)^rr(a2,19)^(a2>>>10);
+      w[i]=(w[i-16]+s0+w[i-7]+s1)|0;
+    }
+    var a=H[0],b=H[1],c=H[2],d=H[3],e=H[4],f=H[5],g=H[6],h=H[7];
+    for(var i=0;i<64;i++){
+      var S1=rr(e,6)^rr(e,11)^rr(e,25);
+      var ch=(e&f)^(~e&g);
+      var t1=(h+S1+ch+K[i]+w[i])|0;
+      var S0=rr(a,2)^rr(a,13)^rr(a,22);
+      var mj=(a&b)^(a&c)^(b&c);
+      var t2=(S0+mj)|0;
+      h=g;g=f;f=e;e=(d+t1)|0;d=c;c=b;b=a;a=(t1+t2)|0;
+    }
+    H[0]=(H[0]+a)|0;H[1]=(H[1]+b)|0;H[2]=(H[2]+c)|0;H[3]=(H[3]+d)|0;
+    H[4]=(H[4]+e)|0;H[5]=(H[5]+f)|0;H[6]=(H[6]+g)|0;H[7]=(H[7]+h)|0;
+  }
+  var out='';
+  for(var i=0;i<8;i++) out+=('00000000'+((H[i]>>>0).toString(16))).slice(-8);
+  return out;
+}
+
+function gateShow(cb){
+  GATE_CB=cb||null;
+  var g=document.getElementById('gate');
+  g.style.display='flex';
+  document.body.style.overflow='hidden';
+  var inp=document.getElementById('gatePw');
+  document.getElementById('gateErr').textContent='';
+  inp.value='';
+  setTimeout(function(){ inp.focus(); }, 60);
+}
+function gateHide(){
+  document.getElementById('gate').style.display='none';
+  document.body.style.overflow='';
+}
+function gateTry(){
+  var v=document.getElementById('gatePw').value||'';
+  if(sha256hex(v)===GATE_SHA){
+    try{ localStorage.setItem('xzt_gate','1'); }catch(e){}
+    document.getElementById('gateErr').textContent='';
+    gateHide();
+    var cb=GATE_CB; GATE_CB=null;
+    if(cb) cb();
+  }else{
+    document.getElementById('gateErr').textContent='口令不对，再想想';
+    var g=document.getElementById('gate');
+    g.classList.remove('shake'); void g.offsetWidth; g.classList.add('shake');
+  }
+}
+function gateForget(){
+  try{ localStorage.removeItem('xzt_gate'); }catch(e){}
+  toast('本机访问锁记忆已清除，下次进入需重新输口令');
+}
+function gateBoot(){
+  var ok=false;
+  try{ ok=localStorage.getItem('xzt_gate')==='1'; }catch(e){}
+  if(!ok) gateShow();
+}
+document.addEventListener('keydown', function(e){
+  var g=document.getElementById('gate');
+  if(g && g.style.display!=='none' && e.key==='Enter') gateTry();
+});
+/* 高级设置展开也要过一道口令（本会话内只问一次） */
+(function(){
+  var orig=window.accToggleAdv;
+  window.accToggleAdv=function(){
+    var adv=document.getElementById('accAdv'); if(!adv) return;
+    if(adv.style.display==='none' && sessionStorage.getItem('xzt_adv')!=='1'){
+      gateShow(function(){ try{sessionStorage.setItem('xzt_adv','1');}catch(e){} if(orig) orig(); });
+      return;
+    }
+    if(orig) orig();
+  };
+})();
+
+/* --- 投稿箱 --- */
+var SUB={file:null};
+function subGo(){
+  go('set');
+  setTimeout(function(){
+    var el=document.getElementById('subCard');
+    if(el){ el.scrollIntoView({behavior:'smooth',block:'center'}); }
+  }, 250);
+}
+function subRefreshUI(){
+  var on=!!CLOUD.on;
+  document.getElementById('subOff').style.display=on?'none':'block';
+  document.getElementById('subOn').style.display=on?'block':'none';
+  if(on) subList();
+}
+function subPick(inp){
+  var f=inp.files&&inp.files[0];
+  if(!f) return;
+  if(f.size>4*1024*1024){
+    SUB.file=null; inp.value='';
+    document.getElementById('subFileInfo').textContent='⚠️ '+f.name+' 有 '+Math.round(f.size/1024/1024*10)/10+'MB，超过 4MB 了——照片可以在手机上先截个图或压缩一下再传';
+    return;
+  }
+  SUB.file={name:f.name, type:f.type||'application/octet-stream', size:f.size};
+  document.getElementById('subFileInfo').textContent='✅ 已选 '+f.name+'（'+Math.round(f.size/1024)+'KB）';
+  var rd=new FileReader();
+  rd.onload=function(){ SUB.file.data=rd.result; };
+  rd.readAsDataURL(f);
+}
+async function subSend(){
+  if(!SUB.file || !SUB.file.data){ toast('先选一个文件'); return; }
+  if(!CLOUD.on){ toast('先登录账号'); return; }
+  var btns=document.querySelectorAll('#subCard .mini-btn.blue');
+  btns.forEach(function(b){ b.disabled=true; });
+  try{
+    await cloudFetch('/rest/v1/submissions', {
+      method:'POST',
+      headers:{'Prefer':'return=minimal'},
+      body: JSON.stringify([{
+        uploader: CLOUD.uid,
+        uploader_email: CLOUD.email||'',
+        fname: SUB.file.name,
+        ftype: SUB.file.type,
+        fsize: SUB.file.size,
+        note: (document.getElementById('subNote').value||'').slice(0,100),
+        content: SUB.file.data
+      }])
+    }, true);
+    toast('投出去了✅ 站长收到会处理');
+    SUB.file=null;
+    document.getElementById('subFile').value='';
+    document.getElementById('subNote').value='';
+    document.getElementById('subFileInfo').textContent='还没选文件（支持照片、PDF、Word、压缩包等）';
+    subList();
+  }catch(e){
+    toast('投稿失败：'+(e.message||'网络问题'));
+  }finally{
+    btns.forEach(function(b){ b.disabled=false; });
+  }
+}
+async function subList(){
+  var el=document.getElementById('subList'); if(!el) return;
+  if(!CLOUD.uid){ el.innerHTML='<p class="gh-status">未登录</p>'; return; }
+  try{
+    var rows=await cloudFetch('/rest/v1/submissions?select=id,fname,fsize,note,created_at&uploader=eq.'+encodeURIComponent(CLOUD.uid)+'&order=created_at.desc&limit=20', {}, true);
+    rows=rows||[];
+    if(!rows.length){ el.innerHTML='<p class="gh-status">还没有投过，第一条放这儿</p>'; return; }
+    var h='';
+    for(var i=0;i<rows.length;i++){
+      var r=rows[i], d=new Date(r.created_at);
+      var ds=(d.getMonth()+1)+'/'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+      h+='<div class="sub-item"><span>📄</span><span class="sub-n">'+escA(r.fname)+'　'+esc(r.note||'')+'</span>'
+        +'<span class="sub-d">'+Math.round((r.fsize||0)/1024)+'KB · '+ds+'</span>'
+        +'<span class="hw-del" onclick="subDel(\''+r.id+'\')">删</span></div>';
+    }
+    el.innerHTML=h;
+  }catch(e){
+    el.innerHTML='<p class="gh-status">列表加载失败（'+esc(e.message||'')+'）</p>';
+  }
+}
+async function subDel(id){
+  if(!confirm('删掉这条投稿？')) return;
+  try{
+    await cloudFetch('/rest/v1/submissions?id=eq.'+encodeURIComponent(id)+'&uploader=eq.'+encodeURIComponent(CLOUD.uid), {method:'DELETE'}, true);
+    subList();
+  }catch(e){ toast('删除失败'); }
+}
+/* 登录态变化时刷新投稿箱 UI（挂到原有的状态刷新点上） */
+(function(){
+  var orig=cloudStatus;
+  window.cloudStatus=function(msg,cls){
+    if(orig) orig(msg,cls);
+    var off=document.getElementById('subOff');
+    if(off){ /* 登录态可能已变化，轻量同步一次 */
+      var on=!!CLOUD.on;
+      var cur=off.style.display==='none';
+      if(cur!==on) subRefreshUI();
+    }
+  };
+})();
+window.addEventListener('load', function(){ setTimeout(gateBoot, 50); });
 
 </script>
 <div class="imgv" id="imgv" onclick="if(event.target===this)imgvClose()">
