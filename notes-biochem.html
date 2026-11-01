@@ -1,0 +1,1499 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1a1d24">
+<title>学长笔记·生物化学（精校版）</title>
+<style>
+:root{--bg:#0f1115;--panel:#1a1d24;--panel2:#22262e;--line:#2c313a;--txt:#e8eaee;--sub:#9aa3ad;--acc:#5fb0ff;--star:#ffd60a;--warn:#ff9f0a}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;font-size:16px;line-height:1.75}
+header{position:sticky;top:0;z-index:10;background:linear-gradient(180deg,#1a1d24 85%,rgba(26,29,36,0));padding:14px 16px 20px;border-bottom:1px solid var(--line)}
+header .back{display:inline-flex;align-items:center;gap:6px;color:var(--acc);text-decoration:none;font-size:14.5px;margin-bottom:8px}
+header h1{margin:2px 0 4px;font-size:19px}
+header .meta{color:var(--sub);font-size:13px}
+nav.chap{display:flex;gap:8px;overflow-x:auto;padding:10px 16px 2px;scrollbar-width:none}
+nav.chap::-webkit-scrollbar{display:none}
+nav.chap a{flex:0 0 auto;background:var(--panel2);border:1px solid var(--line);color:var(--txt);text-decoration:none;font-size:13.5px;padding:6px 12px;border-radius:20px}
+main{max-width:760px;margin:0 auto;padding:6px 18px 90px}
+h1{font-size:22px}
+h2{font-size:19px;margin:34px 0 12px;padding-left:10px;border-left:4px solid var(--acc)}
+h3{font-size:16.5px;margin:24px 0 8px;color:#bfe0ff}
+p,li{color:var(--txt)}
+strong{color:var(--star);font-weight:600}
+em{color:#c7a4ff;font-style:normal}
+a{color:var(--acc)}
+blockquote{margin:12px 0;padding:10px 14px;background:var(--panel);border-left:3px solid var(--warn);border-radius:8px;color:#cfd4da;font-size:14.5px}
+hr{border:0;border-top:1px solid var(--line);margin:28px 0}
+ul,ol{padding-left:22px}
+li{margin:5px 0}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:12px 0}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+th{background:var(--panel2);color:#cfe6ff;text-align:left;font-weight:600;white-space:nowrap}
+th,td{border:1px solid var(--line);padding:7px 10px;vertical-align:top}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+code{background:var(--panel2);padding:1px 6px;border-radius:5px;font-size:.92em}
+.top{position:fixed;right:16px;bottom:22px;width:42px;height:42px;border-radius:50%;background:var(--panel2);border:1px solid var(--line);color:var(--txt);font-size:18px;display:flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 4px 14px rgba(0,0,0,.4)}
+.badge{display:inline-block;background:#2b3a2e;color:#7ddb8a;font-size:12px;padding:2px 9px;border-radius:10px;margin-left:8px;vertical-align:2px}
+</style>
+</head>
+<body>
+<header>
+  <a class="back" href="./index.html">‹ 返回刷题总台</a>
+  <h1>📖 学长笔记 · 生物化学（精校版）<span class="badge">788 处识别标注已校对</span></h1>
+  <div class="meta">来源：学长手写笔记 68 页（2026-10-31 拍摄）· 精校于 2026-11-01</div>
+</header>
+<nav class="chap">
+  <a href="#p0">考点总表</a>
+  <a href="#p1">① 氨基酸与蛋白质</a>
+  <a href="#p2">② 核酸化学</a>
+  <a href="#p3">③ 酶化学</a>
+  <a href="#p4">④ 糖·脂·膜</a>
+  <a href="#p5">⑤ 代谢与糖代谢</a>
+  <a href="#p6">⑥ 脂代谢</a>
+  <a href="#p7">⚠ 待复核清单</a>
+</nav>
+<main>
+<blockquote>
+<p>来源：2026-10-31 拍摄的 68 页手写笔记（学长提供），AI 逐张识别转录后<strong>由工作台精校</strong>。
+校对规则：识别不清的字一律用学科知识修复；修复后仍无法确定原文的，用 ⚠ 标出并列入文末「待复核清单」。
+符号：★ = 原笔记红笔/荧光笔/方框标记的重点；〔便利贴〕= 贴在笔记上的考点清单（学长自己总结的出题点）。</p>
+</blockquote>
+<hr />
+<h2 id="p0">零、便利贴考点总表（学长亲笔标的重点）</h2>
+<ul>
+<li>氨基酸：元素组成、分类（5 类）、性质、特征反应</li>
+<li>蛋白质三方面：结构层次、名词解释（结构域、超二级结构/模体、构象与构型）、蛋白质分类（纤维状/球状/膜蛋白）、理化性质、研究方法（层析纯化）</li>
+<li>肽：方向性、理化性质、一级~四级结构与作用力（大题 1/4）</li>
+<li>核酸：(1) 组成及性质 (2) 功能 (3) 结构及分类 {DNA 结构（填空）；DNA 与蛋白质结构对比} (4) RNA 成熟过程（补充）(5) 核酸功能 (6) 研究方法 (7) 核酸杂交</li>
+<li>酶：金属离子的作用、酶小结、催化性质（特征、学说、活化能、活性中心）</li>
+<li>酶动力学：酶促反应、米氏方程（Km）、抑制剂、激活剂</li>
+<li>可逆抑制剂（大题 1/4）☆☆☆☆</li>
+<li>过渡态化学机制（大题 1/4）</li>
+<li>珠蛋白（Mb/Hb 结构与功能，大题 1/4）☆☆☆☆</li>
+<li>糖酵解 10 步、米氏方程 Km、抑制剂、别构调节</li>
+</ul>
+<hr />
+<h1 id="p1">第一部分 氨基酸与蛋白质</h1>
+<h2>第一章 氨基酸</h2>
+<h3>1.1 蛋白质的元素组成与含量计算</h3>
+<ul>
+<li>◇ 蛋白质都是由氨基酸通过肽键相连而成的<strong>含氮</strong>有机化合物。</li>
+<li>元素组成：<strong>C、H、O、N、S</strong>（N 占 10%~40%，荧光笔标）。</li>
+<li>各种蛋白质含氮量很接近，<strong>平均 16%</strong>（红笔）。</li>
+<li>★ <strong>粗蛋白含量 = 蛋白质含氮量 × 6.25</strong>（6.25 = 1/16%，红笔注：N=16%）。</li>
+<li>蛋白质的大小顺序：蛋白质 — 多肽（分子量 1000~5000，20~100 残基）— 氨基酸。</li>
+<li>蛋白质的生物学功能（6 条）：1) 催化剂（酶）2) 代谢调节 3) 免疫保护 4) 细胞内的转运和储存 5) 运动支持 6) 细胞间信息传递。</li>
+</ul>
+<h3>1.2 蛋白质水解</h3>
+<ul>
+<li>完全水解（酸/碱）→ 氨基酸混合物；部分水解（酶解）→ 多肽 + 氨基酸混合物。</li>
+<li><strong>酸水解</strong>：色氨酸被破坏；含羟基氨基酸（丝、苏）部分被水解；天冬酰胺、谷氨酰胺的酰胺基被水解下来（<strong>脱氨</strong>，红笔划线）。</li>
+<li><strong>碱水解</strong>：发生外消旋作用，但色氨酸不被破坏。</li>
+<li><strong>酶水解</strong>：优点——氨基酸不被破坏、不易发生消旋；缺点——水解不完全，中间产物多。</li>
+</ul>
+<h3>1.3 氨基酸结构</h3>
+<ul>
+<li>α-氨基酸通式：中心 C 连 R、NH₂、H、COOH。</li>
+<li>组成蛋白质的氨基酸有 <strong>20 种，均属 L-α-氨基酸（甘氨酸除外，无手性——红笔）</strong>。</li>
+<li>各种 AA 的差异体现在 <strong>R 基</strong>上。</li>
+<li>★ <strong>含特殊基团的氨基酸</strong>（红笔重点）：
+  1. 含 -OH：丝氨酸、苏氨酸、酪氨酸
+  2. 含 S：半胱氨酸、蛋氨酸（甲硫氨酸）
+  3. 含杂环：色氨酸、组氨酸
+  4. 含酰胺基：天冬酰胺、谷氨酰胺</li>
+<li>非蛋白质氨基酸：大多是标准 α-AA 存在于体内，有些是 β-、γ-、δ-、D-型。存在意义：1) D-AA 存在于细菌细胞壁（肽聚糖）和某些抗生素中；2) 作为代谢中间物的非蛋白质氨基酸（如鸟氨酸、瓜氨酸）；3) 蛋白质翻译后修饰产生（如羟脯氨酸、羟赖氨酸）；4) 作为体内氨的转运和储存载体；5) 调节生物体功能（如甘氨酸是抑制性神经递质）。</li>
+</ul>
+<h3>1.4 L 型与 D 型的区别</h3>
+<ol>
+<li>旋光/构型不同：Fischer 投影中 D 型氨基在右，L 型氨基在左（-COOH 都在上端）。</li>
+<li>组成的蛋白质不同：D-AA 只参与细菌细胞壁等的合成；天然蛋白质由 L-AA 组成。</li>
+<li>含量不同：D 型少；生物体蛋白质中均由 L 型组成（红笔下划线）。</li>
+</ol>
+<h3>1.5 氨基酸的两性解离与等电点 pI ★</h3>
+<ul>
+<li>氨基酸在结晶态或水溶液中以<strong>兼性离子</strong>（两性离子）形式存在。</li>
+<li>◇ <strong>pH &gt; pI：氨基酸带负电；pH &lt; pI：带正电</strong>（红笔）；pI 时净电荷为零，呈电中性，在电场中不移动。</li>
+<li>Gly 的三级解离式：⁺H₃N—CH₂—COOH ⇌ ⁺H₃N—CH₂—COO⁻ ⇌ H₂N—CH₂—COO⁻（标 pK₁、pK₂）。</li>
+<li>★ <strong>pI = ½(pK₁ + pK₂)</strong>（红笔「背」）。红笔注：pI 一定小于 pK₂、一定大于 pK₁（对侧链不带电的 AA 而言）。</li>
+<li>推导：GlyH₂⁺ ⇌ Gly± + H⁺（k₁）；Gly± ⇌ Gly⁻ + H⁺（k₂）；pI 时 [Gly⁺] = [Gly⁻]，得 [H⁺]² = k₁·k₂，pH = ½(pK₁+pK₂)。</li>
+<li>蓝笔小字：H⁺ 带正电、OH⁻ 带负电、R 基不同则电性不同。</li>
+</ul>
+<h3>1.6 氨基酸的特征化学反应</h3>
+<p>★ α-羧基和 α-氨基参加的反应（红笔◇重点）：</p>
+<ol>
+<li><strong>茚三酮反应</strong>：α-氨基酸的游离 α-氨基与水合茚三酮共热，生成蓝紫色化合物，在 <strong>570 nm</strong> 处有吸收峰（脯氨酸、羟脯氨酸生成黄色化合物，430 nm）。</li>
+<li><strong>成肽反应</strong>：应用——氨基酸自动分析仪的检测原理。</li>
+</ol>
+<h3>1.7 常见氨基酸缩写与分类</h3>
+<ul>
+<li>三字母缩写表：Ala 丙、Arg 精、Asn 天冬酰胺、Asp 天冬、Cys 半胱、Gln 谷氨酰胺、Glu 谷、Gly 甘、His 组、Ile 异亮、Leu 亮、Lys 赖、Met 甲硫（含硫）、Phe 苯丙、Pro 脯、Ser 丝、Thr 苏、Trp 色、Tyr 酪、Val 缬；Sec 硒代半胱氨酸（红笔注：第 21 种氨基酸）。</li>
+<li>★ <strong>五种分类（红笔「背」）</strong>：
+  1. 非极性脂肪族（侧链仅 C、H）：甘、丙、缬、亮、异亮、脯
+  2. 极性中性（侧链有极性不带电）：丝、半胱、苏、天冬酰胺、谷氨酰胺、酪
+  3. 芳香族：苯丙、色、酪
+  4. 酸性（侧链含可解离负电基团）：天冬、谷
+  5. 碱性（侧链含可解离正电基团）：赖、精、组（红笔划线）</li>
+<li>◇ 特殊的氨基酸——<strong>半胱氨酸</strong>（红笔注：二硫键）：两个半胱氨酸的 -SH 脱氢形成 <strong>S—S 二硫键</strong>（红笔划线）。二硫键使相邻肽段（蛋白质）的结构更稳定（红笔「背」）。</li>
+</ul>
+<h2>第二章 蛋白质的结构</h2>
+<p>〔便利贴〕考点：一级~四级结构及其作用力（大题 1/4）；方向性；理化性质；结构域、模体（名词解释）；「构象、构型」。</p>
+<h3>2.1 结构层次总览</h3>
+<ul>
+<li>一级结构 → 二级结构 → 三级结构 → 四级结构；<strong>二、三、四级统称空间结构（高级结构）</strong>。</li>
+</ul>
+<h3>2.2 一级结构 ★</h3>
+<ul>
+<li><strong>广义定义：蛋白质一级结构 = 多肽链中氨基酸的排列顺序 + 二硫键的位置</strong>（红笔）。</li>
+<li>☆ 维持一级结构的化学键：<strong>肽键、二硫键</strong>（※）。</li>
+<li>氨基酸残基：肽键中的氨基酸因参与成肽已不是完整的氨基酸，称氨基酸残基（红笔【重点】）。</li>
+<li>肽：由氨基酸之间氨基与羧基脱水缩合形成的化合物；多个相连为多肽。</li>
+<li>N 末端（自由氨基端）、C 末端（自由羧基端）；多肽链有方向性，<strong>序列从 N 端读到 C 端</strong>（红笔）。</li>
+<li>补充（红笔「背」）：20 种 AA 平均分子量 138，但蛋白质中优势 AA 使实际平均接近 128，减去一分子水 → <strong>残基平均分子量 110</strong>；蛋白质含氮量与残基数估算常用此值。</li>
+</ul>
+<h3>2.3 肽单元与构象</h3>
+<ul>
+<li>◇ <strong>肽平面（肽单元）</strong>：肽键 C—N 不能自由旋转（肽键具有<strong>部分双键性质</strong>）；一个羰基碳与相邻的共 6 个原子（Cα、C、O、N、H、Cα′）处于同一平面（红笔注：肽单元是蛋白质构象的结构单元）。</li>
+<li>α-C 的两个单键可自由旋转：Cα—N 旋转角称 <strong>φ</strong>，Cα—C 旋转角称 <strong>ψ</strong>；理论上 −180°~+180°，但在蛋白质中互相制约而受限（Ramachandran 图的物理基础）。</li>
+<li>◇ <strong>分子伴侣</strong>：协助蛋白质在体内正确折叠（红笔）。</li>
+<li>蓝笔竖排边注：<strong>构象</strong>——肽键不能旋转（靠单键旋转形成的不同空间结构）；与「构型」区分（构型改变需断键）。</li>
+</ul>
+<h3>2.4 二级结构 ★</h3>
+<ul>
+<li>定义：蛋白质分子中某一段肽链主链骨架相对有规律的空间结构（不涉及侧链）。</li>
+<li>☆ <strong>维持二级结构的化学键：氢键</strong>（红笔）。</li>
+<li>类型：<strong>α-螺旋、β-折叠、β-转角、β-凸起、Ω 环、无规卷曲</strong>。</li>
+<li><strong>1. α-螺旋</strong>（最早提出；红笔圈）：</li>
+<li>肽单元 6 原子共平面是结构基础。</li>
+<li>★ 每圈 <strong>3.6 个氨基酸残基，螺距 0.54 nm，每残基上升 0.15 nm</strong>（又称 3.6₁₃ 螺旋，氢键环含 13 个原子）。</li>
+<li>氢键：第 n 个残基的 C=O 与第 n+4 个残基的 N—H 形成链内氢键，方向与螺旋轴平行。</li>
+<li>影响因素（红笔「背」）：1) 组成 AA 的种类和侧链大小；2) <strong>Gly、Pro 不利于形成 α-螺旋</strong>（甘氨酸太柔、脯氨酸环状亚氨基）；3) 连续的 R 基带相同电荷的 AA 不易形成（如 Poly-Lys、Poly-Glu 同性相斥）。</li>
+<li><strong>2. β-折叠</strong>（红笔：折叠状、锯齿状）：</li>
+<li>由两条以上肽段组成，肽段几乎充分延展呈锯齿状。</li>
+<li>相邻肽段间靠链间氢键维系；侧链基团交替分布于片层两侧。</li>
+<li>★ 平行/反平行两种：反平行的 N—H…O 几乎在一直线上，<strong>更稳定</strong>（红笔划线）。</li>
+<li>R 基团太大或连续带相同电荷的 AA 较难形成片层（蓝笔）。</li>
+<li><strong>3. β-转角</strong>：常出现在球状蛋白表面，使肽链回折 ~180°；由 4 个残基组成，第 1 个残基的 C=O 与第 4 个残基的 N—H 形成氢键；<strong>Gly、Pro 常出现在 β-转角中</strong>。</li>
+<li><strong>4. β-凸起</strong>：β-折叠中多插入一个残基使连续氢键被打断形成的特殊小转折，主要出现在<strong>抗体可变区</strong>。</li>
+<li><strong>5. 无规卷曲</strong>：肽链中无确定规律的部分，二面角多变，常构成酶的功能部位（活性中心所在）。</li>
+</ul>
+<h3>2.5 超二级结构与结构域</h3>
+<ul>
+<li>蓝笔对照：<strong>模体（motif）→ 超二级结构（功能）</strong>；<strong>结构域（domain）→ 三级结构（功能）</strong>。</li>
+<li>◇ <strong>超二级结构/模体</strong>：相邻二级结构肽段在空间上组合形成的有规则组合方式（介于二级与三级之间）。e.g. αα（α-螺旋束）、βαβ、β-曲折、发夹、HLH、Rossmann 折叠等。</li>
+<li>◇ <strong>结构域（domain）</strong>：三级结构中相对独立、可独立行使功能的区域（荧光笔划线）；大蛋白的三级结构常由 2 个以上结构域构成。</li>
+<li>分类：α 型结构域、α/β 型、α+β 型、少 α/少 β 型（β-桶等）。</li>
+</ul>
+<h3>2.6 三级结构 ★</h3>
+<ul>
+<li>定义：二级结构基础上进一步盘曲折叠形成的整体球状三维结构，包括主链和侧链的空间排布。</li>
+<li>☆ <strong>维持三级结构的主要化学键：疏水键（疏水作用）</strong>（红笔划线）；此外有氢键、范德华力、离子键（盐键）、配位键、二硫键。</li>
+<li>疏水作用：水介质中球状蛋白的折叠类似油滴聚集，疏水残基埋在分子内部、亲水侧链分布表面（红笔「油滴」）。</li>
+<li>◇ 各种次级键的键能（kJ/mol）：氢键 12~30；离子键 10~20；疏水作用 12~20；范德华力 4~8；<strong>二硫键约 210</strong>（唯一的共价键）。</li>
+<li>球状蛋白三维结构特征（5 条）：1) 全为球状；2) 有明显折叠层级；3) 紧密的球状/椭球实体；4) 疏水侧链在内、亲水在外；5) 表面常有空穴（活性部位所在）。</li>
+</ul>
+<h3>2.7 四级结构</h3>
+<ul>
+<li><strong>亚基</strong>：具有独立三级结构的肽链（红笔圈）。</li>
+<li><strong>四级结构 = 各亚基的空间排布 + 亚基间相互作用</strong>。</li>
+<li>亚基相同 → 同源寡聚体；不同 → 异源寡聚体。</li>
+<li>☆ 亚基聚合的作用力：<strong>主要是疏水力（疏水作用）和氢键、离子键等次级键，无二硫键</strong>（红笔）。</li>
+<li>蓝笔：除一级结构外，各层次都靠次级键维持。</li>
+<li>◇ 亚基缔合的优越性：1) 结构更稳定（表面积/体积比降低）；2) 提高遗传经济性和编码效率；3) 提高催化效率；4) 具备协同调节能力。</li>
+</ul>
+<h3>2.8 蛋白质结构分析技术</h3>
+<ul>
+<li>除色谱、质谱外，还有：光谱（紫外/荧光/圆二色）、<strong>X-射线晶体学</strong>、<strong>核磁共振（NMR）</strong>、<strong>冷冻电镜（Cryo-EM）</strong>。</li>
+</ul>
+<h2>第三章 蛋白质的结构与功能</h2>
+<h3>3.1 蛋白质分类</h3>
+<ul>
+<li>▷ 按<strong>形状/组成</strong>分：纤维状蛋白、球状蛋白、膜蛋白（红笔下划线）。</li>
+<li>蓝笔注：按<strong>功能</strong>分：结构蛋白、功能蛋白（活性蛋白）等；同工酶类同源蛋白。</li>
+</ul>
+<h3>3.2 结构与功能的基本规则（红笔划线区）</h3>
+<ol>
+<li><strong>结构源于序列</strong>：一级结构决定高级结构，高级结构决定功能（红笔划线，必背）。</li>
+<li><strong>功能源于结构</strong>：蛋白合成后折叠成特定结构并行使其功能。</li>
+<li><strong>结构会变化</strong>：行使功能时三维结构发生改变（构象变化）。</li>
+<li><strong>相似序列具相似功能</strong>：结构相似→功能相似，e.g. 同源蛋白（红笔圈）。</li>
+<li>相似功能暗示进化相关性。</li>
+<li>序列相似可推测共同进化起源。</li>
+</ol>
+<h3>3.3 一级结构是高级结构与功能的基础</h3>
+<ul>
+<li>
+<ol>
+<li>一级结构是空间构象的基础（e.g. 核糖核酸酶 A 变性复性实验）。</li>
+</ol>
+</li>
+<li>
+<ol start="2">
+<li>一级结构相似 → 空间构象和功能相似，e.g. 细胞色素 C 的序列-结构-功能对应。</li>
+</ol>
+</li>
+<li>
+<ol start="3">
+<li>序列携带重要生物信息（蓝笔：可据此推测进化关系/构建系统进化树）。</li>
+</ol>
+</li>
+<li>
+<ol start="4">
+<li>关键氨基酸改变 → 功能异常：e.g. <strong>镰刀状细胞贫血</strong>（Hbβ 链第 6 位 Glu→Val，红笔圈「贫血」）。</li>
+</ol>
+</li>
+<li>⌄ 这种由蛋白质分子内部结构改变导致的疾病称<strong>分子病</strong>。</li>
+</ul>
+<h3>3.4 构象病（红笔「背」，划线贯穿）</h3>
+<ul>
+<li>◇ 蛋白质构象改变可致病：一级结构不变、空间结构改变 → 功能受损 → 疾病（<strong>构象病/蛋白错误折叠病</strong>）。</li>
+<li>错误折叠的蛋白相互聚集、抵抗蛋白酶水解、具传染性（<strong>朊病毒 PrP</strong> 病理性传递），e.g. 老年痴呆（阿尔茨海默病）、疯牛病（海绵状脑病）。</li>
+</ul>
+<h3>3.5 纤维状蛋白（三个经典结构蛋白）★</h3>
+<ul>
+<li>纤维状蛋白大多不溶于水、机械强度高；常由单一类型二级结构组成（红笔）。</li>
+<li><strong>1. α-角蛋白</strong>（毛发、指甲、羽毛）：</li>
+<li>肽链中央形成 α-螺旋（棒状结构区 + N/C 端非螺旋区）。</li>
+<li>★ 中央区含<strong>七肽重复序列 (a-b-c-d-e-f-g)ₙ，a、d 位为疏水氨基酸</strong>（蓝笔波浪线）——疏水面促使两股螺旋相互缠绕成二聚体。</li>
+<li>相邻多肽链间由<strong>二硫键</strong>交联 → 提高强度。</li>
+<li>〔红笔〕主要作用力：<strong>疏水键 + 二硫键</strong>。</li>
+<li><strong>2. β-角蛋白 = 丝心蛋白</strong>（蚕丝、蜘蛛丝；二级结构主要是 β-折叠）：</li>
+<li>★ 反平行 β-折叠片以平行方式堆积的多层结构，富含 <strong>Gly、Ala、Ser</strong>（红笔下划线）。</li>
+<li>重复序列 Gly-Ala/Ser；片层间距 0.47 nm。</li>
+<li>质地柔软、抗张强度高，但<strong>不能拉伸</strong>（β 折叠已充分伸展）。</li>
+<li><strong>3. 胶原蛋白</strong>（细胞外基质结构蛋白，结缔组织）：</li>
+<li>基本组成单位：<strong>3 条 α 肽链相互扭转形成原胶原（三股螺旋）</strong>。</li>
+<li>AA 组成特点：★ <strong>Gly 占 1/3；Pro、羟脯氨酸（Hyp）合计占 1/5 以上</strong>；羟赖氨酸约 0.6%；Tyr 少；<strong>缺 Trp、Cys</strong>（营养不完全蛋白）。</li>
+<li>重复序列 <strong>Gly-X-Y</strong>：X 常为 Pro，Y 常为 4-羟脯氨酸（也可以是 Lys/Hyl）。</li>
+<li>Gly、Pro 含量高 → 难以形成 α-螺旋，但<strong>有利于形成三股螺旋</strong>。</li>
+<li>Pro、Lys 的羟基化（需维生素 C）是为了在链间形成<strong>共价交联键</strong>，稳定三股螺旋（缺 Vit C → 坏血病）。</li>
+<li>◇ <strong>三股螺旋</strong>：胶原蛋白特有的二级结构；三股<strong>左手</strong>螺旋相互缠绕、平行排列，形成<strong>右手超螺旋</strong>；最小的 Gly 位于螺旋内部构成紧密的轴，Pro 和 Hyp 的环状侧链位于表面（红笔划线）。</li>
+</ul>
+<h3>3.6 珠蛋白家族：Mb 与 Hb（大题 1/4 ★☆☆☆☆）</h3>
+<ul>
+<li>◇ 同源蛋白有自身的不同种类，e.g. 血红蛋白 HbA、肌红蛋白 Mb、脑红蛋白 Ngb、细胞色素类。</li>
+<li><strong>1. 肌红蛋白（Mb）的结构</strong>：</li>
+<li>一级结构：<strong>一条肽链、153 个氨基酸残基</strong>，结合 1 个血红素辅基（血红素 = 原卟啉 IX + Fe²⁺）。</li>
+<li>二级结构：<strong>8 段 α-螺旋（A~H），约占 75%</strong>；螺旋间由无规卷曲/转角连接，有 4 个脯氨酸终止螺旋。</li>
+<li>血红素配位：Fe²⁺ 共 6 个配位键——4 个与原卟啉环吡咯 N 相连，<strong>第 5 个与 F8 近端组氨酸（His F8）相连，第 6 个空置或与 O₂ 结合</strong>。</li>
+<li>三级结构：紧密球状，亲水表面 + <strong>疏水袋</strong>；疏水袋允许 O₂ 进入而阻止 H₂O，保证 Fe²⁺ 结合 O₂ 而不被氧化为 Fe³⁺（红笔划线「疏水袋」）。</li>
+<li><strong>2. O₂ 与 CO 的结合</strong>（红笔重点）：</li>
+<li>His E7（远端组氨酸）的作用：1) 保护 Fe²⁺ 不被氧化；2) <strong>制造空间障碍</strong>——迫使 O₂ 以 120°（≈弯曲）角度、CO 以 180°（直线）角度接近铁（笔记标 O₂ 90°/CO 120°，角度以课本为准，考点是<strong>E7 降低 CO 的亲和力</strong>，CO 亲和力由自由状态的 2 万倍降到约 200 倍）。</li>
+<li><strong>3. Mb 的功能</strong>：O₂ 的<strong>贮存</strong>（肌细胞内）；氧合曲线为<strong>双曲线</strong>，p50 低、亲和力高。</li>
+<li><strong>4. 血红蛋白（Hb）的结构和功能</strong>（蓝笔☆×4）：</li>
+<li>▷ 存在于红细胞，<strong>4 个亚基（α₂β₂）→ 具四级结构</strong>（红笔）。</li>
+<li>单个亚基一级结构与 Mb 差别较大（只有约 27 个位置的残基相同），<strong>但三级结构与 Mb 十分相似</strong>（红笔重点：进化保守）。</li>
+<li>★ <strong>Hb 因具有四级结构 → 正协同效应、波尔效应、别构效应，运输 O₂</strong>（红笔下划线）；氧合曲线为 <strong>S 形</strong>。</li>
+<li>Hb 含 4 个血红素，能结合 4 个 O₂；每个氧结合部位有 2 个关键 His（E7、F8）和 2 个关键疏水残基（Phe CD1、Leu F4）。</li>
+<li><strong>(1) 正协同效应</strong>（红笔下划线）：一个亚基结合 O₂ 后，其余亚基对 O₂ 的<strong>亲和力增强</strong>（↑→↑↑，红笔）。</li>
+<li>解释模型两种：<strong>齐变模型（MWC， concerted）与序变模型（KNF， sequential）</strong>；都假设两种构象：<strong>紧张态 T（亲和力低）与松弛态 R（亲和力高）</strong>（红笔）。</li>
+<li>T 态：四条链间结合紧密——由<strong>盐键</strong>及结合在 2 条 β 链缝隙中的 <strong>2,3-BPG（2,3-二磷酸甘油酸）</strong>造成；它们稳定 T 态，使 Hb 结合 O₂ 能力降低（蓝笔）。</li>
+<li><strong>(2) 波尔效应</strong>（红笔下划线）：可解释 Hb 在肺中吸 O₂ 排 CO₂、在组织中吸 CO₂ 排 O₂。</li>
+<li>定义：<strong>H⁺ 和 CO₂ 促进 Hb 释放 O₂ 的现象</strong>（红笔；蓝笔：结合能力下降）。</li>
+<li>原因：H⁺、CO₂ 与 Hb 的质子化位点结合，<strong>促进 Hb 从 R 态转变为 T 态</strong>。</li>
+<li>H⁺ 相关的高度质子化基团：<strong>α 亚基 N 端氨基、α 亚基 His122 咪唑基、β 亚基 His146 咪唑基</strong>；T 态时三者高度质子化，O₂ 结合后质子解离。pH↓（H⁺↑）→ 稳定 T 态 → 抑制 O₂ 结合（红笔波浪线）。</li>
+<li>CO₂ 两条途径：1) H₂O+CO₂ ⇌ H₂CO₃ ⇌ HCO₃⁻+H⁺（碳酸酐酶，肺部反向）；2) Hb-NH₂ + CO₂ ⇌ Hb-NH-COO⁻ + H⁺（氨基甲酰化，形成盐键稳定 T 态）。</li>
+<li><strong>(3) 别构效应</strong>（红笔下划线）：O₂ 以外的配体在血红素铁以外的位点与 Hb 结合，引起构象变化、影响 O₂ 结合能力的现象。</li>
+<li>★ 哺乳动物 Hb 的别构效应物：<strong>H⁺、CO₂、2,3-BPG、NO</strong>。</li>
+<li>蓝笔：2 个 α 亚基间的缝隙使 2 条 β 链间出现中央空穴，即 <strong>2,3-BPG 结合部位</strong> → 保持 T 态（高原适应：2,3-BPG 增多使氧解离曲线右移）。</li>
+<li><strong>(4) 膜蛋白</strong>：占总蛋白约 30%，具识别、信号转导、运输等功能。e.g. 溶质载体 SLC、G 蛋白偶联受体 GPCR。</li>
+</ul>
+<h2>第四章 蛋白质的理化性质与研究方法</h2>
+<h3>4.1 胶体性质</h3>
+<ul>
+<li>蛋白质分子直径 1~100 nm，属胶体体系；有<strong>丁达尔效应、布朗运动、不能透过半透膜</strong>。</li>
+<li>★ 胶体稳定的两大因素：<strong>1) 颗粒表面带同种电荷（同电相斥）；2) 水化膜</strong>（表面亲水基团吸引水分子形成致密水化膜；荧光笔划线）。</li>
+<li>◇ <strong>等电点 pI</strong>：蛋白质解离成正、负离子趋势相等（兼性离子，净电荷为 0）时溶液的 pH。pI 处溶解度最低。</li>
+</ul>
+<h3>4.2 沉淀反应</h3>
+<ul>
+<li>◇ 除去稳定因素（电荷、水化膜）→ 蛋白质从溶液中析出。</li>
+<li>红笔：<strong>变性蛋白易沉淀；沉淀的蛋白不一定变性</strong>。</li>
+<li>沉淀方法：
+  1. <strong>盐析</strong>：加中性盐（常用 (NH₄)₂SO₄）破坏水化膜，<strong>一般不引起变性</strong>（可复性）。
+  2. <strong>有机溶剂沉淀</strong>（乙醇、丙酮）：破坏水化膜 + 降低介电常数，低温短时不可逆性小。
+  3. <strong>等电点沉淀</strong>：pI 时净电荷为 0。
+  4. <strong>重金属盐沉淀</strong>：与带<strong>负</strong>电荷的蛋白质结合成不溶性盐（碱性条件）。
+  5. <strong>生物碱试剂和某些酸</strong>（苦味酸、鞣酸、钨酸、磺基水杨酸、三氯乙酸）：与带<strong>正</strong>电荷的蛋白质成不溶性盐（酸性条件）。</li>
+</ul>
+<h3>4.3 变性与复性（红笔 D 标记 = 必考）</h3>
+<ul>
+<li>◇ <strong>变性</strong>：某些物理化学因素下，蛋白质<strong>特定的空间结构被破坏</strong>（有序→无序），导致理化性质改变和<strong>生物活性丧失</strong>。一级结构（肽键）不断裂。</li>
+<li>变性因素：</li>
+<li>物理：加热、高压、紫外线、X 射线、超声波、剧烈震荡等。</li>
+<li>化学：强酸强碱、重金属盐、<strong>尿素、盐酸胍</strong>（破坏氢键和疏水作用）、三氯乙酸等。</li>
+<li>★ 变性的本质（红笔）：<strong>二硫键、次级键（非共价键）被破坏</strong>。</li>
+<li>变性现象：1) 结晶能力丧失；2) 侧链基团暴露；3) 理化性质改变（溶解度降低、黏度增加、扩散系数降低）；4) 易被蛋白酶消化；5) 生物活性丧失。</li>
+<li>◇ 变性过程存在<strong>协同效应</strong>：局部结构破坏立即引起整体稳定性骤降（蓝笔）。</li>
+<li><strong>复性</strong>：变性程度较轻、去除变性因素后，恢复（或部分恢复）原有构象与功能。变性不可逆时——凝固（变性后絮凝物加热成坚固凝块，不再溶于强酸强碱）。</li>
+<li>★ 红笔辨析：<strong>变性蛋白不一定沉淀；沉淀蛋白不一定变性；凝固的蛋白一定已变性，且不可逆</strong>。</li>
+</ul>
+<h3>4.4 分离纯化与研究方法</h3>
+<ul>
+<li>常用去除/浓缩手段：澄清、透析、超滤、凝胶过滤（蓝笔）。</li>
+<li>▷ <strong>分离纯化总体策略</strong>（四步）：1° 预处理（提取）；2° 粗分级（盐析/等电点沉淀/有机溶剂）；3° 细分级（凝胶过滤、离子交换、吸附层析、亲和层析）；4° 结晶。</li>
+<li>按性质选择方法：
+  1. 分子大小：透析/超滤、离心、<strong>凝胶过滤层析（分子筛）</strong>
+  2. 溶解度：等电点沉淀、盐析、有机溶剂
+  3. 电荷：电泳、<strong>离子交换层析</strong>
+  4. 特异亲和力：<strong>亲和层析</strong></li>
+<li>◇ <strong>分子量测定</strong>：凝胶过滤层析、<strong>SDS-聚丙烯酰胺凝胶电泳（SDS-PAGE）</strong>、沉降离心（超离心）法、质谱法。</li>
+<li>◇ <strong>含量测定</strong>：凯氏定氮法、双缩脲法、Folin-酚试剂法（Lowry）、紫外吸收法（280 nm）、染料结合法（考马斯亮蓝）、胶体金法。</li>
+<li>纯度鉴定：电泳（一条带）、HPLC、免疫法、N 端分析。</li>
+<li>◇ <strong>一级结构测定</strong>（蓝笔划线流程）：纯化 → 拆分多肽链 → 断开二硫键 → 分析氨基酸组成 → 测 N/C 末端 → 裂解肽段 → 测各肽段顺序 → 重建完整序列 → 确定二硫键位置。</li>
+</ul>
+<hr />
+<h1 id="p2">第二部分 核酸化学</h1>
+<h2>第五章 核苷酸与核酸</h2>
+<p>〔便利贴〕重点：组成及性质、功能、结构及分类、DNA 结构（填空）、DNA 与蛋白质结构对比、RNA 成熟过程、核酸功能、研究方法、核酸杂交。</p>
+<h3>5.1 核酸的组成层级</h3>
+<ul>
+<li>▷ 核酸：以<strong>核苷酸</strong>为基本组成单位的生物大分子（红笔）。</li>
+<li>元素组成：<strong>C、H、O、N、P</strong>（特征元素 P）。</li>
+<li>分子组成：<strong>碱基 + 戊糖 + 磷酸</strong> →（核苷）→ 核苷酸 → 核酸。</li>
+<li>红笔小字：核苷酸的 3′ 排列顺序 → 遗传信息。</li>
+</ul>
+<h3>5.2 碱基</h3>
+<ul>
+<li>含 N 杂环化合物：</li>
+<li><strong>嘌呤（双环）</strong>：A、G（黄笔高亮）</li>
+<li><strong>嘧啶（单环）</strong>：C、U、T（黄笔高亮）</li>
+<li>稀有碱基：含量很少，多为<strong>甲基化碱基</strong>；<strong>tRNA 中含量最多</strong>（页 25：tRNA 含 10%~20% 稀有碱基）。</li>
+<li>碱基性质（4 条）：1) 几乎不溶于水（芳香族杂环）；2) <strong>强烈紫外吸收 260 nm</strong>；3) 酸碱解离——双螺旋结构的基础（红笔）；4) 互变异构（酮式 ⇌ 烯醇式，与基因突变相关）。</li>
+</ul>
+<h3>5.3 核苷与核苷酸</h3>
+<ul>
+<li>◇ <strong>核苷</strong>：碱基和核糖（或脱氧核糖）通过 <strong>β-N-糖苷键</strong>（红笔）相连；嘌呤用 N-9、嘧啶用 N-1 与核糖 C-1′ 相连。</li>
+<li>嘧啶核苷多为<strong>反式</strong>（红笔）；自由嘌呤核苷因空间位阻更易形成顺式。</li>
+<li><strong>核苷酸</strong>：核苷的磷酸酯（戊糖羟基以酯键连接磷酸）；DNA 链中一个核苷酸 3′-OH 与另一个的 5′-磷酸缩合形成 <strong>3′,5′-磷酸二酯键</strong>（红笔波浪线）。</li>
+<li>环核苷酸：cAMP、cGMP（第二信使）。</li>
+</ul>
+<h3>5.4 核苷酸的功能（红笔✓ 七条）</h3>
+<ol>
+<li>核酸合成的原料（dNTP→DNA、NTP→RNA）</li>
+<li><strong>能量货币</strong>（ATP、UTP、CTP、GTP）</li>
+<li>辅助结构成分（辅酶 NAD/FAD/CoA 含 AMP；cAMP/cGMP）</li>
+<li>代谢调节：许多辅酶是核苷酸衍生物</li>
+<li>活化的中间物（如 UDP-葡萄糖、CDP-甘油二酯）</li>
+<li>作为酶的抑制剂和激活剂，参与代谢调节（红笔圈）</li>
+<li>调节基因表达</li>
+</ol>
+<h3>5.5 核酸的分类与分布</h3>
+<ul>
+<li><strong>DNA</strong>：90% 以上分布于细胞核，其余在线粒体/叶绿体（是遗传信息的载体，决定基因型）。</li>
+<li><strong>RNA</strong>：分布于细胞核与细胞质；除少数 RNA 病毒外，均转录自 DNA，多数参与蛋白质合成。</li>
+<li>◇ DNA 一种类型一种功能；RNA 多种类型多种功能（编码/非编码 RNA）。</li>
+<li>◇ Why：DNA 用 T 不用 U？——C 易脱氨变成 U，若 DNA 本身就用 U，修复酶将无法区分"原生的 U"和"突变来的 U"；用 T 则 U 一律视为损伤可被识别修复。</li>
+<li>◇ Why：DNA 2′-脱氧？——RNA 的 2′-OH 使磷酸二酯键易被碱水解，DNA 缺 2′-OH 更稳定，适于长期储存遗传信息。</li>
+<li>◇ Why：RNA 单链、DNA 双链？——(1) RNA 单链可自我折叠出多样的二级/三级结构（可与蛋白结合行使多种功能）；(2) 三维结构多样性使 RNA 能行使多种功能，而 DNA 的主要功能仅是储存遗传信息。</li>
+</ul>
+<h3>5.6 三种重要 RNA（占细胞总 RNA 比例）</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>RNA</th>
+<th>占比</th>
+<th>功能</th>
+<th>特点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>mRNA</td>
+<td>2%~5%</td>
+<td>蛋白质合成的模板</td>
+<td>种类多、分子量差异大、<strong>代谢快（半衰期短，原核几分钟；真核一般数小时~数天）</strong></td>
+</tr>
+<tr>
+<td>tRNA</td>
+<td>约 15%</td>
+<td>活化氨基酸的载体</td>
+<td>分子小且相似，<strong>74~95 个核苷酸</strong></td>
+</tr>
+<tr>
+<td>rRNA</td>
+<td>约 80%</td>
+<td>与蛋白组成核糖体</td>
+<td>细胞内含量最多的 RNA</td>
+</tr>
+</tbody>
+</table></div>
+<h3>5.7 核酸一级结构</h3>
+<ul>
+<li>通常指<strong>碱基序列</strong>（共价结构）【红笔】；遗传信息储存在碱基序列中。</li>
+<li>DNA：脱氧核苷酸经 <strong>3′,5′-磷酸二酯键</strong>（红笔）连接；链的方向 <strong>5′→3′</strong>（红笔）；<strong>磷酸-戊糖交替构成骨架</strong>（红笔）。</li>
+<li>小核酸片段（<strong>&lt;50 bp</strong>）称<strong>寡核苷酸</strong>（红笔 P 标记）。</li>
+</ul>
+<h3>5.8 DNA 的二级结构——双螺旋 ★</h3>
+<p><strong>B 型双螺旋模型要点</strong>：
+1. <strong>反向平行互补双链</strong>（红笔方框）：脱氧核糖-磷酸骨架在外侧，碱基垂直螺旋轴居内侧。
+2. <strong>碱基配对：A=T（2 氢键）、G≡C（3 氢键）</strong>；嘌呤数=嘧啶数（荧光笔）。
+3. 稳定力：<strong>横向——氢键；纵向——碱基堆积力</strong>（比氢键更强，红笔划线；含碱基疏水相互作用）。
+4. 两链<strong>反向平行</strong>（红笔划线）；右手螺旋，螺距 3.4 nm，每圈 10~10.5 bp，相邻碱基对垂直距离 0.34 nm。
+- 生物学意义：提供<strong>半保留复制</strong>的结构基础；遗传信息以碱基对序列形式储存、稳定传递。
+- <strong>DNA 的多样性（构象族）</strong>：
+  - <strong>A-DNA</strong>：与 B 型同为右手、反向平行；但每圈约 10.4 bp（不同教材 10.4~11）、直径约 2.55 nm、每 bp 上升 0.26 nm、沟槽更浅更宽。蓝笔：RNA-DNA 杂交双链或脱水时 DNA 由 B→A 转变。
+  - <strong>Z-DNA——左手螺旋</strong>（红笔大字）：嘌呤-嘧啶<strong>交替序列</strong>（如 CGCGCG）易形成；生物学意义：与基因调节有关（红笔）。负超螺旋（蓝笔/红笔照录：局部超螺旋张力）有利于 Z-DNA 形成；CpG 甲基化与基因表达调控相关（笔记原文「甲基化能激活基因表达」，⚠ 表述以课本为准：甲基化通常抑制转录，Z-DNA 与调控区活性相关）。
+- <strong>非标准二级结构</strong>：弯曲 DNA、十字形（回文序列）、三链螺旋、发夹、四链结构（G-四链，靠 <strong>Hoogsteen 配对</strong>，蓝笔）。</p>
+<h3>5.9 DNA 的高级结构——超螺旋</h3>
+<ul>
+<li><strong>(二) DNA 的高级结构是超螺旋结构</strong>（红笔+黄笔高亮）。</li>
+<li>正超螺旋：双螺旋<strong>过度缠绕</strong>（拧紧）引起；负超螺旋：<strong>缠绕不足</strong>（欠旋）引起——<strong>利于复制和转录的解链</strong>（红笔旁注）；天然环状 DNA（原核）多为负超螺旋。</li>
+<li>蓝笔：<strong>拓扑异构酶</strong>改变超螺旋的数量和类型。</li>
+<li>比超螺旋（超螺旋密度）σ = (Lk − Lk₀)/Lk₀（Lk 连接数；⚠ 原笔记公式有笔误）。</li>
+<li>原核生物 DNA 多为<strong>环状</strong>，平均约 200 bp 形成一个超螺旋；真核线粒体、叶绿体 DNA 也是环状超螺旋。</li>
+<li>★ 超螺旋的意义（红笔方框）：DNA 超螺旋整体或局部的拓扑学变化及其调控，对 DNA 复制和转录有关键作用。</li>
+<li><strong>真核基因组 DNA 的致密包装</strong>：间期以松散<strong>染色质</strong>存在；分裂期形成高度致密的<strong>染色体</strong>（串珠样，基本单位<strong>核小体</strong>）。</li>
+<li>★ 核小体组成：<strong>约 200 bp DNA + 组蛋白八聚体（H2A、H2B、H3、H4 各两分子）+ H1</strong>（锁住进出 DNA）。</li>
+</ul>
+<h3>5.10 RNA 的空间结构</h3>
+<ul>
+<li>RNA 空间结构取决于一级结构；种类、大小和结构的多样性远超 DNA（⚠ 笔记原文存疑照录：通常 RNA 比 DNA 小得多）。</li>
+<li>RNA 通常<strong>单链</strong>，但有复杂的局部二级、三级结构（红笔）：茎环、发夹、内部环、凸起、假结等。</li>
+</ul>
+<h3>5.11 mRNA 的结构与成熟 ★</h3>
+<ul>
+<li>hnRNA（不均一核 RNA）：核内合成的 mRNA 初级产物，比成熟 mRNA 大得多。</li>
+<li>★ <strong>hnRNA → mRNA</strong>（黄笔高亮）：需 5′ 加帽、3′ 加尾、剪接。</li>
+<li>成熟真核 mRNA = 编码区 + 非编码区（UTR）。</li>
+<li><strong>5′ 帽子结构 m⁷GpppNm</strong>（黄笔高亮）：转录开始不久由鸟苷酸转移酶在新生的 hnRNA 5′ 端添加。功能（4 条）：1) 防止外切核酸酶降解、提高稳定性；2) 利于起始密码子的识别；3) 使 mRNA 从细胞核转入胞质；4) 提高剪接效率。</li>
+<li><strong>3′ 多聚腺苷酸尾 poly(A)</strong>（黄笔高亮）：约 20~200 个腺苷酸，转录完成后由 poly(A) 聚合酶添加。功能：与 mRNA 的核输出、稳定性、翻译效率有关。</li>
+<li>mRNA 按碱基序列指导蛋白质中氨基酸序列的合成。</li>
+</ul>
+<h3>5.12 tRNA 的结构 ★</h3>
+<ul>
+<li>一级结构特点：<strong>含 10%~20% 稀有碱基</strong>（黄笔高亮，e.g. 双氢尿嘧啶 DHU、甲基化鸟嘌呤、假尿嘧啶 ψ）；<strong>3′ 末端 -CCA-OH</strong>；5′ 末端大多为 G；有 <strong>TψC 序列</strong>。</li>
+<li><strong>二级结构——三叶草形</strong>（红笔）：四臂四环——<strong>氨基酸臂（5′、3′ 端构成局部双螺旋，红笔）</strong>、<strong>DHU 环（D 环）</strong>、<strong>反密码子环</strong>、<strong>TψC 环</strong>、可变环（额外环）。</li>
+<li><strong>三级结构——倒 L 形</strong>：一端是 3′-CCA（⚠ 笔记写 5′-CCA，已按事实改正），另一端是反密码子环，两端相距约 7 nm；D 环与 TψC 环构成倒 L 的转角/一横，DHU 环与反密码子环参与竖臂；部分碱基额外配对维持构象。</li>
+<li>结构与功能：3′ 端 A 与氨基酸共价结合（氨基酸臂）；<strong>反密码子识别 mRNA 的密码子</strong>。</li>
+</ul>
+<h3>5.13 rRNA 与核糖体</h3>
+<ul>
+<li>rRNA 种类（沉降系数）：</li>
+<li>真核：5S、5.8S、18S、28S</li>
+<li>原核：5S、16S、23S</li>
+<li>核糖体组成表：原核 <strong>70S = 50S 大亚基（23S rRNA + 5S rRNA + 31 种蛋白）+ 30S 小亚基（16S rRNA + 21 种蛋白）</strong>；真核 <strong>80S = 60S（28S+5.8S+5S+~49 蛋白）+ 40S（18S+~33 蛋白）</strong>。</li>
+<li>rRNA 配对区形成局部双螺旋，间以亮环（内环）、突环、多分支环等（18S rRNA 二级结构示例）。</li>
+<li>翻译时核糖体上有 <strong>E 位、P 位、A 位</strong>（tRNA 结合部位）。</li>
+<li>◇ <strong>核酶（ribozyme）</strong>（黄笔高亮）：具有催化功能的 RNA；天然核酶催化的大多是与磷酸二酯键有关的反应（<strong>转酯反应</strong>，蓝笔），功能一般为 RNA 的加工（剪接）；大多数核酶属自催化，绝对需要二价金属离子 Mg²⁺ 或 Mn²⁺。</li>
+</ul>
+<h3>5.14 核酸的功能（红笔 D 标记）</h3>
+<ul>
+<li>DNA：<strong>遗传信息的载体</strong>。</li>
+<li>RNA 多样化功能：(1) rRNA——核糖体组分 (2) mRNA——模板 (3) tRNA——氨基酸载体 (4) 参与 RNA 前体加工（snRNA、核酶）(5) 基因表达调控（miRNA、siRNA 等）(6) 参与蛋白质生物合成（红笔）。</li>
+</ul>
+<h3>5.15 补充：DNA 与蛋白质结构对比（红笔，必背填空）</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th></th>
+<th>蛋白质 α-螺旋</th>
+<th>DNA 双螺旋（B 型）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>方向</td>
+<td>顺时针、右手螺旋</td>
+<td>顺时针、右手螺旋</td>
+</tr>
+<tr>
+<td>每圈</td>
+<td>3.6 个氨基酸</td>
+<td>10~10.5 个碱基对</td>
+</tr>
+<tr>
+<td>螺距</td>
+<td>0.54 nm</td>
+<td>3.4 nm（每 bp 上升 0.34 nm）</td>
+</tr>
+<tr>
+<td>内侧</td>
+<td>—（R 基朝外）</td>
+<td>碱基（在内侧）</td>
+</tr>
+<tr>
+<td>外侧</td>
+<td>R 基侧链</td>
+<td>脱氧核糖 + 磷酸基团（骨架）</td>
+</tr>
+<tr>
+<td>纵向维系</td>
+<td>—（链内氢键）</td>
+<td><strong>碱基堆积力 / 疏水作用</strong></td>
+</tr>
+<tr>
+<td>横向维系</td>
+<td><strong>氢键</strong>（链内）</td>
+<td><strong>氢键</strong>（碱基对之间）</td>
+</tr>
+</tbody>
+</table></div>
+<h2>第七章 核酸的理化性质与研究方法</h2>
+<h3>7.1 水解（黄笔高亮）</h3>
+<ul>
+<li>核酸的<strong>酯键、糖苷键均可水解，糖苷键更易</strong>。</li>
+<li>1) 酸水解：糖苷键 &gt; 磷酸酯键（对酸敏感程度）；嘌呤糖苷键 &gt; 嘧啶糖苷键。蓝笔：<strong>DNA 怕酸，会发生脱嘌呤作用</strong>。</li>
+<li>2) 碱水解：<strong>RNA 的磷酸二酯键对碱异常敏感</strong>（2′-OH 参与分子内转酯），得 2′-和 3′-核苷酸混合物；<strong>DNA 对碱不敏感</strong>（无 2′-OH）。</li>
+<li>3) 酶促水解（主要，红笔）：非特异性——磷酸二酯酶；特异性——核酸酶（DNase / RNase；内切酶——<strong>△限制性内切酶</strong>、外切酶）。右下大字：核酶（RNA）。</li>
+</ul>
+<h3>7.2 酸碱解离、沉淀、紫外吸收（黄笔高亮）</h3>
+<ul>
+<li>酸碱解离：碱基解离、核苷解离、核苷酸解离（多磷酸基 → 酸性）。</li>
+<li>沉淀：乙醇、异丙醇可沉淀核酸。</li>
+<li>★ 核酸在 <strong>260 nm</strong> 有强烈吸收（蓝笔：蛋白质在 280 nm）。OD260 用途：1) 浓度测定；2) 纯度鉴定——<strong>DNA：OD260/OD280 ≈ 1.8；RNA：≈ 2.0</strong>。</li>
+</ul>
+<h3>7.3 变性、复性与杂交 ★</h3>
+<ul>
+<li><strong>变性</strong>：DNA 双链→单链（红笔）；实质：破坏<strong>氢键、碱基堆积力</strong>，一级结构不变（蓝笔）。</li>
+<li>变性因素：高温（热变性）、强酸强碱（pH&lt;2 / pH&gt;11，红笔）、甲醇、尿素。</li>
+<li>变性后理化性质变化：<strong>OD260↑——增色效应</strong>（☆☆，碱基暴露）、比旋度下降、黏度下降、浮力密度升高。</li>
+<li>★ <strong>热变性与 Tm</strong>：OD260-温度呈 S 形「跃迁式」解链曲线；<strong>Tm = OD260 达最大增量 50% 时的温度</strong>。</li>
+<li>Tm 的影响因素（蓝笔☆）：1) DNA 均一性↑ → Tm 范围变窄（熔解陡）；2) <strong>GC 含量↑ → Tm↑</strong>（G≡C 三个氢键）；3) 介质离子强度（离子强度↑ → Tm↑）；4) 双螺旋长度。</li>
+<li><strong>复性</strong>：缓慢降温（<strong>退火</strong>，红笔圈）→ 单链重新配对 → <strong>减色效应（低色效应）</strong>（红笔）。影响复性速度：分子量↑ 复性↓；浓度↑ 复性↑；序列复杂度↑ 复性↓（⚠ 已按事实修正原笔记方向）。</li>
+<li><strong>分子杂交</strong>：不同来源的单链形成杂交双链。e.g. DNA1 加热变单链，与 DNA2 缓慢退火形成杂化双链；<strong>Southern blot（DNA）、Northern blot（RNA）</strong>。</li>
+</ul>
+<h3>7.4 分离纯化原则（红笔）</h3>
+<ul>
+<li>温度不可过高；pH 5~9；避免过低离子强度（保持一定盐浓度稳定双链）⚠ 原笔记此处存疑；减少物理剪切（摇动、吸管）；加 EDTA 抑制核酸酶。</li>
+</ul>
+<hr />
+<h1 id="p3">第三部分 酶化学</h1>
+<h2>第八章 酶学</h2>
+<p>〔便利贴〕重点：金属离子的作用；酶小结；催化性质——特征、学说、活化能、活性中心。</p>
+<h3>8.1 酶的概念与化学本质</h3>
+<ul>
+<li>▷ <strong>酶</strong>：由活细胞合成的、对其特异底物起<strong>高效催化</strong>作用的蛋白质/核酸（红笔圈「高效」）。功能——催化作用；化学本质——绝大多数是蛋白质，极少数是 RNA（<strong>核酶</strong>）。</li>
+<li>蓝笔：酶催化通式 <strong>E + S ⇌ ES → E + P</strong>。</li>
+<li>酶是蛋白质的证据（5 条）：酸碱水解终产物为氨基酸、能被蛋白酶水解而失活、变性失活、两性电解质、不能透过半透膜、有蛋白质呈色反应。</li>
+</ul>
+<h3>8.2 酶的组成 ★</h3>
+<ul>
+<li><strong>单纯酶</strong>：仅由氨基酸残基组成，e.g. 脲酶、淀粉酶、核糖核酸酶（红笔）。</li>
+<li><strong>结合酶（全酶）= 酶蛋白 + 辅助因子</strong>：</li>
+<li>★ <strong>酶蛋白决定反应的专一性；辅助因子决定反应的种类和性质</strong>（红笔大箭头，必背）。</li>
+<li>辅助因子 = 有机小分子（辅酶/辅基）+ 无机金属离子。</li>
+<li><strong>辅酶与酶蛋白结合松（可透析分离）、辅基结合紧</strong>（红笔）。</li>
+<li>◇ <strong>金属离子是最常见的辅因子</strong>（红笔）：作用——稳定酶构象、参与组成活性中心、传递电子、连接底物与酶、中和电荷等。</li>
+<li>小分子有机物：传递电子、质子或基团（e.g. NAD⁺、FAD、TPP、磷酸吡哆醛）。</li>
+<li><strong>单体酶 / 寡聚酶 / 多酶体系</strong>：单体酶只有一条肽链但可有多个活性（<strong>多功能酶</strong>，e.g. 哺乳动物脂肪酸合酶——蓝笔）；寡聚酶由两个以上亚基以非共价键结合；多酶体系是一系列酶按顺序组成的复合物（e.g. 丙酮酸脱氢酶系）。</li>
+</ul>
+<h3>8.3 酶催化特征 ★</h3>
+<ul>
+<li>与一般催化剂相同：反应前后本身不变；只催化热力学允许的反应；只加快到达平衡的速率，<strong>不改变平衡点</strong>。</li>
+<li><strong>生物催化剂的特点（红笔！）：高效性</strong>（更有效降低活化能；蓝笔：无需高温）、<strong>专一性</strong>、<strong>可调节性</strong>（对酶生成/降解量的调节、酶原激活、条件温和下反应、对调节敏感易失活——红笔）。</li>
+<li>▷ <strong>活化能</strong>：一定温度下 1 mol 底物变成活化态（过渡态）所需的自由能。</li>
+</ul>
+<h3>8.4 必需基团与活性中心 ★（大题）</h3>
+<ul>
+<li>▷ <strong>必需基团</strong>：酶分子中与酶活性相关的化学基团（氨基酸残基侧链基团）。</li>
+<li>▷ <strong>活性中心（活性部位）</strong>：酶分子上与底物结合并直接起催化作用的<strong>空间区域</strong>（蓝笔：稳定反应的过渡态）。</li>
+<li>组成：<strong>结合基团</strong>（结合底物，形成酶-底物复合物）+ <strong>催化基团</strong>（催化反应）。</li>
+<li>必需基团 { 活性中心内：结合 + 催化；活性中心外：维持酶的空间构象 }（黄便利贴图示）。</li>
+<li>★ 活性中心特征（6 条，红笔部分）：
+  1. 三维实体，通常由一级序列上不相邻的残基在空间上靠近组成（多位于无规卷曲区，红笔）
+  2. 只占酶体积的很小一部分（约 1%~2%）
+  3. 是酶表面的裂缝/凹穴/口袋，<strong>其中多为疏水氨基酸残基</strong>（微环境），也有少量极性残基参与结合与催化
+  4. 与底物靠<strong>多次级键</strong>结合：氢键、疏水作用、范德华力（偶有离子键）
+  5. 专一性取决于活性中心与底物<strong>结构的互补性</strong>（红笔）
+  6. 构象不是固定不变的，有一定<strong>柔性</strong></li>
+</ul>
+<h3>8.5 酶的专一性 ★</h3>
+<ul>
+<li>一种酶仅作用于一种/一类化合物或一种特定化学键。</li>
+<li><strong>绝对专一性</strong>：仅作用于一个特定底物，e.g. 脲酶只水解尿素（红笔）。</li>
+<li><strong>相对专一性</strong>：作用于一类化合物或一种化学键，e.g. 胰蛋白酶（水解碱性氨基酸羧基侧的肽键，⚠ 原笔记此处字迹不全）。</li>
+<li><strong>立体专一性</strong>：只作用于立体异构体中的一种——旋光异构专一性、几何异构专一性。</li>
+<li>★ 专一性学说（红笔）：<strong>锁钥学说</strong>（活性中心构象刚性不变）、<strong>诱导契合学说</strong>（底物诱导酶构象改变后契合——主流）、<strong>三点附着学说</strong>（与 3 个结合点都匹配才有催化活性，解释立体专一性）。</li>
+</ul>
+<h2>第九章 酶动力学</h2>
+<p>〔便利贴〕酶促反应、米氏方程（Km）、抑制剂、激活剂。</p>
+<h3>9.1 影响酶促反应速率的因素</h3>
+<ul>
+<li>红笔注：<strong>内因——酶的浓度、结构；外因——底物浓度、温度、pH、抑制剂、激活剂</strong>。</li>
+<li>酶浓度：v ∝ [E]（直线）。</li>
+<li>底物浓度：<strong>矩形双曲线</strong>（低 [S] 时 v∝[S]，高 [S] 时趋于 Vmax，红笔）。</li>
+<li>其他：pH（钟形曲线，有最适 pH）、温度（有最适温度）、抑制剂、激活剂。</li>
+</ul>
+<h3>9.2 米氏方程 ★★</h3>
+<ul>
+<li>推导前提（3 条）：① 初速率（v 与 [S] 成正比阶段）；② <strong>稳态</strong>——ES 浓度恒定；③ 服从质量作用定律。</li>
+<li>★ <strong>米氏方程：V = Vmax[S] / (Km + [S])</strong></li>
+<li><strong>Km 的意义（红笔 D 标记）</strong>：</li>
+<li>当 V = Vmax/2 时，<strong>Km = [S]</strong>（米氏常数的数值定义）。</li>
+<li>▷ <strong>酶的特征性常数</strong>：只与酶本身、底物种类和反应环境（温度、pH、离子强度）有关，<strong>与酶浓度无关</strong>。</li>
+<li>▷ 表示酶与底物的亲和力（红笔）：<strong>Km↓ 亲和↑ 催化↑；Km↑ 亲和↓</strong>。</li>
+<li>b. 判断酶的专一性和天然底物（Km 最小者最适）；c. 判断抑制剂类型；d. 判断代谢反应的方向与途径；e. 催化可逆反应的酶，两个方向 Km 不同，<strong>Km 小的方向为主要方向</strong>（蓝笔：途径底物）；由 Km 可知测酶活所需底物浓度（一般 [S] &gt;&gt; Km）。</li>
+<li><strong>Vmax</strong>：酶被底物完全饱和时的反应速率；E+S ⇌ ES → E+P 中 <strong>Vmax = k₃[E]</strong>（红波浪线）。</li>
+<li><strong>kcat（转换数）</strong>：单位时间内每个酶（活性中心）催化转化的底物分子数；<strong>酶催化效率 = Vmax/[E] = kcat</strong>（红笔）。</li>
+<li><strong>kcat/Km</strong>：酶的催化效率常数，反映酶趋近"完美酶"的程度（红笔圈「完美」）。</li>
+</ul>
+<h3>9.3 抑制剂 ★☆（大题 1/4）</h3>
+<ul>
+<li>▷ <strong>抑制剂</strong>：能使酶催化活性下降而<strong>酶量（酶蛋白）不变</strong>的物质（红笔下划线）。</li>
+<li><strong>(一) 可逆性抑制剂</strong>（蓝笔☆☆☆☆）：以<strong>非共价键</strong>与酶/酶-底物复合物可逆结合，可通过<strong>透析、超滤</strong>除去（红笔）。</li>
+<li><strong>1. 竞争性抑制剂</strong>：与底物结构和化学性质强相似，竞争酶的<strong>活性中心</strong>；抑制程度取决于 [I] 与 [S] 的相对比例（红笔）。动力学：<strong>Km↑（表观），Vmax 不变</strong>。双倒数图：直线交于<strong>纵轴</strong>（1/Vmax 不变，斜率变大）。</li>
+<li><strong>2. 非竞争性抑制剂</strong>：既能与游离酶 E 结合，也能与 ES 结合（结合在活性中心以外的必需基团，红笔：不是结合在活性中心上）；底物与抑制剂间无竞争。动力学：<strong>Km 不变，Vmax↓</strong>。双倒数图：交于<strong>横轴</strong>。</li>
+<li><strong>3. 反竞争性抑制剂</strong>：<strong>仅与 ES 结合</strong>（不能与游离酶结合），使 ES 不能转变为产物。动力学：<strong>Km↓，Vmax↓</strong>（二者同比例下降，双倒数图平行线）。</li>
+<li>★ 〔红笔〕可逆抑制作用比较表（必背）：</li>
+</ul>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>特征</th>
+<th>竞争性</th>
+<th>非竞争性</th>
+<th>反竞争性</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>与酶结合形式</td>
+<td>只结合 E</td>
+<td>结合 E 和 ES</td>
+<td>只结合 ES</td>
+</tr>
+<tr>
+<td>表观 Km</td>
+<td>↑</td>
+<td>不变</td>
+<td>↓</td>
+</tr>
+<tr>
+<td>Vmax</td>
+<td>不变</td>
+<td>↓</td>
+<td>↓</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>(二) 不可逆性抑制剂</strong>：通常以<strong>共价键</strong>与酶活性中心的必需基团结合，使酶永久失活（划线）。四种类型：
+  1. <strong>基团特异性抑制剂</strong>：与底物无结构相似性，专一修饰活性中心必需基团，e.g. <strong>有机磷化合物（DFP）修饰丝氨酸的 -OH</strong>（胆碱酯酶失活）；解毒剂解磷定（⚠ 原笔记此句潦草，按教材补全）。
+  2. <strong>底物类似物抑制剂</strong>：结构与底物类似，e.g. TPM（⚠ 原笔记字迹不全，教材常例：TPCK 修饰胰蛋白酶的 His）。
+  3. <strong>过渡态类似物抑制剂</strong>：与反应过渡态极为相似，与酶的结合比底物更紧（最强的抑制剂设计思路）。
+  4. <strong>自杀型（机制性）抑制剂</strong>：作为酶的底物被催化，转变成有反应活性的基团后反过来使酶失活，e.g. 青霉素（抑制转肽酶）。</li>
+<li>双倒数（Lineweaver-Burk）作图规律（笔记图）：竞争性——纵轴截距同、斜率↑；非竞争性——横轴截距同、斜率↑；反竞争性——平行线。</li>
+</ul>
+<h3>9.4 激活剂</h3>
+<ul>
+<li>定义：使酶由无活性→有活性，或提高酶活性的物质。</li>
+<li>种类：<strong>必需激活剂</strong>（无它酶无活性，e.g. 多数激酶的 Mg²⁺）；<strong>非必需激活剂</strong>（增强已有活性）。</li>
+<li>常见：无机离子（金属、非金属离子，e.g. Cl⁻ 激活唾液淀粉酶）；小分子（e.g. 胆汁酸盐、半胱氨酸/还原型谷胱甘肽 ⚠ 原笔记此处字迹不全）；蛋白质大分子（使酶原激活的蛋白酶）。</li>
+</ul>
+<h2>第六章 酶的催化机制（红笔标记；大题 1/4）</h2>
+<h3>6.1 过渡态与酶的亲和力</h3>
+<ul>
+<li>▷ <strong>过渡态</strong>：不稳定的高能状态（底物经活化达到的状态）。</li>
+<li>▷ <strong>酶与过渡态的亲和力比与基态（底物）大得多</strong>——这是酶降低活化能的本质（红笔：过渡态的稳定）。</li>
+</ul>
+<h3>6.2 过渡态稳定的化学机制（六种）★☆</h3>
+<ol>
+<li><strong>邻近定向效应</strong>：多个底物同时结合在活性中心上，相互靠近并采取正确的空间取向；提高底物<strong>有效浓度</strong>，使分子间反应近似分子内反应，加快反应（划线）。</li>
+<li><strong>广义酸碱催化</strong>：水分子以外的分子/基团作为质子供体或受体参与催化；pKa 接近反应 pH（≈7）的基团是最有效的广义酸碱催化剂（红笔）；把质子转移给过渡态中间体可使其稳定（划线）。</li>
+<li><strong>静电催化（静电稳定）</strong>：酶用自身带电基团中和过渡态形成时产生的相反电荷，稳定过渡态；有时靠静电把底物引入活性中心（划线）。</li>
+<li><strong>金属催化</strong>：约 1/3 的酶需要金属离子（金属酶/金属激活酶，红笔）；金属离子以 5 种方式参与：Lewis 酸（接受电子对）、静电催化（结合带负电基团）、作为电子受体/供体参与氧化还原、通过底物的"屏蔽"降低静电斥力、稳定酶构象（⚠ 末条原笔记被遮挡，按教材补全）。</li>
+<li><strong>共价催化</strong>：酶与底物暂时形成<strong>不稳定的共价中间物</strong>（亲核/亲电催化），改变反应路径降低活化能（划线）。</li>
+<li><strong>底物形变</strong>：酶诱导底物分子内敏感键变形、更加敏感（接近过渡态）（划线）。</li>
+</ol>
+<h2>第十二章 酶活性的调节</h2>
+<h3>12.1 酶量的调节（"量变"）</h3>
+<ul>
+<li>酶浓度变化：控制<strong>酶蛋白基因的表达（诱导与阻遏）和酶分子的降解</strong>（红笔划线）。</li>
+<li><strong>同工酶</strong>：催化相同反应、但分子结构和理化性质不同的一组酶（e.g. LDH 五种四聚体）。</li>
+</ul>
+<h3>12.2 酶活性的调节（"质变"）★</h3>
+<p>在不改变酶量的前提下调节已有酶的活性，包括<strong>别构调节、共价修饰、水解激活</strong>。</p>
+<ul>
+<li><strong>1. 别构调节</strong>：代谢物与酶活性中心<strong>以外</strong>的别构部位（别构中心，蓝笔圈）非共价（红笔：非共价反应）结合，使酶构象改变、活性改变。别构效应剂分<strong>别构激活剂/别构抑制剂</strong>。</li>
+<li>底物本身作为效应剂 → <strong>同促效应</strong>（异促效应：效应剂是其他代谢物）。</li>
+<li>★ 别构酶常为多亚基寡聚体，具<strong>协同效应</strong>，动力学曲线呈 <strong>S 形</strong>，<strong>不遵循米-曼氏动力学</strong>（红笔）。</li>
+<li>▷ <strong>反馈抑制</strong>：别构调节最多见于代谢途径的反馈抑制——<strong>终产物作为别构抑制剂抑制途径前段限速酶</strong>。</li>
+<li><strong>2. 共价修饰调节</strong>：在其他酶催化下，酶蛋白上某些基团发生<strong>可逆共价</strong>结合。e.g. <strong>磷酸化/去磷酸化（红笔：最常见）</strong>、腺苷化、乙酰化/去乙酰化、-SH ⇌ -S-S（红笔划线）。特点：<strong>级联放大效应</strong>（红笔）。</li>
+<li><strong>3. 水解激活（酶原激活）</strong>（红笔划线）：</li>
+<li><strong>酶原</strong>：细胞内合成或初分泌时无活性的酶前体。</li>
+<li>激活机理：酶原经特异肽键断裂，水解掉 1 个/几个肽段 → 分子构象改变 → <strong>形成或暴露出活性中心</strong>（划线）。e.g. 胰蛋白酶原→胰蛋白酶（肠激酶启动）。</li>
+<li>生理意义：(1) 保护机体组织自身（消化酶不消化自身细胞）；(2) 保证酶在特定部位/环境中发挥催化作用（在合适时间地点激活）；(3) 是酶的储存形式。</li>
+<li>补：4. 同工酶/抑制剂的调节（⚠ 原笔记整行辨认困难）；5. 酶的聚合与解聚（如乙酰辅酶A羧化酶）。</li>
+<li>〔便利贴〕酶调节分类树：<strong>活性调节</strong>（酶原激活、别构/变构酶、共价修饰）+ <strong>含量调节</strong>（同工酶、酶蛋白合成的诱导与阻遏、酶降解调控）。</li>
+</ul>
+<h3>12.3 别构酶的动力学性质</h3>
+<ol>
+<li>动力学曲线为 <strong>S 形</strong>（划线）</li>
+<li>有别构效应剂，通常与酶非共价结合（划线）</li>
+<li>效应剂使活性呈双向变化（激活/抑制）</li>
+<li>温和变性导致别构效应消失（红笔圈注）</li>
+<li>通常为<strong>寡聚体</strong>（红笔圈注）</li>
+<li>与非别构酶相比，对底物浓度变化更敏感（⚠ 原笔记此处字迹不全）</li>
+</ol>
+<hr />
+<h1 id="p4">第四部分 糖类、脂类与生物膜</h1>
+<h2>第十五章 糖类</h2>
+<h3>15.1 糖的概念与分类</h3>
+<ul>
+<li>▷ 糖的化学本质：<strong>多羟基醛或多羟基酮及其衍生物</strong>，通式 (CH₂O)ₙ（n≥3）（红笔圈）——即碳水化合物。</li>
+<li>分类：<strong>单糖、寡糖（2~10 个单糖）、多糖、衍生糖（结合糖）</strong>。</li>
+<li>e.g. 单糖：葡萄糖、果糖（不能水解/水解 1 个分子）；寡糖：麦芽糖、蔗糖、乳糖（水解 2 个分子）；多糖：水解 20 个以上；结合糖：糖蛋白、糖脂（结合蛋白质、脂质）。</li>
+<li>★ 各单糖间以<strong>脱水缩合形成的糖苷键</strong>相连（红笔★）。</li>
+</ul>
+<h3>15.2 单糖的结构</h3>
+<ul>
+<li><strong>D/L 构型</strong>（红笔：天然糖均为 D 型）：以离羰基<strong>最远</strong>的手性 C 为准，Fischer 投影中该碳 —OH 在右为 D 型、在左为 L 型。</li>
+<li><strong>二羟丙酮</strong>：唯一<strong>无手性 C</strong> 的常见单糖（酮糖，C=O 居中）。</li>
+<li>仅一个手性 C 构型不同的非对映体互称<strong>差向异构体</strong>（e.g. 葡萄糖与甘露糖为 C2 差向异构体）。</li>
+<li><strong>环状结构</strong>：分子内羟基与羰基发生快速可逆的<strong>亲核加成</strong>，形成<strong>半缩醛/半缩酮</strong>（环状）。</li>
+<li>新形成的手性 C 称<strong>异头碳（异头中心）</strong>；其上形成的异构体称<strong>异头物</strong>：<ul>
+<li><strong>α 异头物</strong>：异头碳上的 —OH 与最末手性碳的 —OH 取向<strong>相反</strong>（红笔圈）</li>
+<li><strong>β 异头物</strong>：取向<strong>相同</strong>（红笔圈）</li>
+</ul>
+</li>
+<li>★（红笔★★）D 型异头物最末的 —CH₂OH 在环（Haworth 投影）<strong>上方</strong>；L 型在<strong>下方</strong>。</li>
+<li>葡萄糖环化 → 六元环<strong>吡喃糖</strong>；果糖、核糖 → 五元环<strong>呋喃糖</strong>（蓝笔）。</li>
+</ul>
+<h3>15.3 单糖的性质</h3>
+<ul>
+<li><strong>变旋现象</strong>：异头物（α/β）在溶液中通过<strong>开环-再成环</strong>互相转变，达到平衡，使旋光度改变。</li>
+<li>还原反应：<strong>Benedict 试剂</strong>（Cu²⁺ 碱性液）将醛糖氧化成糖酸，Cu²⁺→Cu₂O 砖红色沉淀，<strong>临床上检测血糖/尿糖</strong>（半缩醛羟基具还原性→还原糖）。</li>
+<li><strong>成糖苷</strong>：环状单糖的<strong>半缩醛（半缩酮）羟基</strong>与另一化合物的羟基（等）脱水缩合形成缩醛/缩酮——<strong>糖苷</strong>；糖苷键可通过 O、N、S 或 C-C 相连（O-苷、N-苷、C-苷）；糖苷无变旋、无还原性。〔红笔〕键型记法：α-(1→4)、α-1,4 等。</li>
+</ul>
+<h3>15.4 重要单糖与寡糖</h3>
+<ul>
+<li>己糖：<strong>葡萄糖、果糖、半乳糖</strong>（红笔注）。</li>
+<li>寡糖（2~10 个单糖，糖苷键连接）三个结构要素：1) 组成单糖的种类（D/L、呋喃/吡喃）；2) 连接键的类型（α/β 及位置）；3) 是否有游离异头碳（<strong>还原端/非还原端</strong>）。</li>
+<li>命名 3 种方式：① 反映单糖名称+成键异头碳构型，如 O-α-D-葡萄糖-(1→4)-D-葡萄糖；② 区分呋喃环/吡喃环；③ ★ 标明<strong>糖苷键连接的碳原子位置</strong>（如 1→4、1→6）（⚠ 原笔记整句辨认不全，按教材补全）。</li>
+<li>常见二糖/三糖（红笔划线）：蔗糖、乳糖、麦芽糖、海藻糖。</li>
+</ul>
+<h3>15.5 多糖</h3>
+<ul>
+<li><strong>同多糖</strong>：水解只产生一种单糖；<strong>杂多糖</strong>：产生一种以上（蓝笔「杂」）。</li>
+<li>★ 糖苷键的类型与多糖的结构、功能、溶解性相关（红笔划线）。</li>
+<li>多糖特点（红笔划线）：多数<strong>无还原性（仅一端有还原端）、无变旋现象</strong>；分子量大，大多不溶于水；只有 1 个还原端 + 多个非还原端（支链多糖）。</li>
+<li><strong>1. 淀粉</strong>（植物储能多糖）：</li>
+<li><strong>直链淀粉</strong>：葡萄糖经 <strong>α-1,4 糖苷键</strong>连接的线性分子（红笔划线），卷曲成<strong>螺旋</strong>（与碘显蓝色）；一端还原端、另一端非还原端。</li>
+<li><strong>支链淀粉</strong>：α-1,4 为主 + <strong>α-1,6 糖苷键分支</strong>（红笔划线）；每 <strong>24~30 个</strong>残基一个分支点（⚠ 原笔记「分支点处以 α-1,6 糖苷键连接」——原文辨不出，按教材补正）；只有 1 个还原端，多个非还原端。</li>
+<li><strong>2. 糖原</strong>（动物储能多糖）：结构与支链淀粉相似但<strong>分支更密（约每 8~12 个残基一个分支）</strong> → 溶解性更好、水解更快、有更多非还原端 → 便于糖原磷酸化酶同时从多个末端动员（⚠ 原笔记此处字迹不全，按教材补全）。</li>
+<li><strong>(二) 结构多糖</strong>：
+  1. <strong>纤维素</strong>：植物细胞壁主要成分；葡萄糖经 <strong>β-1→4 糖苷键</strong>连接的线性多糖，平行排列成片层（氢键网络）。
+  2. <strong>几丁质（壳多糖）</strong>：<strong>N-乙酰-D-葡萄糖胺</strong>的均聚体，β-1→4 连接；存在于真菌细胞壁和节肢动物外骨骼（⚠ 原笔记「动物和〔真菌〕细胞〔壁〕」）。</li>
+<li><strong>(三) 杂多糖（糖胺聚糖等）</strong>：果胶（平行排列，半乳糖醛酸）；糖胺聚糖：透明质酸、硫酸软骨素、硫酸皮肤素、硫酸乙酰肝素；<strong>肝素（抗凝血）</strong>。</li>
+<li><strong>六、复合糖（糖复合物）</strong>：
+  1. <strong>糖蛋白</strong>：蛋白质为主、糖含量较低（糖链短而分支）；糖链特征是细胞的标记/标签（血型、识别）。<ul>
+<li>★〔红笔方框〕<strong>糖肽键</strong>：连接糖链还原端残基与多肽链氨基酸残基的共价连接：</li>
+<li><strong>N-糖苷键</strong>：N-乙酰葡萄糖胺的 C1 与<strong>天冬酰胺（Asn）</strong>的酰胺 N 相连</li>
+<li><strong>O-糖苷键</strong>：单糖异头碳与含 -OH 氨基酸（<strong>Ser/Thr</strong>，及羟赖氨酸）的羟基相连
+  2. <strong>蛋白聚糖</strong>：糖为主（糖胺聚糖与核心蛋白共价相连）；是结缔组织主要成分，在胞外基质形成网状、提供强度与韧性。
+  3. <strong>肽聚糖</strong>：细菌细胞壁的刚性骨架成分（NAG-NAM 交替 + 短肽交联）。</li>
+</ul>
+</li>
+</ul>
+<h2>第十六章 脂类</h2>
+<h3>16.1 脂的分类</h3>
+<ul>
+<li>▷ 定义：<strong>不溶于水而溶于非极性溶剂</strong>的生物有机分子（划线）。</li>
+<li>分类 A：<strong>简单脂</strong>（脂肪酸+醇形成的酯）、<strong>复合脂</strong>（简单脂+非脂组分）、<strong>异戊二烯脂类</strong>。</li>
+<li>分类 B：<strong>储存脂</strong>（三酰甘油、蜡）、<strong>膜脂</strong>（磷脂、鞘脂、糖脂）、<strong>活性脂类</strong>（激素、脂溶性维生素等有生物活性的少量脂质）。</li>
+</ul>
+<h3>16.2 三酰甘油与脂肪酸（划线标注）</h3>
+<ul>
+<li>▷ 三酰甘油（脂肪）= 甘油 + 3 脂肪酸；<strong>还原程度高</strong>（⚠ 原笔记此处辨不出，按事实补正：高度还原、疏水，是高效储能分子），氧化释能多、热值高。</li>
+<li>★ 脂肪酸命名（红笔）：<strong>碳原子数：双键数目 Δ双键位置</strong>，e.g. <strong>18:1Δ⁹</strong>（油酸，第 9-10 碳间一个双键）。</li>
+<li>性质：烃链越长熔点越高；<strong>顺式双键越多（不饱和度越高）熔点越低</strong>（链弯曲难紧密堆积）。</li>
+<li>▷ <strong>蜡</strong>：长链脂肪酸 + 长链一元醇形成的酯（划线）。</li>
+</ul>
+<h3>16.3 磷脂与鞘脂（膜脂，划线标注）</h3>
+<ul>
+<li><strong>(1) 甘油磷脂（磷酸甘油酯）</strong>：甘油骨架 + 2 个脂肪酸（C1、C2 酯键）+ C3 磷酸及醇基 X。</li>
+<li>X = H：磷脂酸（3-sn-磷脂酸）。</li>
+<li>X = 极性/带电醇：胆碱（磷脂酰胆碱=卵磷脂）、乙醇胺（脑磷脂）、丝氨酸、肌醇等。</li>
+<li>★ 特性——<strong>两亲分子</strong>（红笔划线）：磷酸基团带负电、胆碱/乙醇胺部分带正电、丝氨酸部分带负电、肌醇不带电（红笔划线）。</li>
+<li>水解甘油磷脂的酶：<strong>磷脂酶</strong>（A1、A2、C、D，⚠ 原笔记此行不确定，按教材补全）。</li>
+<li>常见甘油磷脂（红笔划线）：磷脂酰胆碱、磷脂酰乙醇胺、磷脂酰丝氨酸。</li>
+<li><strong>(四) 醚甘油磷脂</strong>：一条烃链以<strong>醚键</strong>连接（如血小板活化因子、缩醛磷脂）。</li>
+<li><strong>(五) 鞘脂类</strong>（红笔框注）：</li>
+<li>骨架是 <strong>C18 氨基醇（鞘氨醇）</strong>，其氨基经<strong>酰胺键</strong>连接长链脂肪酸 → <strong>神经酰胺</strong>（红笔划线）。</li>
+<li>极性头基在鞘氨醇 C1 上：磷酸酯键连接 → <strong>鞘磷脂</strong>；糖苷键连接 → <strong>鞘糖脂</strong>（红笔划线）。</li>
+<li>鞘氨醇 C3 带三个特征基团（-OH、-NH₂、-CH₂OH 区域）⚠ 原笔记此处辨认不全。</li>
+<li>鞘脂衍生关系图（红笔）：<strong>鞘氨醇 --(+FA)--&gt; 神经酰胺 --(+P-X)--&gt; 鞘磷脂；--(+糖)--&gt; 鞘糖脂（葡萄糖脑苷脂、神经节苷脂等）</strong>。</li>
+<li><strong>三、萜类与类固醇</strong>（划线标注）：</li>
+<li><strong>(一) 萜类</strong>：由一个或多个<strong>异戊二烯</strong>单元组成，直链或环状（红笔划线）。结构式 CH₂=C(CH₃)-CH=CH₂。</li>
+<li><strong>(二) 类固醇（甾体）</strong>：母核为<strong>环戊烷多氢菲</strong>（三个六元环+一个五元环，红笔圈注）。<ul>
+<li>结构特点：C3 有羟基或酮基；C17 有侧链；C4-C5 或 C5-C6 间常为双键。</li>
+<li><strong>固醇</strong>：C3 有羟基、C17 有 8~10 个碳的侧链。</li>
+<li><strong>(1) 胆固醇</strong>：<strong>两亲分子但极性头基很小</strong>，甾核+C17 烃链是<strong>刚性平面</strong>——调节（限制）膜流动性；是血液中脂蛋白的成分，与动脉粥样硬化沉积有关（红笔划线）。</li>
+<li><strong>(2) 植物固醇</strong>：结构与胆固醇相似（C17 侧链不同，C24 有乙基/甲基），<strong>能抑制胆固醇的吸收</strong>（红笔划线）。</li>
+</ul>
+</li>
+</ul>
+<h3>16.4 生物膜</h3>
+<p><strong>功能</strong>（红笔划线）：选择通透性屏障；为功能不同的细胞器提供独立场所；能量转换、神经传递、信号转导。</p>
+<p><strong>(一) 组成</strong>：
+- 主要由<strong>蛋白质、脂类、糖类</strong>组成；<strong>功能越复杂的膜蛋白质种类和含量越多</strong>（红笔划线）。
+- 膜脂包括：磷脂、鞘脂、胆固醇；磷脂以甘油磷脂为主，其次是鞘磷脂（红笔划线）。
+- 不同细胞器膜脂组成有差异（⚠ 原笔记此段辨认不全）：线粒体内膜富含心磷脂（二磷脂酰甘油）；核膜、内质网膜、细胞膜胆固醇含量较高。
+- <strong>膜蛋白</strong>：<strong>外周（周边）蛋白</strong>——不具跨膜区段，通过非共价相互作用/共价锚附着于膜表面；<strong>内在（整合）蛋白</strong>——镶嵌或贯穿脂双层（跨膜蛋白）。
+- 外周蛋白的共价锚定方式（a-d，⚠ 多处辨认不全，按教材补全）：脂酰化（N 端 Gly 的酰胺键连脂肪酸）、异戊二烯化（C 端 Cys）、棕榈酰化（C16 酯键）、<strong>GPI 锚</strong>（C 端经乙醇胺-寡糖-磷脂酰肌醇共价连接）。</p>
+<p><strong>(三) 脂双层的自发装配</strong>：
+- 磷脂<strong>尾部靠疏水作用聚集</strong>，头基亲水与水形成氢键——疏水效应驱动；脂双层是<strong>最低能量构象</strong>（红笔划线），自发形成并能自我封闭。</p>
+<p><strong>(三)〔编号照录〕膜组分的不对称分布</strong>：
+- 不对称分布导致膜两侧电荷和流动性的差异（红笔划线）；
+- 与膜蛋白的定向分布和功能有关（红笔划线）。</p>
+<p><strong>(四) 膜脂的流动性</strong>：
+- 膜脂运动方式：1) 磷脂分子内运动（烃链旋转、异构化）；2) <strong>侧向扩散</strong>（同一层内，快）；3) <strong>翻转运动</strong>（两层之间，慢，需翻转酶，红笔划线）。
+- ★ <strong>相变温度</strong>：膜脂从晶胶态（有序）→ 液晶态（无序）的温度（红笔划线）。
+- 影响流动性：脂肪酸链越长、饱和度越高 → 范德华力强 → 流动性↓；<strong>不饱和脂肪酸（顺式双键使链弯曲）→ 流动性↑</strong>（红笔划线）。
+- 胆固醇对流动性<strong>双向调节</strong>：高于相变温度时限制流动（刚性），低于时防固化。无胆固醇（原核）的膜通过改变脂肪酸不饱和比例来调节流动性（红笔划线）。
+- e.g. <strong>大肠杆菌温度适应</strong>：温度变化诱导<strong>脂肪酸脱饱和酶</strong>基因表达，改变不饱和脂肪酸比例（红笔划线）。
+- <strong>流动镶嵌模型</strong>（划线）：1) 膜是脂类（主要磷脂）和蛋白质组成的动态结构；2) 磷脂双分子层是<strong>流动的基质</strong>；3) 磷脂与蛋白质能以多种形式相互作用；膜蛋白也可侧向扩散。</p>
+<p><strong>跨膜运输</strong>：
+- ▷ 被动运输——顺浓度梯度；主动运输——逆浓度梯度（耗能）。
+- <strong>1. 被动运输</strong>：
+  - <strong>简单扩散</strong>：非极性小分子（O₂、N₂、CO₂）、不带电极性小分子（乙醇、甘油、水）。
+  - <strong>易化扩散（载体蛋白介导）</strong>：不带电极性大分子（葡萄糖转运体 GLUT）、带电小分子（氨基酸）。
+  - <strong>通道运输</strong>：带电离子（Na⁺、K⁺、H⁺、Cl⁻ 等，经离子通道）。
+- <strong>2. 主动运输</strong>：
+  - <strong>初级主动运输</strong>：直接消耗 ATP，e.g. <strong>Na⁺/K⁺-ATP 泵</strong>：
+    - a. 每消耗 1 ATP，<strong>泵出 3 Na⁺、泵入 2 K⁺</strong>（逆浓度梯度，红笔划线）
+    - b. 维持膜电位差（动作电位的基础）
+    - c. 静息状态下消耗细胞约 1/3 的 ATP（⚠ 原笔记「25%」，教材常写 1/3 或 20%~30%，神经元更高）
+    - d. 维持渗透压，并为<strong>次级主动运输（协同运输）</strong>提供电化学梯度（红笔划线）
+  - <strong>次级主动运输</strong>：依赖某离子（Na⁺）顺浓度梯度的电化学势能驱动（同向：葡萄糖/氨基酸吸收；反向：Ca²⁺/Na⁺ 交换）。
+- <strong>3. 大分子运输</strong>：<strong>胞吞/胞吐</strong>（囊泡运输）。</p>
+<hr />
+<h1 id="p5">第五部分 代谢总论与糖代谢（红笔标注最密的一章）</h1>
+<h2>新陈代谢总论</h2>
+<ol>
+<li>代谢的特点：
+   1) 反应<strong>条件温和</strong> 2) <strong>高度调控</strong>（可调节） 3) <strong>单向性/不可逆</strong>（一条代谢途径至少有一个<strong>限速步骤</strong>，红笔） 4) 代谢途径由一系列酶促反应构成</li>
+<li><strong>高能化合物</strong>：水解时释放大量自由能（一般指 ≥ 21 kJ/mol / 5 kcal/mol）的化合物 ⇌ 低能化合物。
+   - <strong>ATP 是能量货币</strong>：产生 → 储存 → 消耗（⚠ 原笔记此处辨字不全）。
+   - 生理条件下 ATP、ADP 与 <strong>Mg²⁺</strong> 结合（以 MgATP²⁻ 形式）参与酶促反应。</li>
+<li>ATP 以<strong>基团转移</strong>（磷酸基团转移）的形式提供能量，而非直接水解供能。
+   - ADP + Pi → ATP 的再生途径：有氧氧化 → <strong>氧化磷酸化</strong>；光合作用 → <strong>光合磷酸化</strong>；底物水平磷酸化。</li>
+</ol>
+<h2>糖酵解（Glycolysis）★★</h2>
+<ul>
+<li>Q：什么是糖酵解？（红笔圈注【无氧/不需氧条件下】）<strong>葡萄糖分解为 2 分子丙酮酸的过程</strong>。</li>
+<li>Q：什么是发酵？（红笔圈注【无氧条件下】）葡萄糖经糖酵解途径最终产生乙醇（酒精发酵）或乳酸（乳酸发酵）的过程。</li>
+<li>★ 10 步反应，<strong>发生在细胞质（胞质溶胶）</strong>；两个阶段：<strong>准备阶段（第 1~5 步：六碳糖→三碳糖×2，耗 2 ATP）</strong> + <strong>产能阶段（第 6~10 步：三碳糖→丙酮酸，产 4 ATP + 2 NADH）</strong>。</li>
+</ul>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>步</th>
+<th>反应</th>
+<th>酶</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1°</td>
+<td>Glucose → G-6-P（+ATP→ADP）</td>
+<td><strong>己糖激酶</strong>（肝：葡萄糖激酶）</td>
+<td>红叉标记；△G 很大负值，<strong>不可逆</strong>；Mg²⁺</td>
+</tr>
+<tr>
+<td>2°</td>
+<td>G-6-P ⇌ F-6-P</td>
+<td>磷酸己糖（葡萄糖-6-磷酸）异构酶</td>
+<td>醛糖⇌酮糖</td>
+</tr>
+<tr>
+<td>3°</td>
+<td>F-6-P → F-1,6-BP（+ATP→ADP）</td>
+<td><strong>磷酸果糖激酶-1（PFK-1）</strong></td>
+<td>★★ <strong>限速步骤</strong>（红笔大星号），不可逆；Mg²⁺。若 PFK-2 则生成 F-2,6-BP（信号分子）</td>
+</tr>
+<tr>
+<td>4°</td>
+<td>F-1,6-BP → DHAP + GAP</td>
+<td><strong>醛缩酶</strong></td>
+<td>可逆裂解</td>
+</tr>
+<tr>
+<td>5°</td>
+<td>DHAP ⇌ GAP</td>
+<td><strong>磷酸丙糖异构酶（TPI）</strong></td>
+<td>DHAP 转为 GAP 才能继续</td>
+</tr>
+<tr>
+<td>6°</td>
+<td>GAP → 1,3-BPG（+Pi，NAD⁺→NADH+H⁺）</td>
+<td><strong>甘油醛-3-磷酸脱氢酶（GAPDH）</strong></td>
+<td>★ 唯一的氧化还原反应（红笔），产生第一个高能中间物（酰基磷酸）</td>
+</tr>
+<tr>
+<td>7°</td>
+<td>1,3-BPG → 3-磷酸甘油酸（+ADP→ATP）</td>
+<td><strong>磷酸甘油酸激酶（PGK）</strong></td>
+<td>★ <strong>底物水平磷酸化①</strong>：高能磷酸化合物（1,3-BPG）把磷酸基转移给 ADP 生成 ATP（红笔下划线，定义必背）</td>
+</tr>
+<tr>
+<td>8°</td>
+<td>3-磷酸甘油酸 ⇌ 2-磷酸甘油酸</td>
+<td>磷酸甘油酸变位酶</td>
+<td>磷酸基分子内转移；Mg²⁺</td>
+</tr>
+<tr>
+<td>9°</td>
+<td>2-磷酸甘油酸 → <strong>PEP</strong>（−H₂O）</td>
+<td><strong>烯醇化酶</strong></td>
+<td>★ 产生第二个高能中间物 PEP（红笔波浪线）；氟离子抑制</td>
+</tr>
+<tr>
+<td>10°</td>
+<td>PEP → 丙酮酸（+ADP→ATP）</td>
+<td><strong>丙酮酸激酶</strong></td>
+<td>★ <strong>底物水平磷酸化②</strong>，不可逆；Mg²⁺、K⁺</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>〔红笔页首流程〕1 葡萄糖 −2ATP → 2×GAP →（2NAD⁺）→ … → 4ATP。</li>
+<li>总结（黄笔高亮）：<strong>净得 2 ATP + 2 NADH</strong>；准备阶段耗 2 ATP、产能阶段产 4 ATP、2 NADH（⚠ 原笔记「NADPH」已改正）。</li>
+<li>▷ 所有酶都存在于<strong>细胞质</strong>中；所有中间产物都被磷酸化（防漏出细胞 + 用于酶的识别结合）。</li>
+<li>▷ 其它糖（果糖、半乳糖、糖原）须转化为糖酵解中间产物才能进入该途径氧化。</li>
+</ul>
+<h3>NADH 与丙酮酸的去路 ★</h3>
+<ul>
+<li><strong>NADH 的去路</strong>：</li>
+<li>〔红笔圈注重点〕<strong>无氧条件</strong>：NADH 使丙酮酸还原为乳酸（乳酸发酵）或乙醛还原为乙醇（酒精发酵），<strong>NAD⁺ 得以再生</strong>，糖酵解才能持续。</li>
+<li><strong>有氧条件</strong>：NADH 经线粒体内膜的<strong>穿梭系统</strong>进入呼吸链重新氧化：<strong>3-磷酸甘油穿梭</strong>（→FADH₂，产 1.5 ATP）/<strong>苹果酸-天冬氨酸穿梭</strong>（→线粒体 NADH，产 2.5 ATP）。</li>
+<li><strong>丙酮酸的去路</strong>（流程图）：</li>
+<li>缺氧/发酵 → 2 乳酸（乳酸脱氢酶 LDH，NADH→NAD⁺）；或 2 乙醇 + 2 CO₂（丙酮酸脱羧酶需 TPP；乙醇脱氢酶需 NADH）。</li>
+<li>有氧 → 进线粒体 → 2 乙酰-CoA（<strong>丙酮酸脱氢酶复合体</strong>，需 NAD⁺、TPP、FAD、硫辛酸、CoA 五种辅因子，产 NADH+H⁺+CO₂）→【红笔：柠檬酸循环】→ 4 CO₂。</li>
+<li>〔便利贴〕<strong>糖酵解调节</strong>（见下）。</li>
+</ul>
+<h3>糖酵解的调节 ★</h3>
+<ul>
+<li><strong>一、己糖激酶/葡萄糖激酶水平</strong>：G-6-P 反馈抑制己糖激酶（肌肉）；肝葡萄糖激酶不受 G-6-P 抑制，受<strong>葡萄糖激酶调节蛋白（GKRP）</strong>抑制；胰岛素↑ → 促进葡萄糖进入细胞 → 激活糖原合成方向。</li>
+<li><strong>二、PFK-1 的调节（最重要的限速酶）</strong>：</li>
+<li>别构抑制（负）：<strong>ATP（高浓度）、H⁺（低 pH）、柠檬酸</strong>；别构激活（正）：<strong>AMP、ADP、F-2,6-BP</strong>（最强的激活剂）。</li>
+<li>两个 ATP 结合位点（红笔圈：活性中心 + 别构中心）：ATP 低浓度时作底物在活性中心结合；<strong>ATP 浓度高时结合别构部位 → 抑制</strong>（红笔）。</li>
+<li>手绘图：高 ATP 时 v-[F-6-P] 曲线呈 <strong>S 形右移</strong>（协同性）。</li>
+<li>★ F-2,6-BP 的生成与降解（PFK-2 / FBPase-2 双功能酶，同一多肽链上两个活性）：<ul>
+<li><strong>胰高血糖素 →（PKA 磷酸化）→ PFK-2 活性↓ / FBPase-2 活性↑ → F-2,6-BP↓ → 抑制 PFK-1（抑制糖酵解，促进糖异生）</strong>（⚠ 原笔记把「胰高血糖素」写成胰岛素，已修正）</li>
+<li><strong>胰岛素 → 去磷酸化 → PFK-2 活性↑ → F-2,6-BP↑ → 激活 PFK-1（促进糖酵解）</strong></li>
+</ul>
+</li>
+<li><strong>三、丙酮酸激酶的调节</strong>：</li>
+<li>抑制：ATP、丙酮酸（别构）；激活：<strong>F-1,6-BP 正反馈</strong>。</li>
+<li>肝型丙酮酸激酶受共价修饰：<strong>磷酸化失活、去磷酸化激活</strong>（口诀：肝内磷酸化是失活机制；⚠ 原笔记此处辨字不全，按教材补全）。</li>
+</ul>
+<p>〔黄笔高亮·糖酵解总结流程〕Glu →(+ATP)→ G-6-P → F-6-P →(+ATP)→ F-1,6-BP → DHAP/GAP →(Pi+NAD⁺)→ 1,3-BPG → 3-PG → 2-PG → PEP →(−ATP)→ Pyruvate（→+ATP 标注）。</p>
+<h2>丙酮酸脱氢酶复合体与三羧酸循环 ★★</h2>
+<ul>
+<li><strong>丙酮酸脱氢酶复合体</strong>：丙酮酸经特异性转运蛋白从胞质转入<strong>线粒体基质</strong>，氧化脱羧生成<strong>乙酰-CoA</strong>（红笔：连接糖酵解与 TCA）；产 NADH+H⁺ + CO₂；辅因子：TPP、硫辛酸、FAD、NAD⁺、CoA；受共价修饰（磷酸化失活/去磷酸化激活）与别构调节。</li>
+</ul>
+<h3>三羧酸循环（TCA / 柠檬酸循环）——8 步反应，3 步不可逆</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>步</th>
+<th>反应</th>
+<th>酶</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>乙酰-CoA + 草酰乙酸 + H₂O → <strong>柠檬酸</strong></td>
+<td><strong>柠檬酸合酶</strong></td>
+<td>★ <strong>不可逆①</strong>；CoA-SH 释出；OAA 4C + AcCoA 2C</td>
+</tr>
+<tr>
+<td>2</td>
+<td>柠檬酸 ⇌ 顺乌头酸 ⇌ <strong>异柠檬酸</strong></td>
+<td><strong>顺乌头酸酶</strong></td>
+<td>−H₂O 再 +H₂O（脱水再水合），将 −OH 移位</td>
+</tr>
+<tr>
+<td>3</td>
+<td>异柠檬酸 → <strong>α-酮戊二酸</strong> + CO₂（NAD⁺→NADH）</td>
+<td><strong>异柠檬酸脱氢酶</strong></td>
+<td>★ <strong>不可逆②</strong>；<strong>第一次氧化脱羧</strong>（产第 1 个 CO₂），先脱氢成草酰琥珀酸再 β-脱羧；限速酶</td>
+</tr>
+<tr>
+<td>4</td>
+<td>α-酮戊二酸 + CoA-SH → <strong>琥珀酰-CoA</strong> + CO₂（NAD⁺→NADH）</td>
+<td><strong>α-酮戊二酸脱氢酶系</strong></td>
+<td>★ <strong>不可逆③</strong>；<strong>第二次氧化脱羧</strong>（产第 2 个 CO₂）；机制类似 PDH</td>
+</tr>
+<tr>
+<td>5</td>
+<td>琥珀酰-CoA + GDP + Pi → <strong>琥珀酸</strong> + GTP + CoA-SH</td>
+<td><strong>琥珀酰-CoA 合成酶</strong></td>
+<td>★ <strong>TCA 中唯一一步底物水平磷酸化</strong>（蓝笔），产 GTP</td>
+</tr>
+<tr>
+<td>6</td>
+<td>琥珀酸 → <strong>延胡索酸</strong>（FAD→FADH₂）</td>
+<td><strong>琥珀酸脱氢酶</strong></td>
+<td>★ <strong>唯一嵌合在线粒体内膜上的酶</strong>（蓝笔）；FAD 为辅基</td>
+</tr>
+<tr>
+<td>7</td>
+<td>延胡索酸 + H₂O ⇌ <strong>L-苹果酸</strong></td>
+<td><strong>延胡索酸酶</strong></td>
+<td>可逆水合</td>
+</tr>
+<tr>
+<td>8</td>
+<td>L-苹果酸 → <strong>草酰乙酸</strong>（NAD⁺→NADH）</td>
+<td><strong>苹果酸脱氢酶</strong></td>
+<td>OAA 再生，回到第 1 步</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>★ <strong>TCA 一轮总结</strong>（每轮氧化 1 个乙酰-CoA）：</li>
+<li>底物水平磷酸化：<strong>1 GTP</strong></li>
+<li>脱氢：<strong>3 NADH + 1 FADH₂</strong>（共 4 次脱氢）；产生 <strong>2 CO₂</strong></li>
+<li>3 步不可逆：<strong>柠檬酸合酶、异柠檬酸脱氢酶、α-酮戊二酸脱氢酶系</strong>（红笔下划线重点）</li>
+<li>有氧时 O₂ 不直接参与循环反应，但 NADH/FADH₂ 需经呼吸链（氧化磷酸化）把电子传给 O₂ 才能再生 NAD⁺/FAD</li>
+<li>★ <strong>总反应式</strong>：乙酰-CoA + 3NAD⁺ + FAD + GDP + Pi + 2H₂O → <strong>2CO₂ + 3NADH + FADH₂ + GTP + CoA-SH</strong>（+3H⁺，红笔）</li>
+<li>〔红笔页首〕1 分子葡萄糖彻底氧化净得 <strong>30/32 ATP</strong>（红笔黄底）。</li>
+<li><strong>TCA 的生理功能（6 条）</strong>：
+  1. 三大营养素（糖、脂、氨基酸）最终氧化分解的<strong>共同途径</strong>
+  2. 产生更多 ATP（还原当量进呼吸链）
+  3. 为多种生物分子合成提供原料（<strong>柠檬酸→脂肪酸合成；α-酮戊二酸→氨基酸；琥珀酰-CoA→血红素</strong>）
+  4. 某些中间产物作为别构效应物（柠檬酸抑制 PFK-1、激活乙酰CoA羧化酶）
+  5. 产生 CO₂（参与酸碱平衡调节）
+  6. 某些厌氧菌/细菌利用<strong>反向 TCA 循环固定 CO₂</strong>（消耗能量与高能电子 NADH、FADH₂，将 CO₂ 转变为有机分子）</li>
+<li>★ <strong>TCA 的调节（红笔：ATP、AMP、NADH、ADP）</strong>：
+  1. <strong>丙酮酸脱氢酶系</strong>：别构（乙酰-CoA、NADH、ATP 抑制；CoA、NAD⁺、AMP 激活）+ 共价修饰（磷酸化失活）+ 产物反馈
+  2. <strong>柠檬酸合酶</strong>：别构（ATP、NADH、柠檬酸、琥珀酰-CoA 抑制）
+  3. <strong>异柠檬酸脱氢酶</strong>：别构（★ ADP、Ca²⁺ 激活；ATP、NADH 抑制）
+  4. <strong>α-酮戊二酸脱氢酶系</strong>：别构（NADH、琥珀酰-CoA 抑制；Ca²⁺ 激活）</li>
+</ul>
+<h3>乙醛酸循环 ★</h3>
+<ul>
+<li><strong>定义</strong>：发生在植物、微生物（及无脊椎动物）中，以乙酰-CoA 为底物的<strong>合成代谢途径</strong>；整体发生在<strong>乙醛酸循环体</strong>（glyoxysome）内。</li>
+<li>★ 特有酶（红笔）：<strong>异柠檬酸裂合酶、苹果酸合酶</strong>（与 TCA 共有的其余步骤相同）。</li>
+<li>净结果：<strong>2 乙酰-CoA → 琥珀酸</strong>（琥珀酸离开乙醛酸循环体进入线粒体，经 TCA 转为苹果酸/草酰乙酸，作为<strong>糖异生</strong>的原料）。</li>
+<li>★ <strong>无 CO₂ 生成</strong>（红笔下划线）；无 GTP/底物水平磷酸化。</li>
+<li>与 TCA 的区别表：</li>
+</ul>
+<div class="tw"><table>
+<thead>
+<tr>
+<th></th>
+<th>TCA 循环</th>
+<th>乙醛酸循环</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>乙酰-CoA 消耗</td>
+<td>每轮 1 分子（被彻底氧化）</td>
+<td>每轮 2 分子（合成琥珀酸）</td>
+</tr>
+<tr>
+<td>还原当量</td>
+<td>3NADH + 1FADH₂</td>
+<td>1NADH + 1FADH₂</td>
+</tr>
+<tr>
+<td>底物水平磷酸化</td>
+<td>1 GTP</td>
+<td><strong>无</strong></td>
+</tr>
+<tr>
+<td>CO₂</td>
+<td>2 分子</td>
+<td><strong>无 CO₂</strong></td>
+</tr>
+<tr>
+<td>场所</td>
+<td>线粒体基质</td>
+<td>乙醛酸循环体</td>
+</tr>
+</tbody>
+</table></div>
+<h2>氧化呼吸链与氧化磷酸化 ★★</h2>
+<h3>P/O 值</h3>
+<ul>
+<li>◇ <strong>P/O 值</strong>：氧化磷酸化中每消耗 1 个氧原子（即每对电子经呼吸链传给 O₂）所<strong>合成</strong>的 ATP 分子数。</li>
+<li>★（黄笔）：<strong>NADH → 约 2.5 ATP；FADH₂（琥珀酸）→ 约 1.5 ATP</strong>。</li>
+</ul>
+<h3>呼吸链的组成（5 类组分，红笔）</h3>
+<ol>
+<li><strong>NAD⁺（辅酶Ⅰ）及 NADH 脱氢酶</strong>（含 FMN、Fe-S）</li>
+<li><strong>黄素蛋白</strong>（辅基 <strong>FAD——黄素腺嘌呤二核苷酸</strong>（红笔）、FMN）</li>
+<li><strong>泛醌（辅酶 Q，CoQ）</strong>——唯一非蛋白的电子传递体，小分子疏水，可在膜内自由扩散</li>
+<li><strong>铁硫蛋白</strong>（Fe 与 Cys 的 S 或无机 S 配位，Fe-S 中心）</li>
+<li><strong>细胞色素</strong>：含铁<strong>血红素辅基</strong>的电子传递蛋白（b、c₁、c、a、a₃）</li>
+</ol>
+<p>★ 4 种复合体（红笔：具有传氢/传递电子功能）：</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>复合体</th>
+<th>名称（红笔）</th>
+<th>电子流向</th>
+<th>泵 H⁺</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Complex Ⅰ</strong></td>
+<td><strong>NADH-CoQ 氧化还原酶</strong></td>
+<td>NADH → FMN → Fe-S → CoQ（NADH 是 NADH 呼吸链电子入口）</td>
+<td>★ <strong>4 H⁺</strong>（红笔大星号重点）</td>
+</tr>
+<tr>
+<td><strong>Complex Ⅱ</strong></td>
+<td><strong>琥珀酸-CoQ 氧化还原酶</strong>（= 琥珀酸脱氢酶）</td>
+<td>琥珀酸 → FAD → Fe-S → Cyt b₅₆₀ → CoQ</td>
+<td>★ <strong>无质子泵</strong>（蓝笔下划线重点）</td>
+</tr>
+<tr>
+<td><strong>Complex Ⅲ</strong></td>
+<td>CoQ-细胞色素 c 氧化还原酶（<strong>细胞色素 bc₁ 复合体</strong>）</td>
+<td>CoQH₂ → Cyt b → Fe-S → Cyt c₁ → <strong>Cyt c</strong>（红笔方框）</td>
+<td>4 H⁺（Q 循环）</td>
+</tr>
+<tr>
+<td><strong>Complex Ⅳ</strong></td>
+<td><strong>细胞色素 c 氧化酶</strong></td>
+<td>Cyt c → CuA → 血红素 a → 血红素 a₃-CuB 双核中心 → O₂（1/2O₂ + 2H⁺ + 2e⁻ → H₂O）</td>
+<td>2 H⁺</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>〔蓝笔〕电子流动路线：<strong>NADH → Ⅰ → CoQ → Ⅲ → Cyt c → Ⅳ → O₂</strong>（共泵出 10 H⁺，驱动合成约 2.5 ATP）；<strong>FADH₂ → Ⅱ → CoQ → Ⅲ → Cyt c → Ⅳ → O₂</strong>（共泵出 6 H⁺，约 1.5 ATP）。</li>
+<li>Q（蓝笔）：细胞质中生成的 NADH 如何进入线粒体？——<strong>3-磷酸甘油穿梭 / 苹果酸-天冬氨酸穿梭</strong>。</li>
+</ul>
+<h3>氧化磷酸化与 ATP 合酶 ★★</h3>
+<ul>
+<li><strong>氧化磷酸化</strong>：与电子传递相偶联、由呼吸链释能驱动 ADP 磷酸化生成 ATP 的过程。</li>
+<li>三种假说：化学偶联假说 ×；构象偶联假说 ×；<strong>化学渗透假说 √</strong>（Mitchell）——<strong>质子梯度中储存的电化学势能</strong>（质子浓度梯度 + 电位差）驱动 ATP 合成。</li>
+<li>★ <strong>F₀F₁-ATP 合酶</strong>（红笔圈注）：F₁（颗粒状头部，催化部位 α₃β₃γδε）；F₀（质子通道，跨膜 a、b₂、c₁₀₋₁₂ 环）。</li>
+<li>★ <strong>旋转催化机制</strong>：3 个 β 亚基轮流催化 ATP 合成，每个 β 亚基经历三种构象：<ul>
+<li><strong>β-ADP 构象（松散型 L）</strong>：结合 ADP + Pi → 转变为</li>
+<li><strong>β-ATP 构象（紧密型 T）</strong>：合成 ATP →</li>
+<li><strong>O 构象（开放型）</strong>：对 ATP 亲和力极弱，<strong>释放 ATP</strong> → 回到 β-ADP 构象</li>
+</ul>
+</li>
+<li>3 个 β 亚基构象互不相同、相互交错；<strong>γ 亚基每旋转一周，释放 3 个 ATP</strong>；γ 亚基逆向旋转则水解 ATP。</li>
+<li>C 亚基环：质子流驱动 c 环旋转；每合成 3 ATP 所需质子数由 c 亚基数目决定（⚠ 原笔记此句未写完）。</li>
+<li>线粒体内膜对代谢物不通透：<strong>腺苷酸转位酶</strong>（ATP⁴⁻ 出 / ADP³⁻ 入，电化学势能下降需电子传递补偿）+ <strong>磷酸转位酶</strong>（H₂PO₄⁻ 与 H⁺ 同向运入）。</li>
+<li>★ 氧化磷酸化的抑制剂三类（红笔方框）：
+  1. <strong>抑制呼吸链</strong>（电子传递）：鱼藤酮/安密妥（Ⅰ）、抗霉素 A（Ⅲ）、<strong>氰化物、CO、叠氮化物（Ⅳ）</strong>
+  2. <strong>抑制 ATP 合酶</strong>：<strong>寡霉素</strong>
+  3. <strong>解偶联剂</strong>（红笔方框）：<strong>2,4-二硝基苯酚（DNP）</strong>——质子梯度泄漏，电子传递照常但只产热不产 ATP（褐色脂肪组织产热蛋白 UCP 天然解偶联）</li>
+<li>〔红笔〕<strong>氧化磷酸化的调节</strong>：主要受 <strong>ADP 浓度（ADP/ATP 比值）</strong>调节——ADP↑ 呼吸加速（呼吸控制）。</li>
+</ul>
+<h2>磷酸戊糖途径（PPP）★★</h2>
+<h3>氧化阶段（不可逆）</h3>
+<ul>
+<li><strong>G-6-P →(6-磷酸葡萄糖脱氢酶 G6PD，NADP⁺→NADPH)→ 6-磷酸葡萄糖酸内酯 →(内酯酶)→ 6-磷酸葡萄糖酸 →(6-磷酸葡萄糖酸脱氢酶，NADP⁺→NADPH，脱羧)→ 5-磷酸核酮糖（RU5P）+ CO₂</strong></li>
+<li>★ 氧化阶段共产生 <strong>2 NADPH + 1 CO₂</strong>（每分子 G-6-P；红字标注①②两步各产 1 个 NADPH）。</li>
+</ul>
+<h3>非氧化阶段（可逆，碳骨架重排）★★（红笔大字：转酮与转醛）</h3>
+<ul>
+<li>RU5P 两条去路（红笔箭头）：</li>
+<li><strong>磷酸核糖异构酶</strong> → <strong>5-磷酸核糖（R5P）</strong>（酮糖⇌醛糖）</li>
+<li><strong>磷酸戊糖差向异构酶</strong> → <strong>5-磷酸木酮糖（Xu5P）</strong>（C3 差向异构）</li>
+<li>★ 碳骨架重组算式（页 64 小结，重点）：</li>
+<li><strong>C₅ + C₅ → C₃ + C₇</strong>（★ <strong>转酮醇酶</strong>，辅基 <strong>TPP/Mg²⁺</strong>，转移<strong>二碳单位（羟乙醛基）</strong>）<ul>
+<li>Xu5P + R5P → S7P（7-磷酸景天庚酮糖）+ GAP（3-磷酸甘油醛）</li>
+</ul>
+</li>
+<li><strong>C₃ + C₇ → C₆ + C₄</strong>（★ <strong>转醛醇酶</strong>，无辅基，转移<strong>三碳单位（二羟丙酮基）</strong>）<ul>
+<li>S7P + GAP → F6P（6-磷酸果糖）+ E4P（4-磷酸赤藓糖）</li>
+</ul>
+</li>
+<li><strong>C₅ + C₄ → C₆ + C₃</strong>（★ 转酮醇酶第二次）<ul>
+<li>Xu5P + E4P → F6P + GAP</li>
+</ul>
+</li>
+<li>⇒ <strong>3 × G-6-P → 2 F6P + 1 GAP + 3 CO₂ + 6 NADPH</strong>（红笔总结；F6P、GAP 回到糖酵解）</li>
+<li>手绘圈注：二碳、三碳单位用括号圈出（页 62B，学长自认易错细节）。</li>
+</ul>
+<h3>PPP 的特点（4 条）</h3>
+<ol>
+<li>脱氢反应以 <strong>NADP⁺</strong> 为氢受体，生成 <strong>NADPH + H⁺</strong>（注意与糖酵解的 NADH 区分）</li>
+<li>进行小分子碳骨架重排（基团转移反应），经历 C3、C4、C5、C6、C7 糖的演变</li>
+<li>中间产物 <strong>5-磷酸核糖（R5P）</strong></li>
+<li>1 分子 G-6-P 经一次脱氢、脱羧生成 1 CO₂ + 2 NADPH（⚠ 原笔记「2 分子 NADPH+H⁺」按每分子 G6P 氧化阶段计）</li>
+</ol>
+<h3>生理意义与调节 ★</h3>
+<ul>
+<li><strong>NADPH</strong>：为合成代谢（脂肪酸、胆固醇等）提供还原当量氢；参与羟化反应（药物/毒物代谢）；维持还原型谷胱甘肽（GSH）→ 红细胞抗氧化（G6PD 缺乏→蚕豆病）；也可经转氢进入呼吸链产能（⚠ 原笔记辨字不全）。</li>
+<li><strong>R5P</strong>：核苷酸/核酸合成的原料。</li>
+<li>★（红笔下划线）<strong>PPP 主要受 NADPH/NADP⁺ 比值调节</strong>：比值↑（NADPH 多）→ 抑制；比值↓ → 激活（G6PD 是限速酶）。</li>
+<li>★ <strong>4 种需求模式</strong>（红笔：对 NADPH、核糖、ATP 需求不同）：
+  1. <strong>R5P 需求 &gt; NADPH</strong>（细胞分裂旺盛）：G-6-P →(氧化阶段反用/糖酵解逆行)→ F6P、GAP →(转酮/转醛逆行)→ R5P；即非氧化阶段逆转合成 R5P
+  2. <strong>NADPH 与 R5P 都需要</strong>：G-6-P + 2NADP⁺ → R5P + CO₂ + 2NADPH（仅走氧化阶段）
+  3. <strong>NADPH 需求 &gt; R5P</strong>：氧化阶段产物经非氧化阶段转入糖酵解（生成 F6P、GAP → 丙酮酸 → 2ATP）；蓝笔：转醛醇酶/转酮醇酶系统
+  4. （NADPH 和 ATP 都需要）：全部氧化产能 ⚠ 原笔记第 4 模式被截断，按教材补全</li>
+</ul>
+<h2>糖异生 ★</h2>
+<ul>
+<li><strong>定义</strong>：从非糖物质（<strong>乳酸、丙酮酸、甘油、生糖氨基酸</strong>）合成葡萄糖或糖原的过程；主要在<strong>肝脏</strong>（哺乳动物；肾脏少量）。</li>
+<li>★ 不完全是糖酵解的逆反应——糖酵解 3 个不可逆步骤需 4 个特异酶绕行（红笔）：</li>
+<li><strong>(1) 丙酮酸羧化支路</strong>（丙酮酸→PEP）：<ul>
+<li><strong>丙酮酸 + CO₂ + ATP + H₂O →(丙酮酸羧化酶，线粒体基质，生物素辅基)→ 草酰乙酸 + ADP + Pi</strong></li>
+<li><strong>草酰乙酸 + GTP →(PEP羧激酶)→ PEP + CO₂ + GDP</strong>（红笔注：PEP 羧激酶脱羧）</li>
+<li>★ 丙酮酸羧化酶被<strong>乙酰-CoA 别构激活</strong>（⚠ 原笔记此处辨字不全，按教材补全）；草酰乙酸不能直接穿内膜（经苹果酸/天冬氨酸转运出线粒体）</li>
+</ul>
+</li>
+<li><strong>(2) F-1,6-BP → F-6-P</strong>：<strong>果糖-1,6-二磷酸酶（FBPase-1）</strong>（水解掉 C1 磷酸；绕过 PFK-1）</li>
+<li><strong>(3) G-6-P → Glucose</strong>：<strong>葡萄糖-6-磷酸酶</strong>（肝、肾有；肌肉没有 → 肌糖原不能直接补血糖）</li>
+<li>（1,3-BPG → GAP 用 3-磷酸甘油醛脱氢酶逆行，消耗 2 NADH——红笔注：消耗 2 个 NADH）</li>
+<li>★ <strong>总反应式（红笔圈注：6ATP——共消耗 6 个高能磷酸键）</strong>：
+  <strong>2 丙酮酸 + 4ATP + 2GTP + 2NADH + 2H⁺ + 6H₂O → 葡萄糖 + 4ADP + 2GDP + 6Pi + 2NAD⁺</strong></li>
+<li>（糖酵解/糖异生双向流程图，各步标注可逆/绕行）</li>
+</ul>
+<hr />
+<h1 id="p6">第六部分 脂代谢（脂肪酸的分解）</h1>
+<h2>脂肪酸的 β-氧化 ★★</h2>
+<ul>
+<li>部位：绝大多数组织均能进行，<strong>肝脏、肌肉最为活跃</strong>（红笔）；场所：<strong>线粒体基质</strong>（大部分）。</li>
+</ul>
+<h3>1° 脂肪酸的活化（红笔：消耗 ATP）</h3>
+<ul>
+<li>脂肪酸 + CoA-SH + ATP →(<strong>脂酰CoA合成酶</strong>，位于内质网/线粒体外膜)→ <strong>脂酰-CoA</strong> + AMP + PPi</li>
+<li>★ 消耗 <strong>2 个高能磷酸键</strong>（ATP→AMP+PPi，红笔）</li>
+</ul>
+<h3>2° 肉碱穿梭（限速步骤）★</h3>
+<ul>
+<li>脂酰-CoA 不能直接穿线粒体内膜 → <strong>肉碱（ carnitine ）转运</strong>：</li>
+<li>膜外：脂酰-CoA --(CPT-Ⅰ / 肉碱脂酰转移酶Ⅰ)--&gt; <strong>脂酰-肉碱</strong> --(转位酶跨膜)--&gt; 膜内</li>
+<li>膜内：--(CPT-Ⅱ)--&gt; 脂酰-CoA（膜内）+ 肉碱（返回膜外）</li>
+<li>★ ★ <strong>CPT-Ⅰ 是限速酶</strong>（红笔下划线）；<strong>肉碱穿梭是脂肪酸 β-氧化的主要限速步骤</strong>（红笔下划线）；丙二酰-CoA 抑制 CPT-Ⅰ（合成与氧化不同时进行）。</li>
+</ul>
+<h3>3° β-氧化四步循环（红笔下划线流程：脱氢→水合→再脱氢→硫解）</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>步</th>
+<th>反应</th>
+<th>酶</th>
+<th>产物/产能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>① <strong>脱氢</strong></td>
+<td>脂酰-CoA → Δ²反-烯脂酰-CoA</td>
+<td>脂酰-CoA 脱氢酶（FAD→<strong>FADH₂</strong>）</td>
+<td>FADH₂ → 呼吸链 → <strong>1.5 ATP</strong>（红笔）</td>
+</tr>
+<tr>
+<td>② <strong>水合</strong></td>
+<td>Δ²反-烯脂酰-CoA + H₂O → L-β-羟脂酰-CoA</td>
+<td>烯脂酰-CoA 水合酶</td>
+<td>—</td>
+</tr>
+<tr>
+<td>③ <strong>再脱氢</strong></td>
+<td>L-β-羟脂酰-CoA → β-酮脂酰-CoA</td>
+<td>羟脂酰-CoA 脱氢酶（NAD⁺→<strong>NADH+H⁺</strong>）</td>
+<td>NADH → <strong>2.5 ATP</strong>（红笔）</td>
+</tr>
+<tr>
+<td>④ <strong>硫解</strong></td>
+<td>β-酮脂酰-CoA + CoA-SH → 脂酰-CoA（少2C）+ <strong>乙酰-CoA</strong></td>
+<td>硫解酶</td>
+<td>乙酰-CoA → TCA 彻底氧化（红笔：肝内可生成<strong>酮体</strong>运往肝外氧化利用，下划线）</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>★〔红笔例题〕<strong>16C 棕榈酸（软脂酸）彻底氧化</strong>：7 轮 β-氧化 → 7 FADH₂ + 7 NADH + 8 乙酰-CoA</li>
+<li>7×4 = <strong>28</strong>（7×(1.5+2.5)，红笔）+ 8×10（TCA：8×10 = 80）− 2（活化）= <strong>106 ATP</strong></li>
+</ul>
+<h2>脂肪酸的其他氧化方式</h2>
+<h3>1. 不饱和脂肪酸的氧化（红笔：需辅助酶）</h3>
+<ul>
+<li>β-氧化中途遇到顺式双键无法继续 → 两个辅助酶：</li>
+<li>★ <strong>烯脂酰-CoA 异构酶</strong>（红笔）：<strong>顺Δ³ → 反Δ²</strong>（只有一个双键时，仅需此酶，少产 1 FADH₂）</li>
+<li>★ <strong>2,4-二烯脂酰-CoA 还原酶</strong>（红笔）：<strong>反Δ²-顺Δ⁴-二烯脂酰-CoA + NADPH → 反Δ²-烯脂酰-CoA</strong>（多一个双键时还需 NADPH）</li>
+</ul>
+<h3>2. 奇数碳脂肪酸的氧化 → 丙酰-CoA</h3>
+<ul>
+<li>奇数 C 脂肪酸经 β-氧化最后生成 <strong>丙酰-CoA（CH₃CH₂CO~CoA）</strong>，三步转成 TCA 中间物：
+  1. 丙酰-CoA --(★ <strong>丙酰-CoA 羧化酶</strong>，ATP、生物素，+CO₂)--&gt; D-甲基丙二酰-CoA
+  2. --(消旋酶)--&gt; L-甲基丙二酰-CoA
+  3. --(★ <strong>甲基丙二酰-CoA 变位酶</strong>，辅酶为 5′-脱氧腺苷钴胺素 = <strong>维生素 B₁₂</strong>，红笔)--&gt; <strong>琥珀酰-CoA</strong> → TCA</li>
+</ul>
+<h3>3. 过氧化物酶体的 β-氧化</h3>
+<ul>
+<li>起始酶：<strong>过氧化物酶体氧化酶</strong>（脂酰-CoA 氧化酶，脱下的氢直接给 O₂ 生成 H₂O₂，⚠ 原笔记辨字不全按教材补全）——<strong>不产 ATP，产能以热散失</strong>。</li>
+<li>★ <strong>超长链脂肪酸（&gt;22C）</strong>先在过氧化物酶体中氧化缩短（至约 8C）→ 脂酰-肉碱 → 扩散/转运进线粒体继续 β-氧化（红笔下划线重点）。</li>
+<li>植物：过氧化物酶体、<strong>乙醛酸循环体</strong>（发芽油料种子将脂肪转化为糖）。</li>
+</ul>
+<h3>脂肪酸的 α-氧化与 ω-氧化</h3>
+<ul>
+<li><strong>α-氧化</strong>：发生在 α-C 上的氧化；当 <strong>β-C 上有甲基支链</strong>（如植烷酸）无法直接 β-氧化时，需先经 α-氧化（部位：内质网/线粒体/过氧化物酶体 ⚠ 原笔记此处存疑）。</li>
+<li><strong>ω-氧化</strong>：从离羧基最远的 <strong>ω-C</strong> 开始氧化（10~12C 脂肪酸）；部位：<strong>肝脏微粒体（内质网）</strong>；产物为二羧酸再进入 β-氧化（⚠ 原笔记末句辨字不全）。</li>
+</ul>
+<hr />
+<h1 id="p7">附录：待复核清单（精校后仍无法确定的原文，建议对照原件）</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>页码</th>
+<th>位置</th>
+<th>问题</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>页01/02</td>
+<td>顶部被便利贴遮挡的行</td>
+<td>「100g 样品中 Pro 的…」「组成元素等行」被遮挡，无法转录</td>
+</tr>
+<tr>
+<td>2</td>
+<td>页03</td>
+<td>页底</td>
+<td>「（Tyr、苯丙 AA …）」与茚三酮反应的关系存疑（可能指芳香族氨基酸的 280nm 紫外吸收）</td>
+</tr>
+<tr>
+<td>3</td>
+<td>页04</td>
+<td>一级结构段</td>
+<td>「体内蛋白质多肽链的 N 端为…」一句残缺</td>
+</tr>
+<tr>
+<td>4</td>
+<td>页05</td>
+<td>化学键能量</td>
+<td>「二硫键 210〔?〕化」——"210 kJ/mol" 数字基本确定，但旁注两字认不出</td>
+</tr>
+<tr>
+<td>5</td>
+<td>页06</td>
+<td>红笔便利贴第 3~5 条</td>
+<td>蛋白质分类（同工蛋白？）、退化性质、个别点——字迹难辨</td>
+</tr>
+<tr>
+<td>6</td>
+<td>页10</td>
+<td>化学因素清单</td>
+<td>「动〔?〕发」两词无法还原（疑为"振荡、加热"类）</td>
+</tr>
+<tr>
+<td>7</td>
+<td>页13</td>
+<td>Z-DNA 生物学意义</td>
+<td>「1) 〔负超螺旋?〕有利于 Z-DNA 形成 (2) 甲基化能激活基因表达」——第二条与教材（甲基化一般抑制转录）冲突，疑为笔记原误</td>
+</tr>
+<tr>
+<td>8</td>
+<td>页14</td>
+<td>红笔旁注</td>
+<td>「Met 的缩写 N? 同一残基上…」「第〔21?〕个 AA」两处</td>
+</tr>
+<tr>
+<td>9</td>
+<td>页19</td>
+<td>Hb 与 Mb 一级结构</td>
+<td>「只有 2 个位置的〔辨〕」——教材数据约为 27 个位置相同</td>
+</tr>
+<tr>
+<td>10</td>
+<td>页24</td>
+<td>超螺旋方向</td>
+<td>正/负超螺旋各为左手还是右手，笔记标注互有出入（不同教材定义不同），建议以杨荣武教材为准</td>
+</tr>
+<tr>
+<td>11</td>
+<td>页30</td>
+<td>金属离子作用</td>
+<td>「〔此句字迹难辨：似为"是称反应酶 pr 分子…参与组成酶活性中心"〕」</td>
+</tr>
+<tr>
+<td>12</td>
+<td>页37</td>
+<td>不可逆抑制剂</td>
+<td>四类型例证整页潦草，例证名（TPCK、DFP 等）已按教材补全，原件另核</td>
+</tr>
+<tr>
+<td>13</td>
+<td>页43/44</td>
+<td>糖的分类行</td>
+<td>「水解为 20〔？〕个分子」的数字</td>
+</tr>
+<tr>
+<td>14</td>
+<td>页45</td>
+<td>寡糖命名第③种</td>
+<td>整句辨认不全（已按教材补全为"标明糖苷键连接的碳原子位置"）</td>
+</tr>
+<tr>
+<td>15</td>
+<td>页47</td>
+<td>甘油磷脂 X 基团</td>
+<td>「X=极性〔性〕或带电荷的醇…」及 X=H 命名两句</td>
+</tr>
+<tr>
+<td>16</td>
+<td>页48</td>
+<td>鞘脂 C2/C3 基团</td>
+<td>「C4、C3、C2 携带三个特殊基团」的列举无法全部还原</td>
+</tr>
+<tr>
+<td>17</td>
+<td>页50</td>
+<td>相变温度段</td>
+<td>「膜〔?〕流动性使各个脂分子的相变温度↑」一句逻辑存疑</td>
+</tr>
+<tr>
+<td>18</td>
+<td>页52</td>
+<td>代谢特点</td>
+<td>「（5）」条与「（1）」之间缺 (2)(3)(4)（原件可能有但被拍漏）</td>
+</tr>
+<tr>
+<td>19</td>
+<td>页56</td>
+<td>F-2,6-BP 调节</td>
+<td>原笔记两条调节均写「胰岛素↑」，其中一条应为「胰高血糖素」（已修正，原件核对确认是否笔记原误）</td>
+</tr>
+<tr>
+<td>20</td>
+<td>页60</td>
+<td>葡萄糖总产能</td>
+<td>「30/3?/32」——已按教材定为 30/32</td>
+</tr>
+<tr>
+<td>21</td>
+<td>页62</td>
+<td>ATP 合酶 C 环</td>
+<td>「1 个 ATP 需从细胞质转运?个 PO₄³⁻?和?个 H⁺」数字缺失</td>
+</tr>
+<tr>
+<td>22</td>
+<td>页65</td>
+<td>PEP 羧激酶部位</td>
+<td>丙酮酸羧化支路两步的亚细胞定位标注不全（线粒体/胞质）</td>
+</tr>
+<tr>
+<td>23</td>
+<td>页66</td>
+<td>蓝笔旁注</td>
+<td>「真核：正常情况 P450?〔辨〕」与肉碱穿梭的关系不明</td>
+</tr>
+<tr>
+<td>24</td>
+<td>页67</td>
+<td>过氧化物酶体</td>
+<td>「起动?」处的酶名及「(~8C?)」的数字</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<p><em>精校完成于 2026-11-01。共修复识别标注 788 处（〔辨〕664 + 〔？〕124），其中绝大部分已按《生物化学原理》（杨荣武）学科知识修复；24 处列入上表待复核。</em></p>
+</main>
+<a class="top" href="#">↑</a>
+</body>
+</html>
