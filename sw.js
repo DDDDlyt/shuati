@@ -1,6 +1,6 @@
 /* 刷题总台 Service Worker：离线也能刷题 */
-const CACHE = 'shuati-v35';
-const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './pako.min.js', './img/glycolysis.svg', './img/tca.svg', './img/replication-fork.svg', './notes-biochem.html'];
+const CACHE = 'shuati-v36';
+const ASSETS = ['./', './index.html', './listening.html', './manifest.json', './icon-192.png', './icon-512.png', './pako.min.js', './img/glycolysis.svg', './img/tca.svg', './img/replication-fork.svg', './notes-biochem.html'];
 
 self.addEventListener('install', e => {
   e.waitUntil(
