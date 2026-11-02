@@ -106,6 +106,9 @@ button{font-family:inherit; cursor:pointer; border:none; outline:none;}
 /* 卡片 */
 .flashcard{background:var(--panel); border-radius:20px; padding:22px 20px; margin-bottom:14px;
   min-height:220px; display:flex; flex-direction:column; position:relative;}
+.flashcard:empty::after{content:"还没有题目\A 点左上角 ← 返回首页，或点「开始 20 张新题」开始刷";white-space:pre-line;
+  display:flex; align-items:center; justify-content:center; flex:1; min-height:200px;
+  color:var(--dim); font-size:14px; line-height:1.9; text-align:center; padding:20px 16px;}
 .card-tag{display:inline-block; padding:3px 9px; border-radius:7px; font-size:10px; font-weight:700;
   background:rgba(10,132,255,.16); color:var(--teal); margin-bottom:12px; align-self:flex-start;}
 .card-tag.exam{background:rgba(191,90,242,.18); color:#d68cff;}
@@ -219,9 +222,9 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
 .nav{position:fixed; bottom:0; left:0; right:0; z-index:30;
   background:rgba(20,22,27,.94); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
   border-top:1px solid var(--line); display:flex; padding:8px 0 max(10px,env(safe-area-inset-bottom));}
-.nav button{flex:1; background:none; color:var(--dim); font-size:10px; font-weight:600;
-  display:flex; flex-direction:column; align-items:center; gap:3px; padding:5px 0;}
-.nav button .ic{font-size:21px;}
+.nav button{flex:1; background:none; color:var(--dim); font-size:11px; font-weight:600;
+  display:flex; flex-direction:column; align-items:center; gap:2px; padding:6px 0 4px;}
+.nav button .ic{font-size:20px;}
 .nav button.on{color:var(--blue);}
 /* toast */
 #toast{position:fixed; left:50%; bottom:96px; transform:translateX(-50%) translateY(20px);
@@ -5872,29 +5875,8 @@ window.addEventListener('load', function(){ setTimeout(gateBoot, 50); });
   </div>
 </div>
 
-<!-- 备份/恢复：独立浮动工具条，不影响现有逻辑 -->
-<div id="bkbar" style="position:fixed;right:12px;bottom:12px;z-index:9998;display:flex;gap:8px;font-family:system-ui,sans-serif">
-  <button id="bkExp" style="border:0;border-radius:8px;padding:9px 12px;background:#2b6cb0;color:#fff;font-size:13px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.3)">⬇ 备份数据</button>
-  <button id="bkImp" style="border:0;border-radius:8px;padding:9px 12px;background:#38a169;color:#fff;font-size:13px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.3)">⬆ 恢复数据</button>
-  <input id="bkFile" type="file" accept="application/json" style="display:none">
-</div>
-<script>
-(function(){
-  function allLS(){var o={};try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);o[k]=localStorage.getItem(k);}}catch(e){}return o;}
-  var exp=document.getElementById('bkExp'),imp=document.getElementById('bkImp'),file=document.getElementById('bkFile');
-  if(exp)exp.onclick=function(){
-    var data=allLS();var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
-    var a=document.createElement('a');a.href=URL.createObjectURL(blob);
-    a.download='shuati-backup-'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove();
-  };
-  if(imp)imp.onclick=function(){file.click();};
-  if(file)file.onchange=function(){
-    var f=file.files&&file.files[0];if(!f)return;var r=new FileReader();
-    r.onload=function(){try{var o=JSON.parse(r.result);var n=0;for(var k in o){localStorage.setItem(k,o[k]);n++;}alert('已恢复 '+n+' 项数据，即将刷新页面');location.reload();}catch(e){alert('恢复失败：文件不是有效的备份 JSON');}};
-    r.readAsText(f);file.value='';
-  };
-})();
-</script>
+<!-- 备份/恢复已内置于「设置 → 更多设置 → 手动互传」（导出文件/选择文件导入/复制数据/粘贴导入），
+     此前的右下角浮动条与新功能重复且遮挡底部导航，已移除。 -->
 
 </body>
 </html>
