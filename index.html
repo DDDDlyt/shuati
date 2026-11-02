@@ -880,69 +880,19 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
     <p style="margin-top:10px">不登录也能正常刷题，进度存在本机。想让手机和平板自动对齐，再展开这里注册一个账号。</p>
 
     <div id="accAnon">
-      <p class="acc-nosrv" id="accNoSrv">服务器已经内置好了，什么都不用配置——直接注册一个账号（邮箱 + 密码），手机、平板各登一次就能自动对齐。</p>
+      <p class="acc-nosrv" id="accNoSrv">服务器已经内置好了，什么都不用配置——直接注册一个账号（用户名 + 密码），手机、平板各登一次就能自动对齐。</p>
       <p class="acc-nosrv" id="accMig" style="display:none; background:rgba(95,176,255,.1); color:#9fd3ff">💡 检测到你在用旧的 GitHub 令牌同步。登录账号后本机数据会自动一起带上去，之后就彻底不用管令牌了。</p>
-      <div class="set-row"><label>邮箱</label>
-        <input id="clEmail" type="email" inputmode="email" autocomplete="username" placeholder="you@example.com">
+      <div class="set-row"><label>用户名</label>
+        <input id="clUser" type="text" autocomplete="username" placeholder="4-32位：字母 / 数字 / 下划线">
       </div>
       <div class="set-row" style="margin-top:9px"><label>密码</label>
-        <input id="clPw" type="password" autocomplete="current-password" placeholder="至少 6 位">
+        <input id="clPw" type="password" autocomplete="current-password" placeholder="至少 8 位">
       </div>
       <div class="gh-btns">
         <button class="mini-btn blue" onclick="cloudLogin()">登录</button>
         <button class="mini-btn" onclick="cloudSignup()">注册新账号</button>
       </div>
-      <button class="acc-adv" onclick="accToggleAdv()">⚙️ 高级：手动换服务器（一般用不到）</button>
-      <div id="accAdv" style="display:none">
-        <p class="acc-steps">
-          <b>1.</b> 打开 <a href="https://supabase.com/dashboard" target="_blank" rel="noopener">supabase.com</a>，用 GitHub 账号登录 → <b>New project</b>（名字随便填，Region 选 Singapore，数据库密码记一下）<br>
-          <b>2.</b> 建好后左侧 <b>SQL Editor</b> → New query → 粘贴下面这段 → 点 <b>Run</b><br>
-          <b>3.</b> 左侧 <b>Project Settings → API Keys</b>，复制 <b>Project URL</b> 和 <b>publishable key</b>（<code>sb_publishable_</code> 开头）填到下面
-        </p>
-        <pre class="sql-box" id="sqlBox">create table if not exists public.shuati_state (
-  user_id uuid primary key references auth.users(id) on delete cascade,
-  data jsonb not null default '{}'::jsonb,
-  rev bigint not null default 1,
-  updated_at timestamptz not null default now()
-);
-alter table public.shuati_state enable row level security;
-drop policy if exists "own_state" on public.shuati_state;
-create policy "own_state" on public.shuati_state
-  for all to authenticated
-  using (auth.uid() = user_id)
-  with check (auth.uid() = user_id);
-grant all on public.shuati_state to authenticated;
-
-create table if not exists public.submissions (
-  id uuid primary key default gen_random_uuid(),
-  uploader uuid not null references auth.users(id) on delete cascade,
-  uploader_email text,
-  fname text not null,
-  ftype text,
-  fsize int,
-  note text,
-  content text,
-  created_at timestamptz not null default now()
-);
-alter table public.submissions enable row level security;
-drop policy if exists "sub_insert" on public.submissions;
-create policy "sub_insert" on public.submissions
-  for insert to authenticated
-  with check (auth.uid() = uploader);
-drop policy if exists "sub_read_own" on public.submissions;
-create policy "sub_read_own" on public.submissions
-  for select to authenticated
-  using (auth.uid() = uploader);
-drop policy if exists "sub_del_own" on public.submissions;
-create policy "sub_del_own" on public.submissions
-  for delete to authenticated
-  using (auth.uid() = uploader);</pre>
-        <p class="acc-tip">上面框里可以左右滑，看不全不影响，点下面直接复制。</p>
-        <button class="mini-btn" onclick="copySql()">📋 复制这段 SQL</button>
-        <div class="set-row" style="margin-top:12px"><label>地址</label><input id="accUrl" placeholder="https://xxxx.supabase.co"></div>
-        <div class="set-row" style="margin-top:9px"><label>Key</label><input id="accKey" type="password" placeholder="sb_publishable_... 或 eyJhbGci...（anon key）"></div>
-        <div class="gh-btns"><button class="mini-btn blue" onclick="cloudSaveServer()">保存服务器</button></div>
-      </div>
+      <p class="acc-tip" style="margin-top:10px">整站只有一个账号位（你自己的）。第一次用点「注册新账号」把位置占了，之后换设备直接「登录」。密码忘了只能找站长重置，想好再设。</p>
     </div>
 
     <div id="accOn" style="display:none">
@@ -5291,28 +5241,21 @@ function cloudCfg(){
   try{ return JSON.parse(localStorage.getItem(CLOUD_CFG_KEY)||'{}'); }catch(e){ return {}; }
 }
 function cloudSetCfg(c){ localStorage.setItem(CLOUD_CFG_KEY, JSON.stringify(c)); }
-function cloudUrl(){ var c=cloudCfg(); return String(c.url||CLOUD_URL_FIXED||'').replace(/\/+$/,''); }
-function cloudKey(){ var c=cloudCfg(); return String(c.key||CLOUD_KEY_FIXED||''); }
-function cloudReady(){ return !!(cloudUrl() && cloudKey()); }
+function cloudReady(){ return true; }
 
 function cloudApplySession(){
   const c=cloudCfg();
   CLOUD.on   = !!c.at;
   CLOUD.at   = c.at||null;
-  CLOUD.rt   = c.rt||null;
-  CLOUD.uid  = c.uid||null;
+  CLOUD.uid  = c.u||null;
+  CLOUD.email= c.u||'';
   CLOUD.exp  = c.exp||0;
-  CLOUD.email= c.email||'';
   CLOUD.lastAt = c.lastAt||0;
   CLOUD.auto = (c.auto===undefined) ? true : !!c.auto;
 }
 function cloudSaveSession(s){
   const c=cloudCfg();
-  if(s.access_token) c.at=s.access_token;
-  if(s.refresh_token) c.rt=s.refresh_token;
-  if(s.expires_in) c.exp=(Date.now()+(Number(s.expires_in)||3600)*1000);
-  if(s.user&&s.user.id) c.uid=s.user.id;
-  if(s.user&&s.user.email) c.email=s.user.email;
+  if(s&&s.token){ c.at=s.token; c.u=s.user||c.u; c.exp=Date.now()+29*24*3600*1000; }
   cloudSetCfg(c); cloudApplySession();
 }
 
@@ -5328,33 +5271,27 @@ function cloudTime(ts){
   return (d.getMonth()+1)+'/'+d.getDate()+' '+hm;
 }
 
-/* --- 网络层 --- */
+/* --- 网络层：Worker API（同域相对路径，服务器已内置，无需任何配置） --- */
 async function cloudFetch(path, opts, withAuth){
   opts = opts||{};
-  const url = cloudUrl()+path;
-  const h = Object.assign({
-    'apikey': cloudKey(),
-    'Content-Type': 'application/json'
-  }, opts.headers||{});
+  const h = Object.assign({'Content-Type':'application/json'}, opts.headers||{});
   if(withAuth && CLOUD.at) h['Authorization']='Bearer '+CLOUD.at;
-
   let ctl=null;
   if(typeof AbortController!=='undefined') ctl=new AbortController();
   const tm = setTimeout(function(){ if(ctl) ctl.abort(); }, 20000);
   let r;
   try{
-    r = await fetch(url, {method:opts.method||'GET', headers:h, body:opts.body, signal:ctl?ctl.signal:undefined});
+    r = await fetch(path, {method:opts.method||'GET', headers:h, body:opts.body, signal:ctl?ctl.signal:undefined});
   }catch(e){
     clearTimeout(tm);
     throw Object.assign(new Error('连不上服务器'), {net:true});
   }
   clearTimeout(tm);
-
   const txt = await r.text();
   let data=null;
   try{ data = txt ? JSON.parse(txt) : null; }catch(e){ data = txt; }
   if(!r.ok){
-    let msg = (data && (data.msg||data.message||data.error_description||data.error||data.hint)) || ('HTTP '+r.status);
+    let msg = (data && (data.error||data.msg||data.message||data.hint)) || ('HTTP '+r.status);
     if(typeof msg!=='string') msg=JSON.stringify(msg);
     throw Object.assign(new Error(msg), {status:r.status, data:data});
   }
@@ -5364,46 +5301,33 @@ async function cloudFetch(path, opts, withAuth){
 function cloudErrText(e){
   const m=String((e&&e.message)||'');
   if(e&&e.net) return '连不上服务器，换下网络（Wi-Fi / 流量）再试';
-  if(e&&e.status===400 && /invalid login credentials/i.test(m)) return '邮箱或密码不对';
-  if(e&&e.status===422 && /already registered/i.test(m)) return '这个邮箱注册过了，直接点「登录」';
-  if(e&&e.status===422) return '邮箱格式不对，或密码太短（至少 6 位）';
+  if(e&&e.status===403 && /已初始化/.test(m)) return '账号位已被占用（全站只有一个账号）——之前注册过就直接点「登录」';
+  if(e&&e.status===401) return /用户名或密码/.test(m) ? '用户名或密码不对' : '登录已过期，请重新登录';
   if(e&&e.status===429) return '试太多次了，等一分钟再试';
-  if(e&&e.status===401) return '登录已过期，请重新登录';
-  if(/email not confirmed/i.test(m)) return '还没验证邮箱：去邮箱点确认链接（或在后台关掉「Confirm email」）';
-  if(/relation .*shuati_state.* does not exist/i.test(m)) return '数据库表还没建：点下面「服务器设置」里的 SQL 复制到后台跑一次';
   return m||'出错了';
 }
 
 /* --- 登录 / 注册 / 退出 --- */
 function cloudCheckInput(){
-  const emEl=document.getElementById('clEmail'), pwEl=document.getElementById('clPw');
-  const em=(emEl&&emEl.value||'').trim(), pw=(pwEl&&pwEl.value||'');
-  if(!cloudReady()) return {err:'还没填服务器地址（点下面「服务器设置」）'};
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) return {err:'邮箱格式不对'};
-  if(pw.length<6) return {err:'密码至少 6 位'};
-  return {em:em, pw:pw};
+  const uEl=document.getElementById('clUser'), pwEl=document.getElementById('clPw');
+  const u=(uEl&&uEl.value||'').trim(), pw=(pwEl&&pwEl.value||'');
+  if(!/^[A-Za-z0-9_]{4,32}$/.test(u)) return {err:'用户名要 4-32 位，只能用字母、数字、下划线'};
+  if(pw.length<8) return {err:'密码至少 8 位'};
+  return {em:u, pw:pw};
 }
 async function cloudSignup(){
   const v=cloudCheckInput(); if(v.err){ cloudStatus('⚠️ '+v.err,'err'); return; }
   cloudStatus('正在注册…');
   try{
-    const s = await cloudFetch('/auth/v1/signup', {method:'POST', body:JSON.stringify({email:v.em, password:v.pw})});
-    const sess = (s&&s.session) ? s.session : ((s&&s.access_token)? s : null);
-    if(sess){ cloudSaveSession(sess); cloudAfterLogin('账号已创建'); }
-    else { cloudStatus('📮 收到注册请求，去邮箱点确认链接，然后回来「登录」','warn'); }
-  }catch(e){
-    cloudStatus('❌ '+cloudErrText(e),'err');
-    if(e.status===422 && /already registered/i.test(e.message||'')){
-      const pw=document.getElementById('clPw'); if(pw) pw.focus();
-    }
-  }
+    const s = await cloudFetch('/api/setup', {method:'POST', body:JSON.stringify({username:v.em, password:v.pw})});
+    cloudSaveSession(s); cloudAfterLogin('账号已创建');
+  }catch(e){ cloudStatus('❌ '+cloudErrText(e),'err'); }
 }
 async function cloudLogin(){
   const v=cloudCheckInput(); if(v.err){ cloudStatus('⚠️ '+v.err,'err'); return; }
   cloudStatus('正在登录…');
   try{
-    const s = await cloudFetch('/auth/v1/token?grant_type=password', {method:'POST', body:JSON.stringify({email:v.em, password:v.pw})});
-    if(!s||!s.access_token) throw new Error('服务器没返回登录凭证');
+    const s = await cloudFetch('/api/login', {method:'POST', body:JSON.stringify({username:v.em, password:v.pw})});
     cloudSaveSession(s);
     cloudAfterLogin('登录成功');
   }catch(e){ cloudStatus('❌ '+cloudErrText(e),'err'); }
@@ -5415,89 +5339,47 @@ function cloudAfterLogin(msg){
 }
 async function cloudLogout(){
   if(!confirm('退出后本机不再自动同步（学习记录不会删，仍在本机）。确定？')) return;
-  try{ await cloudFetch('/auth/v1/logout', {method:'POST'}, true); }catch(e){}
   const c=cloudCfg();
-  delete c.at; delete c.rt; delete c.uid; delete c.email;
+  delete c.at; delete c.u; delete c.exp;
   cloudSetCfg(c); cloudApplySession();
   renderAcc(); cloudStatus('已退出');
 }
 
-/* --- 续期 --- */
+/* --- 凭证有效期：令牌 30 天，过期只能重新输密码（无刷新接口） --- */
 async function cloudRefresh(){
   const c=cloudCfg();
-  if(!c.rt) return false;
-  try{
-    const s = await cloudFetch('/auth/v1/token?grant_type=refresh_token', {method:'POST', body:JSON.stringify({refresh_token:c.rt})});
-    if(!s||!s.access_token) return false;
-    cloudSaveSession(s);
-    return true;
-  }catch(e){
-    if(e.status===400||e.status===401||e.status===403){       /* 刷新令牌也废了 = 要重新登录 */
-      const d=cloudCfg();
-      delete d.at; delete d.rt;
-      cloudSetCfg(d); cloudApplySession();
-      renderAcc();
-      cloudStatus('登录已过期，重新输一次密码就好','warn');
-    }
+  if(!c.at) return false;
+  if(c.exp && c.exp-Date.now() < 90000){
+    delete c.at; cloudSetCfg(c); cloudApplySession();
+    renderAcc();
+    cloudStatus('登录过期了，重新输一次密码就好','warn');
     return false;
   }
+  return true;
 }
-async function cloudEnsure(){
-  if(!CLOUD.at) return false;
-  if(CLOUD.exp-Date.now() > 90000) return true;   /* 还剩 90 秒以上就直接用 */
-  return await cloudRefresh();
-}
+async function cloudEnsure(){ return await cloudRefresh(); }
 
-/* --- 读写 --- */
+/* --- 读写：/api/sync（PUT 存整包，GET 取回；包一层 rev 保持原有版本号习惯） --- */
 async function cloudPull(){
   if(!await cloudEnsure()) throw Object.assign(new Error('登录已过期'), {status:401});
-  const rows = await cloudFetch('/rest/v1/shuati_state?select=data,rev,updated_at&user_id=eq.'+encodeURIComponent(CLOUD.uid), {}, true);
-  if(!rows || !rows.length) return null;
-  return {data: rows[0].data || null, rev: Number(rows[0].rev)||0};
+  const s = await cloudFetch('/api/sync', {}, true);
+  if(!s || !s.ok || !s.data) return null;
+  if(s.data.data!==undefined) return {data:s.data.data, rev:Number(s.data.rev)||0};
+  return {data:s.data, rev:0};
 }
-
-/* 带版本号的上传：
-   baseRev 是刚才读到的版本。写的时候要求服务器上的 rev 还是这个值——
-   如果另一台设备在这中间推过，条件不成立、影响 0 行，我们就重来一次，
-   先把它推的合进来再推。这样两台同时改也不会互相抹掉。            */
 async function cloudPush(pack, baseRev, force){
   if(!await cloudEnsure()) throw Object.assign(new Error('登录已过期'), {status:401});
   const nowIso = new Date().toISOString();
-
-  if(baseRev==null && !force){
-    try{
-      await cloudFetch('/rest/v1/shuati_state', {
-        method:'POST',
-        headers:{'Prefer':'return=minimal'},
-        body: JSON.stringify([{user_id:CLOUD.uid, data:pack, rev:1, updated_at:nowIso}])
-      }, true);
-      return true;
-    }catch(e){
-      if(e.status===409 || /duplicate key/i.test(e.message||'')) return false;
-      throw e;
-    }
-  }
-  if(force){
-    await cloudFetch('/rest/v1/shuati_state?on_conflict=user_id', {
-      method:'POST',
-      headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},
-      body: JSON.stringify([{user_id:CLOUD.uid, data:pack, rev:(Number(baseRev)||0)+1, updated_at:nowIso}])
-    }, true);
-    return true;
-  }
-  const q='/rest/v1/shuati_state?user_id=eq.'+encodeURIComponent(CLOUD.uid)+'&rev=eq.'+Number(baseRev);
-  const r = await cloudFetch(q, {
-    method:'PATCH',
-    headers:{'Prefer':'return=representation'},
-    body: JSON.stringify({data:pack, rev:Number(baseRev)+1, updated_at:nowIso})
+  await cloudFetch('/api/sync', {
+    method:'PUT',
+    body: JSON.stringify({data:pack, rev:(Number(baseRev)||0)+1, updated_at:nowIso})
   }, true);
-  return !!(r && r.length);
+  return true;
 }
 
 async function cloudSync(silent, mode){
   mode = mode || 'both';
   if(!CLOUD.on){ if(!silent) toast('先登录账号'); return; }
-  if(!cloudReady()){ if(!silent) toast('还没填服务器地址'); return; }
   if(CLOUD.busy){ CLOUD.dirty=true; if(!silent) cloudStatus('上一轮还没结束，稍后自动补一次…'); return; }
 
   CLOUD.busy=true; CLOUD.dirty=false; CLOUD.suppress=true;
@@ -5513,14 +5395,14 @@ async function cloudSync(silent, mode){
 
       const pack = ghPack();
       const raw = JSON.stringify(pack);
-      if(raw.length > 3.5*1024*1024){
+      if(raw.length > 20*1024*1024){
         throw Object.assign(new Error('数据太大'), {big:true, size:Math.round(raw.length/1024)});
       }
       ok = await cloudPush(pack, remote ? remote.rev : null, mode==='push');
       bytes = raw.length;
       if(!ok && attempt<2) await new Promise(function(r){ setTimeout(r, 120+Math.random()*180); });
     }
-    if(!ok) throw new Error('云端被另一台设备同时改动，重试三次仍冲突');
+    if(!ok) throw new Error('同步重试三次仍未成功');
 
     const c=cloudCfg(); c.lastAt=Date.now(); cloudSetCfg(c); CLOUD.lastAt=c.lastAt;
     const sizeTxt = bytes ? ' · '+Math.max(1,Math.round(bytes/1024))+' KB' : '';
@@ -5528,7 +5410,7 @@ async function cloudSync(silent, mode){
     if(!silent) toast(mode==='pull'?'已从云端下载 ✅':'同步完成 ✅');
   }catch(e){
     CLOUD.err=e.message||'';
-    const t=e.big ? ('数据 '+e.size+' KB 超过 3.5 MB 上限，多是手写笔迹攒太多') : cloudErrText(e);
+    const t=e.big ? ('数据 '+e.size+' KB 超过 20 MB 上限，多是手写笔迹攒太多') : cloudErrText(e);
     cloudStatus('❌ 同步失败：'+t,'err');
     if(!silent) toast('同步失败：'+t);
   }finally{
@@ -5559,38 +5441,10 @@ function cloudSetAuto(v){
   if(v && CLOUD.on){ cloudSync(true); toast('已开启自动同步'); }
 }
 
-/* --- 服务器设置（第一次用） --- */
-function accToggleAdv(){
-  const el=document.getElementById('accAdv'); if(!el) return;
-  el.style.display = (el.style.display==='none') ? 'block' : 'none';
-}
-function cloudSaveServer(){
-  const uEl=document.getElementById('accUrl'), kEl=document.getElementById('accKey');
-  let u=(uEl&&uEl.value||'').trim().replace(/\/+$/,'');
-  let k=(kEl&&kEl.value||'').trim();
-  if(!/^https?:\/\//.test(u)){ cloudStatus('⚠️ 地址要 https:// 开头（在 Supabase 后台 Settings → Data API 里那个 URL）','err'); return; }
-  if(k.length<20){ cloudStatus('⚠️ key 似乎不完整，一长串都要','err'); return; }
-  const c=cloudCfg(); c.url=u; c.key=k; cloudSetCfg(c);
-  cloudStatus('正在检查服务器…');
-  cloudFetch('/auth/v1/health', {}).then(function(){
-    cloudStatus('✅ 服务器可用，可以注册或登录了','ok');
-    renderAcc();
-  }).catch(function(e){
-    if(e.status===401||e.status===403) { cloudStatus('⚠️ 地址通了但 key 不对，重新复制一次 publishable key','err'); }
-    else if(e.status===404){ cloudStatus('⚠️ 地址不对：应该是 https://xxxx.supabase.co ，末尾不要加 /rest/v1','err'); }
-    else cloudStatus('❌ 连不上：'+cloudErrText(e),'err');
-  });
-}
-function copySql(){
-  const sql=document.getElementById('sqlBox').textContent;
-  const ta=document.createElement('textarea');
-  ta.value=sql; document.body.appendChild(ta); ta.select();
-  let ok=false;
-  try{ ok=document.execCommand('copy'); }catch(e){}
-  document.body.removeChild(ta);
-  if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(sql);
-  toast(ok?'SQL 已复制，去后台 SQL Editor 粘贴执行':'复制失败，长按选中手动复制');
-}
+/* --- 旧 Supabase 时代的入口（UI 已移除，留空实现防别处引用报错） --- */
+function accToggleAdv(){}
+function cloudSaveServer(){}
+function copySql(){}
 
 /* --- 设置页渲染 --- */
 function renderAcc(){
@@ -5599,20 +5453,17 @@ function renderAcc(){
   if(CLOUD.on){
     anon.style.display='none'; on.style.display='block';
     const em=document.getElementById('accEmail');
-    if(em) em.textContent=CLOUD.email||'已登录';
+    if(em) em.textContent=CLOUD.uid||'已登录';
     const st=document.getElementById('accLast');
     if(st) st.textContent = CLOUD.busy ? '同步中…' : ('上次同步：'+cloudTime(CLOUD.lastAt));
     const box=document.getElementById('accAuto');
     if(box) box.checked=!!CLOUD.auto;
     const sv=document.getElementById('accSrv');
-    if(sv) sv.textContent = cloudUrl() ? ('服务器：'+cloudUrl().replace(/^https?:\/\//,'')) : '服务器：未设置';
+    if(sv) sv.textContent = '账号：'+(CLOUD.uid||'')+' · 服务器已内置，无需配置';
   }else{
     anon.style.display='block'; on.style.display='none';
-    const uEl=document.getElementById('accUrl'), kEl=document.getElementById('accKey');
-    if(uEl && !uEl.value) uEl.value=cloudCfg().url||CLOUD_URL_FIXED||'';
-    if(kEl && !kEl.value) kEl.value=cloudCfg().key||CLOUD_KEY_FIXED||'';
     const hint=document.getElementById('accNoSrv');
-    if(hint) hint.style.display = CLOUD.on ? 'none' : 'block';
+    if(hint) hint.style.display='block';
     const mig=document.getElementById('accMig');
     if(mig){
       const gc=ghCfg();
@@ -5624,6 +5475,7 @@ function toggleGhCard(){
   const el=document.getElementById('ghCard'); if(!el) return;
   el.style.display = (el.style.display==='none') ? 'block' : 'none';
 }
+
 
 
 /* ==================== 全屏图片查看器（题图 / 手写笔迹共用） ==================== */
@@ -5834,18 +5686,15 @@ async function subSend(){
   var btns=document.querySelectorAll('#subCard .mini-btn.blue');
   btns.forEach(function(b){ b.disabled=true; });
   try{
-    await cloudFetch('/rest/v1/submissions', {
+    await cloudFetch('/api/sub', {
       method:'POST',
-      headers:{'Prefer':'return=minimal'},
-      body: JSON.stringify([{
-        uploader: CLOUD.uid,
-        uploader_email: CLOUD.email||'',
+      body: JSON.stringify({
         fname: SUB.file.name,
         ftype: SUB.file.type,
         fsize: SUB.file.size,
         note: (document.getElementById('subNote').value||'').slice(0,100),
         content: SUB.file.data
-      }])
+      })
     }, true);
     toast('投出去了✅ 站长收到会处理');
     SUB.file=null;
@@ -5863,12 +5712,12 @@ async function subList(){
   var el=document.getElementById('subList'); if(!el) return;
   if(!CLOUD.uid){ el.innerHTML='<p class="gh-status">未登录</p>'; return; }
   try{
-    var rows=await cloudFetch('/rest/v1/submissions?select=id,fname,fsize,note,created_at&uploader=eq.'+encodeURIComponent(CLOUD.uid)+'&order=created_at.desc&limit=20', {}, true);
-    rows=rows||[];
+    var s=await cloudFetch('/api/sub', {}, true);
+    var rows=(s&&s.items)||[];
     if(!rows.length){ el.innerHTML='<p class="gh-status">还没有投过，第一条放这儿</p>'; return; }
     var h='';
     for(var i=0;i<rows.length;i++){
-      var r=rows[i], d=new Date(r.created_at);
+      var r=rows[i], d=new Date(r.at||r.created_at||Date.now());
       var ds=(d.getMonth()+1)+'/'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
       h+='<div class="sub-item"><span>📄</span><span class="sub-n">'+escA(r.fname)+'　'+esc(r.note||'')+'</span>'
         +'<span class="sub-d">'+Math.round((r.fsize||0)/1024)+'KB · '+ds+'</span>'
@@ -5882,10 +5731,11 @@ async function subList(){
 async function subDel(id){
   if(!confirm('删掉这条投稿？')) return;
   try{
-    await cloudFetch('/rest/v1/submissions?id=eq.'+encodeURIComponent(id)+'&uploader=eq.'+encodeURIComponent(CLOUD.uid), {method:'DELETE'}, true);
+    await cloudFetch('/api/sub/'+encodeURIComponent(id), {method:'DELETE'}, true);
     subList();
   }catch(e){ toast('删除失败'); }
 }
+
 /* 登录态变化时刷新投稿箱 UI（挂到原有的状态刷新点上） */
 (function(){
   var orig=cloudStatus;
