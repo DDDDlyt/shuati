@@ -1,0 +1,16 @@
+name = "shuati-api"
+main = "worker.js"
+compatibility_date = "2024-09-01"
+account_id = "32a56e3a2e7c9ea7cfecf5770edda9d8"
+
+# 接管根域名：HTML 走 KV，静态资源反代 GitHub Pages；/api/* 仍归本 Worker 处理
+routes = ["ddddlyt.top/*"]
+
+kv_namespaces = [
+  { binding = "DATA", id = "234a505aab7b4516aacfd88e6c2b7aea" }
+]
+
+[vars]
+# 临时置空：用户无信用卡/无 PayPal，暂不开 Cloudflare Access 第一层。
+# 仅保留第二层 Worker 账号密码登录（PBKDF2 加盐哈希）。有卡后填回邮箱即可补回第一层。
+ACCESS_EMAIL = ""
