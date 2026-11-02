@@ -1897,7 +1897,9 @@ function recGrade(c, txt){
   if(!u.trim()) return {total:pts.length, hit:0, miss:pts, rate:0, wrote:false};
   const miss=[];
   let hit=0;
-  pts.forEach(p=>{
+  pts.forEach(p0=>{
+    // 单词/释义卡的要点常带词性前缀（n. / adj. / vt. …），匹配前剥掉，别让它挡命中
+    const p=String(p0).replace(/^\s*(adj|adv|prep|conj|pron|interj|aux|modal|art|num|vt|vi|n|v|int|a)\.\s*/i,'') || String(p0);
     const toks=recTokens(p);
     let ok=false;
     if(toks.length){
@@ -1905,9 +1907,11 @@ function recGrade(c, txt){
       const n=toks.filter(t=>{ const k=recNorm(t); return k.length>=2 && nu.indexOf(k)>=0; }).length;
       ok = toks.length<=2 ? n>=1 : (n/toks.length)>=0.5;
     } else {
-      ok = nu.indexOf(recNorm(p).slice(0,3))>=0;
+      const k=recNorm(p);
+      // 双向包含：写「奖学金」能命中要点「n. 奖学金」；要点核心长时短语也能命中
+      ok = k.length>=2 && (nu.indexOf(k)>=0 || (nu.length>=2 && k.indexOf(nu)>=0) || nu.indexOf(k.slice(0,3))>=0);
     }
-    if(ok) hit++; else miss.push(p);
+    if(ok) hit++; else miss.push(p0);
   });
   return {total:pts.length, hit:hit, miss:miss, rate:pts.length?hit/pts.length:0, wrote:true};
 }
