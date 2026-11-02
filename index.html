@@ -191,6 +191,19 @@ button{font-family:inherit; cursor:pointer; border:none; outline:none;}
 .fill-inp.fill-ok{border-color:rgba(52,199,89,.7); background:rgba(52,199,89,.12); color:var(--ok);}
 .fill-inp.fill-no{border-color:rgba(255,69,58,.7); background:rgba(255,69,58,.1); color:var(--bad);}
 .fill-tip{font-size:12px; color:var(--dim); margin-top:10px;}
+/* 填空符号键盘（v26）：平板打不出 α β ₂ ⁺ 时的救命条 */
+.fill-sym{display:flex; flex-wrap:wrap; gap:6px; margin-top:10px;}
+.fill-sym button{min-width:38px; height:34px; padding:0 8px; border-radius:9px;
+  background:var(--panel2); border:1px solid var(--line); color:var(--txt);
+  font-size:15px; line-height:1; font-family:inherit; cursor:pointer;
+  -webkit-tap-highlight-color:transparent;}
+.fill-sym button:active{background:var(--blue); border-color:var(--blue); color:#fff;}
+.fill-sym .fill-sym-more{font-size:12px; color:var(--sub); min-width:auto; padding:0 10px;}
+.fill-sym button.sy-xs{font-size:21px; font-weight:600; padding-bottom:4px;}
+.fill-fix{margin-top:12px; text-align:center;}
+.fill-fix button{background:none; border:1px dashed var(--line); color:var(--sub);
+  font-size:12px; padding:8px 14px; border-radius:10px; font-family:inherit; cursor:pointer;}
+.fill-fix button:active{color:var(--blue); border-color:var(--blue);}
 .fill-cmp{margin-top:10px;}
 .fill-row{font-size:13px; padding:6px 0; color:var(--sub); border-bottom:1px solid var(--line);}
 .fill-row:last-child{border-bottom:none;}
@@ -1210,7 +1223,7 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
     <button class="hw-btn ghost" onclick="hwClose()">关闭</button>
     <button class="hw-btn blue" id="hwSaveBtn" onclick="hwSaveFlip()">💾 保存并看答案</button>
   </div>
-  <div class="hw-tip">支持手写笔压感（越用力越粗）· 手掌误触就开「仅笔」</div>
+  <div class="hw-tip">支持手写笔压感（越用力越粗）· 手掌误触就开「仅笔」<br>这块板只存笔迹、<b>不会自动转成文字</b>；填空题要打字，空里点一下就有 α β ₂ ⁺ 的快捷键</div>
 </div>
 
 <div id="hwLibMask">
@@ -1890,15 +1903,122 @@ function recPanel(g, txt){
 
 
 /* ---------- 填空题：输入 + 自动判分 ---------- */
+/* v26：判分改「宽容优先」——同一个意思换个说法、只写括号里的缩写、箭头写成汉字，都算对。
+   机器判不准还有「我写对了」一键改判兜底，绝不因为表述差异否掉你答对的题。 */
+const FILL_SYN=[
+  ['失活','失去携氧能力','丧失携氧能力','失去载氧能力','丧失载氧能力','不能携氧','失去运氧能力','丧失运氧能力','失去活性','失效','变性失活'],
+  ['降低','下降','减少','减小','变低','减低','降'],
+  ['升高','上升','增加','增大','变高','增高','升'],
+  ['右移','右','向右','右偏移'],
+  ['左移','左','向左','左偏移'],
+  ['中央空穴','中央孔穴','中央腔','中央孔','中央凹陷'],
+  ['亚铁','二价铁','fe2','二价'],
+  ['高铁','三价铁','fe3','三价'],
+  ['正协同','协同效应','变构协同','正协同效应'],
+  ['半胱氨酸','cys','胱氨酸'],
+  ['脯氨酸','pro'],
+  ['赖氨酸','lys'],
+  ['天冬氨酸','asp'],
+  ['天冬酰胺','asn'],
+  ['谷氨酸','glu'],
+  ['缬氨酸','val'],
+  ['色氨酸','trp'],
+  ['苯丙氨酸','phe'],
+  ['酪氨酸','tyr'],
+  ['丝氨酸','ser'],
+  ['苏氨酸','thr'],
+  ['蛋氨酸','甲硫氨酸','met'],
+  ['精氨酸','arg'],
+  ['组氨酸','his'],
+  ['谷氨酰胺','gln'],
+  ['丙氨酸','ala'],
+  ['甘氨酸','gly'],
+  ['异亮氨酸','ile'],
+  ['亮氨酸','leu'],
+  ['血红素','亚铁血红素','铁卟啉','铁卟啉ix'],
+  ['波尔效应','bohr效应','玻尔效应']
+];
+function fillSynKey(s){
+  const t=recNorm(s); if(!t) return '';
+  for(let i=0;i<FILL_SYN.length;i++){
+    const g=FILL_SYN[i];
+    for(let j=0;j<g.length;j++){
+      const w=recNorm(g[j]);
+      if(w && t.indexOf(w)>=0) return recNorm(g[0]);
+    }
+  }
+  return '';
+}
+/* 一道题的答案可能有很多种写法：全串 / 去括号 / 括号里的别名 / 斜杠分割的每一项 */
+function fillAliases(ans){
+  const raw=String(ans==null?'':ans), out=[];
+  const push=function(x){ const t=recNorm(x); if(t && out.indexOf(t)<0) out.push(t); };
+  push(raw);
+  push(raw.replace(/[（(][^）)]*[）)]/g,''));
+  push(raw.replace(/[↓↑⬇⬆→←⇌]/g,''));
+  (raw.match(/[（(][^）)]*[）)]/g)||[]).forEach(function(g){
+    g.replace(/[（()）]/g,'').split(/[\/、,，;；]/).forEach(push);
+  });
+  raw.split(/[\/、;；]/).forEach(push);
+  return out;
+}
 function fillMatch(mine, ans){
   const m=recNorm(mine); if(!m) return false;
+  const list=fillAliases(ans);
+  // 1) 归一化后完全相等（α₂β₂ = α2β2；降低(↓) 的任一别名）
+  if(list.indexOf(m)>=0) return true;
+  // 2) 同义词/缩写等价（失活 = 失去携氧能力；cys = 半胱氨酸）
+  const km=fillSynKey(m), ka=fillSynKey(ans);
+  if(km && ka && km===ka) return true;
+  // 3) 数字答案：首位数字一致就算对（"4条" / "4"）
   const a=recNorm(ans);
-  const core=recNorm(String(ans).replace(/[（(][^）)]*[）)]/g,''));
-  if(m===a || m===core) return true;
-  if(core.length>=2 && (m.indexOf(core)>=0 || core.indexOf(m)>=0)) return true;
   const na=(a.match(/^[\d.]+/)||[])[0], nm=(m.match(/^[\d.]+/)||[])[0];
   if(na && nm && na===nm) return true;
+  // 4) 互相包含（≥2 字），比方向分开判，避免单字乱命中
+  for(let i=0;i<list.length;i++){
+    const x=list[i];
+    if(x.length>=2 && (m.indexOf(x)>=0 || x.indexOf(m)>=0)) return true;
+  }
+  // 5) 中文关键词覆盖率 ≥75% 也算对（"减少携氧" 对 "失去携氧能力"）
+  const core=recNorm(String(ans).replace(/[（(][^）)]*[）)]/g,'').replace(/[↓↑⬇⬆→←⇌]/g,''));
+  const cs=[];
+  for(let i=0;i<core.length;i++){ const ch=core[i]; if(/[\u4e00-\u9fa5]/.test(ch) && cs.indexOf(ch)<0) cs.push(ch); }
+  if(cs.length>=3){
+    let hit=0;
+    for(let i=0;i<cs.length;i++){ if(m.indexOf(cs[i])>=0) hit++; }
+    if(hit/cs.length>=0.75) return true;
+  }
   return false;
+}
+/* 填空符号键盘：平板打不出 α β ₂ ⁺ 的痛点，点一下就插进当前空格 */
+const SYM_BASE=['α','β','₂','₃','⁺','⁻','↓','↑','→','⇌'];
+const SYM_ALL=['α','β','γ','δ','ε','θ','λ','μ','π','σ','φ','ω','Ω','Δ','Σ',
+  '₀','₁','₂','₃','₄','₅','⁰','¹','²','³','⁺','⁻','↓','↑','→','←','⇌','°','±','×','÷','≈','≥','≤'];
+let FILL_FOCUS=null;
+/* 上下标字形天生小，按钮里放大一档才看得清、点得准 */
+function symBtn(s){
+  const tiny=/[⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻₀₁₂₃₄₅₆₇₈₉]/.test(s);
+  return '<button type="button" class="'+(tiny?'sy-xs':'')+'" data-s="'+s+
+    '" onclick="fillIns(this)" onmousedown="event.preventDefault()">'+s+'</button>';
+}
+function fillIns(btn){
+  const ch=btn.getAttribute('data-s')||'';
+  let el=FILL_FOCUS;
+  if(!el || !document.body.contains(el)) el=document.querySelector('.fill-inp');
+  if(!el) return;
+  const s=(el.selectionStart==null)?el.value.length:el.selectionStart;
+  const e=(el.selectionEnd==null)?el.value.length:el.selectionEnd;
+  el.value=el.value.slice(0,s)+ch+el.value.slice(e);
+  const p=s+ch.length;
+  try{ el.setSelectionRange(p,p); }catch(_){}
+  try{ el.focus(); }catch(_){}
+  FILL_FOCUS=el;
+}
+function fillSymMore(btn){
+  const box=btn.parentNode;
+  if(box.getAttribute('data-full')==='1') return;
+  box.setAttribute('data-full','1');
+  box.innerHTML=SYM_ALL.map(symBtn).join('');
 }
 function renderFillCard(c){
   const segs=String(c.q).split(/_{2,}/);
@@ -1919,12 +2039,18 @@ h+=(c.img?'<div class="card-img" onclick="event.stopPropagation();imgFull(this.q
     if(i<n) h+='<input class="fill-inp" id="fi'+i+'" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="'+(i+1)+'">';
   }
   h+='</div><div class="fill-tip">直接在空里填，填完点「检查」。填错了才需要自己评。</div>';
+  h+='<div class="fill-sym">'+SYM_BASE.map(symBtn).join('')+
+    '<button type="button" class="fill-sym-more" onmousedown="event.preventDefault()" onclick="fillSymMore(this)">希腊字母…</button></div>';
   document.getElementById('flashcard').innerHTML=h;
   document.getElementById('actRow').innerHTML=
     '<button class="act-btn next" onclick="checkFill()">检查 ✍️</button>';
-  setTimeout(function(){ const a=document.getElementById('fi0'); if(a){ try{a.focus();}catch(e){} } },140);
+  // 触屏（平板/手机）不自动弹键盘——一进题就顶起半屏键盘，题都看不全；点空才弹
+  if(window.matchMedia && window.matchMedia('(pointer:fine)').matches){
+    setTimeout(function(){ const a=document.getElementById('fi0'); if(a){ try{a.focus();}catch(e){} } },140);
+  }
   const ins=document.querySelectorAll('.fill-inp');
   ins.forEach(function(el){
+    el.addEventListener('focus', function(){ FILL_FOCUS=el; });
     el.addEventListener('keydown', function(e){
       if(e.key!=='Enter') return;
       e.preventDefault();
@@ -1970,11 +2096,23 @@ function checkFill(){
   h+=hookHtml(c);
   h+=notesLinkHtml(c);
   h+='</div>';
+  h+='<div class="fill-fix"><button type="button" onclick="fillISaidRight()">其实我写对了，按对算 →</button></div>';
   document.getElementById('flashcard').insertAdjacentHTML('beforeend', h);
   document.getElementById('actRow').innerHTML=
     '<button class="act-btn unknown" onclick="markCard(-1)">不熟 ❌</button>'+
     '<button class="act-btn fuzzy sug" onclick="markCard(2)">模糊 🤔　·建议</button>'+
     '<button class="act-btn known" onclick="markCard(1)">认识 ✅</button>';
+}
+/* 机器判错但人知道自己对：一键改判，别跟判题算法较劲 */
+function fillISaidRight(){
+  const c=Q[qi]; if(!c) return;
+  applyScore(c.id, true);
+  if(todayCounted){ todayCounted.rev++; S.todayRev=(S.todayRev||0)+1; save(); checkDailyDone(); }
+  const fix=document.querySelector('.fill-fix'); if(fix) fix.remove();
+  document.getElementById('flashcard').insertAdjacentHTML('beforeend',
+    '<div class="rec-res good"><div class="rec-h">已按「会」记 ✅ 下次间隔拉长。</div></div>');
+  document.getElementById('actRow').innerHTML=
+    '<button class="act-btn next" onclick="qi++;renderCard()">下一题 →</button>';
 }
 
 function pickOpt(i){
@@ -3009,7 +3147,7 @@ document.addEventListener('keydown', e=>{
 
 /* ==================== v5：手写笔作答 ==================== */
 const HW_TYPES={term:1,saq:1,essay:1,fill:1,calc:1,input:1};
-let HW={id:null,strokes:[],cur:null,ctx:null,cv:null,w:1,h:1,dpr:1,size:3.4,er:0,playing:false,sp:1,t0:0};
+let HW={id:null,strokes:[],cur:null,ctx:null,cv:null,w:1,h:1,dpr:1,size:3.4,er:0,playing:false,sp:1,t0:0,penLive:false,penTimer:null};
 
 function hwEnsure(){ if(!S.hw) S.hw={}; if(!S.hwThumb) S.hwThumb={}; if(!S.hwOpt) S.hwOpt={onlyPen:0}; }
 function hwOpt(){ hwEnsure(); return S.hwOpt; }
@@ -3141,8 +3279,8 @@ function hwStart(e){
   if(!HW.strokes.length) HW.t0=now;
   /* 上一次没正常抬笔（capture 失败、移出画布又回来）：先收笔，避免丢一段 */
   if(HW.cur){ if(HW.cur.pts.length) HW.strokes.push(HW.cur); HW.cur=null; }
-  /* v22 断笔续接：笔尖快速移动时会短暂离屏（接触不良），屏幕上断成一串点。
-     抬笔到落笔间隔很短、且离上一点很近、粗细/橡皮没变 → 当作同一笔续上 */
+  /* v23 断笔续接（收紧）：仅同一指针、<100ms、<10px 的真·接触不良才续上。
+     v22 的 200ms/50px 太松，正常笔画也被直线缝起来（用户反馈"连在一起"），已收紧 */
   if(!HW.playing && HW.strokes.length){
     const last=HW.strokes[HW.strokes.length-1];
     const lp=last.pts[last.pts.length-1];
@@ -3152,14 +3290,14 @@ function hwStart(e){
       const dt=now-(HW._lastEnd||0);
       const dx=(x-lp.x)*HW.w, dy=(y-lp.y)*HW.h;
       const wantW=HW.size*(HW.er?4.5:1);
-      if(dt<200 && dx*dx+dy*dy<2500 && last.er===HW.er && Math.abs(last.w-wantW)<0.01){
+      if(dt<80 && dx*dx+dy*dy<64 && last.pid===e.pointerId && last.er===HW.er && Math.abs(last.w-wantW)<0.01){
         HW.cur=last; HW.strokes.pop(); /* 续接：先弹出原笔，避免 hwEnd 重复 push */
         hwAddPoint(e); hwPaintLast();
         return;
       }
     }
   }
-  HW.cur={w:HW.size*(HW.er?4.5:1), c:'#111318', er:HW.er, st:Math.round(now-HW.t0), _t0:now, _d:1, pts:[]};
+  HW.cur={w:HW.size*(HW.er?4.5:1), c:'#111318', er:HW.er, st:Math.round(now-HW.t0), _t0:now, _d:1, pid:e.pointerId, pts:[]};
   hwAddPoint(e);
   hwPaintLast();
 }
@@ -3172,6 +3310,11 @@ function hwBind(){
   });
   cv.addEventListener('pointerdown', function(e){
     if(hwOpt().onlyPen && e.pointerType==='touch') return;
+    /* v23 掌拒/指针归属：一条笔画只属于一个 pointerId，别的指针（手掌/多指）一律不接；
+       笔（pen）在写或刚停 600ms 内，触摸一律吃掉 */
+    if(HW.cur && HW.cur.pid!==e.pointerId) return;
+    if(e.pointerType==='touch' && HW.penLive) return;
+    if(e.pointerType==='pen'){ HW.penLive=true; if(HW.penTimer) clearTimeout(HW.penTimer); }
     if(e.pointerType==='pen' && !hwOpt().penHint){ hwOpt().penHint=1; toast('检测到手写笔，压感已开启 ✏️'); }
     e.preventDefault();
     if(HW._leaveT){ clearTimeout(HW._leaveT); HW._leaveT=null; }
@@ -3180,7 +3323,7 @@ function hwBind(){
     hwStart(e);
   });
   cv.addEventListener('pointermove', function(e){
-    if(!HW.cur) return;
+    if(!HW.cur || e.pointerId!==HW.cur.pid) return;
     if(hwOpt().onlyPen && e.pointerType==='touch') return;
     e.preventDefault();
     if(HW._leaveT){ clearTimeout(HW._leaveT); HW._leaveT=null; }
@@ -3191,11 +3334,17 @@ function hwBind(){
   ['pointerup','pointercancel'].forEach(function(t){
     cv.addEventListener(t, function(e){
       if(HW._leaveT){ clearTimeout(HW._leaveT); HW._leaveT=null; }
+      if(HW.cur && e.pointerId!==HW.cur.pid) return;
+      if(e.pointerType==='pen' && HW.penLive){
+        if(HW.penTimer) clearTimeout(HW.penTimer);
+        HW.penTimer=setTimeout(function(){ HW.penLive=false; }, 600);
+      }
       hwEnd();
     });
   });
   /* capture 失败时笔尖滑出画布：别立刻断笔，等 300ms，回来就接着写 */
   cv.addEventListener('pointerleave', function(e){
+    if(HW.cur && e.pointerId!==HW.cur.pid) return;
     if(HW._leaveT) clearTimeout(HW._leaveT);
     HW._leaveT=setTimeout(function(){ HW._leaveT=null; hwEnd(); }, 300);
   });
@@ -3480,19 +3629,22 @@ function inkDown(e){
   if(!INK.on) return;
   if(e.pointerType === 'pen') INK.penLive = true;
   if(INK.onlyPen && e.pointerType === 'touch') return;
+  /* v23 掌拒/指针归属：一条笔画只属于一个 pointerId；笔在写/刚停时触摸全吃 */
+  if(INK.cur && INK.cur.pid!==e.pointerId) return;
+  if(e.pointerType === 'touch' && INK.penLive) return;
   e.preventDefault();
   try{ INK.cv.setPointerCapture(e.pointerId); }catch(err){}
   var pos = inkPos(e), st = inkStyle();
-  /* v22 断笔续接：快速划重点时笔尖短暂离屏，别断成点 */
+  /* v23 断笔续接（收紧）：仅同一指针、<100ms、<10px 的真·接触不良才续上 */
   var now = performance.now();
   if(INK.strokes.length){
     var last = INK.strokes[INK.strokes.length-1], lp = last.p;
-    if(lp && lp.length>=3){
+    if(lp && lp.length>=3 && last.pid===e.pointerId){
       var dt = now-(INK._lastEnd||0);
       var x0 = lp.length>=6 ? lp[lp.length-3] : lp[0];
       var y0 = lp.length>=6 ? lp[lp.length-2] : lp[1];
-      var dx = pos[0]-x0, dy = pos[1]-y0;
-      if(dt<200 && dx*dx+dy*dy<0.0025 && last.c===st.c && last.w===st.w && (last.e||0)===(st.e||0)){
+      var dx = (pos[0]-x0)*INK.w, dy = (pos[1]-y0)*INK.h;
+      if(dt<80 && dx*dx+dy*dy<64 && last.c===st.c && last.w===st.w && (last.e||0)===(st.e||0)){
         INK.cur = last;
         INK.cur.p.push(pos[0], pos[1], e.pressure||0.5);
         var c2 = INK.ctx, p2 = INK.cur.p, n2 = p2.length;
@@ -3507,7 +3659,7 @@ function inkDown(e){
       }
     }
   }
-  INK.cur = {c:st.c, w:st.w, a:st.a, e:st.e, p:[pos[0], pos[1], e.pressure||0.5]};
+  INK.cur = {c:st.c, w:st.w, a:st.a, e:st.e, pid:e.pointerId, p:[pos[0], pos[1], e.pressure||0.5]};
   INK.strokes.push(INK.cur);
   var c = INK.ctx;
   c.save();
@@ -3517,7 +3669,7 @@ function inkDown(e){
   c.restore();
 }
 function inkMove(e){
-  if(!INK.on || !INK.cur) return;
+  if(!INK.on || !INK.cur || e.pointerId!==INK.cur.pid) return;
   if(INK.onlyPen && e.pointerType === 'touch') return;
   e.preventDefault();
   var p = INK.cur.p, pos = inkPos(e);
@@ -3536,7 +3688,7 @@ function inkUp(e){
     if(INK.penTimer) clearTimeout(INK.penTimer);
     INK.penTimer = setTimeout(function(){ INK.penLive = false; }, 600);
   }
-  if(INK.cur){
+  if(INK.cur && (!e || e.pointerId===INK.cur.pid)){
     INK._lastEnd = performance.now();
     INK.cur = null;
   }
