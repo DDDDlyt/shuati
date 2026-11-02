@@ -793,6 +793,42 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
 .sub-item{display:flex;align-items:center;gap:9px;padding:8px 10px;background:#22262e;border:1px solid #2c313a;border-radius:9px;margin-top:8px;font-size:13.5px}
 .sub-item .sub-n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sub-item .sub-d{color:#9aa3ad;font-size:12px;flex:0 0 auto}
+/* ===== 笔记 + 勾画 ===== */
+#view-notes{ padding:14px 14px 40px; }
+.notes-list{ display:flex; flex-direction:column; gap:12px; margin-top:14px; }
+.note-card{ display:flex; align-items:center; gap:14px; background:var(--card,#1c1c22); border:1px solid var(--line,#333); border-radius:14px; padding:16px; cursor:pointer; transition:.15s; }
+.note-card:active{ transform:scale(.98); }
+.note-ic{ font-size:30px; }
+.note-info{ flex:1; }
+.note-name{ font-size:16px; font-weight:700; }
+.note-scope{ font-size:12px; color:var(--dim,#9aa); margin-top:3px; }
+.note-go{ color:var(--sub,#889); font-size:20px; }
+.notes-tip{ margin-top:18px; font-size:12px; color:var(--dim,#9aa); line-height:1.6; background:rgba(255,255,255,.04); padding:12px 14px; border-radius:10px; }
+.note-read{ margin-top:8px; }
+.note-bar{ display:flex; align-items:center; gap:10px; position:sticky; top:0; background:var(--bg,#15151a); padding:8px 0; z-index:5; }
+.note-title{ flex:1; font-weight:700; font-size:16px; }
+.note-clear{ font-size:12px; color:var(--sub,#889); border:1px solid var(--line,#333); padding:5px 10px; border-radius:8px; }
+.note-body{ margin-top:10px; }
+.note-loading,.note-err{ color:var(--dim,#9aa); padding:30px 0; text-align:center; }
+.notes-body{ font-size:15px; line-height:1.75; color:var(--fg,#eee); }
+.notes-body h1{ font-size:20px; margin:6px 0 12px; }
+.notes-body h2{ font-size:17px; margin:22px 0 10px; padding-left:10px; border-left:4px solid #64d2ff; }
+.notes-body h3{ font-size:15px; margin:16px 0 8px; color:#ffd479; }
+.notes-body p{ margin:8px 0; }
+.notes-body ul{ margin:8px 0; padding-left:22px; }
+.notes-body li{ margin:4px 0; }
+.notes-body blockquote{ margin:12px 0; padding:10px 14px; background:rgba(255,212,121,.08); border-left:3px solid #ffd479; border-radius:0 8px 8px 0; font-size:13px; color:var(--dim,#bbb); }
+.notes-body table{ border-collapse:collapse; width:100%; margin:12px 0; font-size:13px; }
+.notes-body th,.notes-body td{ border:1px solid var(--line,#333); padding:7px 9px; text-align:left; }
+.notes-body th{ background:rgba(255,255,255,.05); }
+.notes-body td:first-child{ font-weight:600; }
+.notes-body strong{ color:#fff; }
+.hl-yellow{ background:#fff3a8; color:#222; border-radius:2px; }
+.hl-green{ background:#b9f6c5; color:#143; border-radius:2px; }
+.hl-pink{ background:#ffc9de; color:#511; border-radius:2px; }
+.hl-bar{ position:absolute; display:none; gap:6px; align-items:center; background:#222; border:1px solid #444; border-radius:20px; padding:5px 8px; box-shadow:0 4px 14px rgba(0,0,0,.4); z-index:60; }
+.hl-sw{ width:22px; height:22px; border-radius:50%; cursor:pointer; border:2px solid rgba(255,255,255,.5); }
+.hl-x{ font-size:12px; color:#fff; padding:0 6px; cursor:pointer; }
 </style>
 </head>
 <body>
@@ -861,6 +897,7 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
 
   <button class="big-btn ghost" style="margin-bottom:9px" onclick="go('examPick')">🎯 模考 · 计时交卷</button>
   <button class="big-btn ghost" style="margin-bottom:9px" onclick="location.href='./listening.html'">🎧 六级听力 · 真题板块刷</button>
+  <button class="big-btn ghost" style="margin-bottom:9px" onclick="go('notes')">📒 复习笔记 · 上课范围</button>
   <button class="big-btn ghost" style="margin-bottom:14px" onclick="go('know')">📖 知识体系 · 看漏洞诊断</button>
 
   <div class="sec-title">📖 题库</div>
@@ -869,6 +906,9 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
   <div class="sec-title">📊 学科掌握</div>
   <div id="subjList"></div>
 </div>
+
+<!-- ============ 笔记页 ============ -->
+<div id="view-notes" class="view"></div>
 
 <!-- ============ 刷题页 ============ -->
 <div id="view-study" class="view">
@@ -1209,6 +1249,7 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
   <button id="navKnow" onclick="go('know')"><div class="ic">📖</div>知识</button>
   <button id="navStat" onclick="go('stat')"><div class="ic">📊</div>统计</button>
   <button id="navSet" onclick="go('set')"><div class="ic">⚙️</div>设置</button>
+  <button id="navNotes" onclick="go('notes')"><div class="ic">📒</div>笔记</button>
   <button id="navListen" onclick="location.href='./listening.html'"><div class="ic">🎧</div>听力</button>
 </div>
 
@@ -1467,8 +1508,10 @@ function go(v){
   const nk=document.getElementById('navKnow'); if(nk) nk.classList.toggle('on', v==='know'||v==='kd'||v==='hook'||v==='term'||v==='read');
   document.getElementById('navStudy').classList.toggle('on', v==='study'||v==='examPick'||v==='exam'||v==='spell'||v==='wb');
   const ns=document.getElementById('navStat'); if(ns) ns.classList.toggle('on', v==='stat');
+  const nn=document.getElementById('navNotes'); if(nn) nn.classList.toggle('on', v==='notes');
   document.getElementById('navSet').classList.toggle('on', v==='set');
   if(v==='home') renderHome();
+  if(v==='notes') renderNotes();
   if(v==='set') renderSet();
   if(v==='stat') renderStat();
   if(v==='examPick') renderExamPick();
@@ -1487,6 +1530,114 @@ function go(v){
   if(v!=='kd' && v!=='study' && v!=='read'){ inkDetach(); }
   window.scrollTo(0,0);
 }
+
+/* ===================== 笔记：列表 + 阅读 + 勾画 ===================== */
+var NOTES=[
+  {id:'genetics', name:'遗传学复习笔记', scope:'上课范围：孟德尔定律 → 基因突变（期中考试）', ic:'🧬'},
+  {id:'biochem',  name:'生物化学复习笔记', scope:'上课范围：蛋白质 / 酶 / 核酸 / 糖代谢（到糖原）', ic:'🧪'},
+];
+var NOTE_TITLES={genetics:'遗传学复习笔记',biochem:'生物化学复习笔记'};
+var NOTE_ID=null;
+
+function renderNotes(){
+  const box=document.getElementById('view-notes');
+  let h='<div class="top"><h1>📒 复习笔记</h1><div class="sub">上课范围整理 · 看的时候选中文字即可高亮，自动存本机</div></div><div class="notes-list">';
+  NOTES.forEach(function(n){
+    h+='<div class="note-card" onclick="openNote(\''+n.id+'\')">'+
+         '<div class="note-ic">'+n.ic+'</div>'+
+         '<div class="note-info"><div class="note-name">'+n.name+'</div><div class="note-scope">'+n.scope+'</div></div>'+
+         '<div class="note-go">▸</div></div>';
+  });
+  h+='</div><div class="notes-tip">💡 选中文字就能高亮（黄 / 绿 / 粉 三色），关掉网页下次打开还在。想跨手机平板同步高亮，登录账号后说一声我接云端。</div>';
+  box.innerHTML=h;
+}
+
+function openNote(id){
+  NOTE_ID=id;
+  const box=document.getElementById('view-notes');
+  box.innerHTML='<div class="note-read">'+
+    '<div class="note-bar"><button class="icon-btn" onclick="renderNotes()">←</button>'+
+    '<div class="note-title" id="noteTitle"></div>'+
+    '<div class="note-clear" onclick="clearHl()">清除高亮</div></div>'+
+    '<div class="note-body" id="noteReader"></div></div>';
+  document.getElementById('noteTitle').textContent=NOTE_TITLES[id]||'笔记';
+  const rd=document.getElementById('noteReader');
+  rd.innerHTML='<div class="note-loading">加载中…</div>';
+  fetch('/api/note?id='+encodeURIComponent(id))
+    .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.text(); })
+    .then(function(html){ rd.innerHTML=html; bindHl(); applyHl(rd, loadHl(id)); })
+    .catch(function(e){ rd.innerHTML='<div class="note-err">笔记加载失败：'+e.message+'</div>'; });
+}
+
+function noteTextNodes(root){
+  const list=[]; let off=0;
+  (function walk(n){
+    if(n.nodeType===3){ if(n.length){ list.push({node:n,start:off,end:off+n.length}); off+=n.length; } }
+    else if(n.nodeType===1){ for(let i=0;i<n.childNodes.length;i++) walk(n.childNodes[i]); }
+  })(root);
+  return list;
+}
+function selRange(root){
+  const sel=window.getSelection();
+  if(!sel||sel.rangeCount===0||sel.isCollapsed) return null;
+  const r=sel.getRangeAt(0);
+  if(!root.contains(r.commonAncestorContainer)) return null;
+  const pre=document.createRange(); pre.selectNodeContents(root); pre.setEnd(r.startContainer,r.startOffset);
+  const s=pre.toString().length;
+  const e=s+r.toString().length;
+  return e<=s ? null : {s:s,e:e};
+}
+function loadHl(id){ try{ return JSON.parse(localStorage.getItem('hl:'+id)||'[]'); }catch(e){ return []; } }
+function saveHl(id,sp){ try{ localStorage.setItem('hl:'+id, JSON.stringify(sp)); }catch(e){} }
+function applyHl(root, spans){
+  root.querySelectorAll('mark[data-hl]').forEach(function(m){ const p=m.parentNode; while(m.firstChild) p.insertBefore(m.firstChild,m); p.removeChild(m); p.normalize(); });
+  const nodes=noteTextNodes(root);
+  spans.slice().sort(function(a,b){return b.s-a.s;}).forEach(function(sp){
+    nodes.forEach(function(n){
+      if(sp.s< n.end && sp.e> n.start){
+        const a=Math.max(sp.s,n.start)-n.start, b=Math.min(sp.e,n.end)-n.start;
+        if(a>=b) return;
+        try{ const rg=document.createRange(); rg.setStart(n.node,a); rg.setEnd(n.node,b);
+          const mk=document.createElement('mark'); mk.dataset.hl='1'; mk.className='hl-'+sp.c; rg.surroundContents(mk); }catch(e){}
+      }
+    });
+  });
+}
+function addHl(id,s,e,c){ let sp=loadHl(id).filter(function(x){ return !(x.s< e && x.e> s); }); sp.push({s:s,e:e,c:c}); sp.sort(function(a,b){return a.s-b.s;}); saveHl(id,sp); }
+function removeHl(id,s,e){ let sp=loadHl(id).filter(function(x){ return !(x.s< e && x.e> s); }); saveHl(id,sp); }
+function clearHl(){ if(!NOTE_ID) return; if(!confirm('清除这篇笔记的全部高亮？')) return; localStorage.removeItem('hl:'+NOTE_ID); const rd=document.getElementById('noteReader'); if(rd) applyHl(rd, []); }
+
+function bindHl(){
+  let bar=document.getElementById('hlBar'); if(bar) bar.remove();
+  bar=document.createElement('div'); bar.id='hlBar'; bar.className='hl-bar';
+  bar.innerHTML='<span class="hl-sw" style="background:#fff3a8" data-c="yellow" title="黄色"></span>'+
+    '<span class="hl-sw" style="background:#b9f6c5" data-c="green" title="绿色"></span>'+
+    '<span class="hl-sw" style="background:#ffc9de" data-c="pink" title="粉色"></span>'+
+    '<span class="hl-x" onclick="hlCancel()">取消</span>';
+  document.body.appendChild(bar); bar.style.display='none';
+  const hide=function(){ bar.style.display='none'; };
+  const show=function(rg){ const sel=window.getSelection(); const rect=sel.getRangeAt(0).getBoundingClientRect();
+    bar.style.display='flex';
+    bar.style.top=Math.max(8, rect.top-bar.offsetHeight-8+window.scrollY)+'px';
+    bar.style.left=Math.max(8, rect.left+rect.width/2-bar.offsetWidth/2+window.scrollX)+'px'; };
+  bar.querySelectorAll('.hl-sw').forEach(function(sw){
+    sw.addEventListener('mousedown', function(e){
+      e.preventDefault();
+      const rd=document.getElementById('noteReader'); const rg=selRange(rd); if(!rg) return;
+      addHl(NOTE_ID,rg.s,rg.e,sw.dataset.c); applyHl(rd,loadHl(NOTE_ID)); hide();
+    });
+  });
+  window.hlCancel=function(){ const rd=document.getElementById('noteReader'); const rg=selRange(rd); if(rg) removeHl(NOTE_ID,rg.s,rg.e); applyHl(rd,loadHl(NOTE_ID)); hide(); };
+  const onUp=function(){ setTimeout(function(){ const rd=document.getElementById('noteReader'); const rg=selRange(rd); if(rg) show(rg); else hide(); },10); };
+  const rd=document.getElementById('noteReader');
+  rd.addEventListener('mouseup',onUp); rd.addEventListener('touchend',onUp);
+}
+document.addEventListener('selectionchange', function(){
+  const bar=document.getElementById('hlBar'); if(!bar||bar.style.display==='none') return;
+  const rd=document.getElementById('noteReader'); const sel=window.getSelection();
+  if(!rd||!sel||sel.isCollapsed||sel.rangeCount===0){ bar.style.display='none'; return; }
+  const rg=selRange(rd); if(!rg) bar.style.display='none';
+});
 
 /* ==================== 首页 ==================== */
 function renderHome(){
