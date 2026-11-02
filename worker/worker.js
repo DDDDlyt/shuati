@@ -31,6 +31,14 @@ function preflight() {
   return new Response(null, { status: 204, headers: JSON_HEADERS });
 }
 
+/* 安全响应头：防 MIME 嗅探、防点击劫持、限制 Referer 泄露 */
+const SEC_HEADERS = {
+  'X-Content-Type-Options': 'nosniff',
+  'X-Frame-Options': 'SAMEORIGIN',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+  'Permissions-Policy': 'geolocation=(), microphone=(), camera=()',
+};
+
 /* 前端静态托管：HTML 存 KV（site:index.html），其余资源反代 GitHub Pages 源站 /shuati/ */
 async function serveStatic(request, env, url) {
   const p = url.pathname;
@@ -39,14 +47,14 @@ async function serveStatic(request, env, url) {
     if (!html) return new Response('site not built', { status: 503 });
     return new Response(html, {
       status: 200,
-      headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' },
+      headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache', ...SEC_HEADERS },
     });
   }
   if (p === '/sw.js') {
     const body = "self.addEventListener('install',e=>self.skipWaiting());self.addEventListener('activate',e=>e.waitUntil((async()=>{try{var k=await caches.keys();await Promise.all(k.map(x=>caches.delete(x)));}catch(e){}try{await self.registration.unregister();}catch(e){}await self.clients.claim();})()));";
     return new Response(body, {
       status: 200,
-      headers: { 'Content-Type': 'application/javascript', 'Cache-Control': 'no-cache' },
+      headers: { 'Content-Type': 'application/javascript', 'Cache-Control': 'no-cache', ...SEC_HEADERS },
     });
   }
   const target = 'https://ddddlyt.github.io/shuati' + (p || '/');
@@ -55,7 +63,7 @@ async function serveStatic(request, env, url) {
     const ct = r.headers.get('Content-Type') || 'application/octet-stream';
     return new Response(r.body, {
       status: r.status,
-      headers: { 'Content-Type': ct, 'Cache-Control': 'public, max-age=86400' },
+      headers: { 'Content-Type': ct, 'Cache-Control': 'public, max-age=86400', ...SEC_HEADERS },
     });
   } catch (e) {
     return new Response('proxy error: ' + e, { status: 502 });

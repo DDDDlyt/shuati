@@ -76,9 +76,12 @@ button{font-family:inherit; cursor:pointer; border:none; outline:none;}
 .bar i.blue{background:linear-gradient(90deg,#0a84ff,#64d2ff);}
 .bar i.warn{background:linear-gradient(90deg,#ff9f0a,#ffd60a);}
 .big-btn{width:100%; padding:15px; border-radius:14px; font-size:16px; font-weight:700;
-  background:linear-gradient(135deg,#0a84ff,#0066d6); color:#fff; margin-top:4px;}
+  background:linear-gradient(135deg,#0a84ff,#0066d6); color:#fff; margin-top:4px; min-height:50px;
+  font-family:inherit,"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji";}
 .big-btn:active{opacity:.85;}
+.mini-btn{min-height:38px; font-family:inherit,"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji";}
 .big-btn.ghost{background:var(--panel2); color:var(--txt);}
+.big-btn.btn-dim{opacity:.42; color:var(--dim);}
 .big-btn.ok{background:linear-gradient(135deg,#34c759,#28a745);}
 .btn-row{display:flex; gap:10px; margin-top:10px;}
 .btn-row .big-btn{margin-top:0;}
@@ -223,8 +226,9 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
   background:rgba(20,22,27,.94); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
   border-top:1px solid var(--line); display:flex; padding:8px 0 max(10px,env(safe-area-inset-bottom));}
 .nav button{flex:1; background:none; color:var(--dim); font-size:11px; font-weight:600;
-  display:flex; flex-direction:column; align-items:center; gap:2px; padding:6px 0 4px;}
-.nav button .ic{font-size:20px;}
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+  padding:6px 0 4px; min-height:48px;}
+.nav button .ic{font-size:20px; line-height:1; font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;}
 .nav button.on{color:var(--blue);}
 /* toast */
 #toast{position:fixed; left:50%; bottom:96px; transform:translateX(-50%) translateY(20px);
@@ -256,6 +260,8 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
   color:#8ecfff; border:1px solid #2f5570; flex:none;}
 .kd-link:active{background:#23405a;}
 .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.empty-hint{background:var(--panel);border:1px dashed var(--line);border-radius:14px;padding:16px;
+  text-align:center;color:var(--sub);font-size:13.5px;line-height:1.85;margin-bottom:12px;}
 .stat-cell{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:13px}
 .stat-cell b{display:block;font-size:23px;color:var(--blue);line-height:1.2}
 .stat-cell span{font-size:12px;color:var(--sub)}
@@ -866,9 +872,12 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
 <div id="view-set" class="view">
   <div class="top"><h1>⚙️ 设置</h1><div class="sub">目标、进度同步、关于</div></div>
 
-  <div class="set-item acc-wrap" id="accCard">
-    <h3>👤 账号登录（手机 / 平板自动对齐）</h3>
-    <p>注册一个账号，手机登一次、平板登一次，之后打开页面就自动对齐——<b>不用再复制令牌</b>，也不会三个月后突然失效。</p>
+  <details class="set-item acc-wrap" id="accCard">
+    <summary style="cursor:pointer;font-size:16px;font-weight:700;margin:0 0 4px;list-style:none;display:flex;align-items:center;justify-content:space-between">
+      <span>☁️ 账号同步（可选 · 手机平板互通）</span>
+      <span style="font-size:12px;color:var(--dim);font-weight:400">点击展开</span>
+    </summary>
+    <p style="margin-top:10px">不登录也能正常刷题，进度存在本机。想让手机和平板自动对齐，再展开这里注册一个账号。</p>
 
     <div id="accAnon">
       <p class="acc-nosrv" id="accNoSrv">服务器已经内置好了，什么都不用配置——直接注册一个账号（邮箱 + 密码），手机、平板各登一次就能自动对齐。</p>
@@ -957,7 +966,7 @@ create policy "sub_del_own" on public.submissions
 
     <p id="accMsg" class="gh-status">未登录</p>
     <button class="acc-adv" onclick="toggleGhCard()">⚙️ 备用：GitHub 私有仓库（旧的令牌方式，能用账号就别管它）</button>
-  </div>
+  </details>
 
   <div class="set-item" id="subCard">
     <h3>📮 投稿箱（笔记 / 卷子 → 站长）</h3>
@@ -1532,6 +1541,30 @@ function renderHome(){
   document.getElementById('taskTitle').textContent=ttl;
   document.getElementById('taskWhy').textContent=why;
   document.getElementById('taskMainBtn').textContent=btn;
+
+  /* 空数据态：错题/收藏为 0 时把按钮置灰并给出说明，避免点了才知道没内容 */
+  (function(){
+    var favN=0; try{ favN=(favList()||[]).length; }catch(e){}
+    var row=document.querySelector('.task-card .btn-row'); if(!row) return;
+    var bts=row.querySelectorAll('button'); if(bts.length<3) return;
+    var defs=[
+      {el:bts[0], n:all.wrong, emptyTxt:'错题重刷', tip:'答错的题会自动收集到这里'},
+      {el:bts[1], n:1,        emptyTxt:'随机 20 题', tip:''},
+      {el:bts[2], n:favN,     emptyTxt:'☆ 收藏',   tip:'刷题时点右上角 ☆ 即可收藏'}
+    ];
+    defs.forEach(function(d){
+      if(!d.el) return;
+      if(!d.n){
+        d.el.classList.add('btn-dim');
+        d.el.setAttribute('title', d.tip||'');
+        if(d.el.dataset.orig===undefined) d.el.dataset.orig=d.el.innerHTML;
+        d.el.innerHTML=d.emptyTxt;
+      }else{
+        d.el.classList.remove('btn-dim');
+        if(d.el.dataset.orig!==undefined){ d.el.innerHTML=d.el.dataset.orig; delete d.el.dataset.orig; }
+      }
+    });
+  })();
 
   // 题库列表
   const subjColor={生化:'#34c759', 遗传:'#bf5af2', 数学:'#ff9f0a', 英语:'#0a84ff'};
@@ -2940,7 +2973,11 @@ function renderStat(){
   for(const c of HUB.cards){ const s=cst(c.id); if(s.fav) fav++; }
   due=dueList().length;
   const rate = all.seen ? Math.round(all.mastered/all.seen*100) : 0;
-  let h='<div class="stat-grid">';
+  let h='';
+  if(!all.seen){
+    h+='<div class="empty-hint">📊 还没有刷题记录<br>去「首页」点「开始 N 张新题」，刷几道回来看这里就有数据了</div>';
+  }
+  h+='<div class="stat-grid">';
   h+='<div class="stat-cell"><b>'+all.mastered+'</b><span>已掌握 / 共 '+all.total+' 张</span></div>';
   h+='<div class="stat-cell"><b>'+due+'</b><span>今日待复习</span></div>';
   if(all.guessed){
