@@ -190,6 +190,16 @@ button{font-family:inherit; cursor:pointer; border:none; outline:none;}
 .fill-inp:focus{border-color:var(--blue); background:#1d222b;}
 .fill-inp.fill-ok{border-color:rgba(52,199,89,.7); background:rgba(52,199,89,.12); color:var(--ok);}
 .fill-inp.fill-no{border-color:rgba(255,69,58,.7); background:rgba(255,69,58,.1); color:var(--bad);}
+.fi-wrap{display:inline-flex; align-items:center; gap:3px; vertical-align:middle;}
+.fi-pen{border:none; background:rgba(95,176,255,.14); color:#7db8ff; border-radius:8px; font-size:14px; line-height:1; padding:3px 6px; cursor:pointer;}
+.fi-pen:active{background:rgba(95,176,255,.3);}
+.fi-res{font-size:12.5px; font-weight:600; white-space:nowrap;}
+.fi-res.ok{color:var(--ok);}
+.fi-res.no{color:var(--bad);}
+.hw-reco{display:none; margin:10px 0 0; padding:10px 12px; border-radius:12px; font-size:13.5px; line-height:1.5;}
+.hw-reco.on{display:block;}
+.hw-reco.ok{background:rgba(52,199,89,.12); color:var(--ok); border:1px solid rgba(52,199,89,.4);}
+.hw-reco.no{background:rgba(255,69,58,.1); color:var(--bad); border:1px solid rgba(255,69,58,.35);}
 .fill-tip{font-size:12px; color:var(--dim); margin-top:10px;}
 /* 填空符号键盘（v26）：平板打不出 α β ₂ ⁺ 时的救命条 */
 .fill-sym{display:flex; flex-wrap:wrap; gap:6px; margin-top:10px;}
@@ -269,7 +279,15 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
 .card-top .card-tag{margin-bottom:0}
 .fav-star{background:none;border:none;color:var(--dim);font-size:21px;padding:0;line-height:1;flex:none}
 .fav-star.on{color:#ffd60a}
-.kao-tag{display:inline-block;vertical-align:1px;margin-left:6px;padding:1px 6px;border-radius:6px;font-size:10px;font-weight:700;background:rgba(255,159,10,.18);color:#ff9f0a}
+.kao-tag{display:inline-block;vertical-align:1px;margin-left:6px;padding:1px 6px;border-radius:6px;font-size:10px;font-weight:600;background:rgba(255,159,10,.12);color:#c9943f}
+.kao-group{margin-top:10px;border:1px dashed var(--line);border-radius:14px;overflow:hidden}
+.kao-group>summary{cursor:pointer;list-style:none;padding:13px 16px;font-size:13.5px;font-weight:600;color:var(--sub);
+  background:var(--panel);user-select:none}
+.kao-group>summary::-webkit-details-marker{display:none}
+.kao-group>summary:before{content:"▸ ";color:#888}
+.kao-group[open]>summary:before{content:"▾ "}
+.kao-group .deck-item{border:0;border-top:1px solid var(--line);border-radius:0}
+.kao-group .deck-item:first-of-type{border-top:0}
 .kd-link{font-size:11px; padding:4px 9px; border-radius:8px; background:#1b2a3a;
   color:#8ecfff; border:1px solid #2f5570; flex:none;}
 .kd-link:active{background:#23405a;}
@@ -1224,7 +1242,8 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
     <button class="hw-btn ghost" onclick="hwClose()">关闭</button>
     <button class="hw-btn blue" id="hwSaveBtn" onclick="hwSaveFlip()">💾 保存并看答案</button>
   </div>
-  <div class="hw-tip">支持手写笔压感（越用力越粗）· 手掌误触就开「仅笔」<br>这块板只存笔迹、<b>不会自动转成文字</b>；填空题要打字，空里点一下就有 α β ₂ ⁺ 的快捷键</div>
+  <div class="hw-reco" id="hwReco"></div>
+  <div class="hw-tip" id="hwTip">支持手写笔压感（越用力越粗）· 手掌误触就开「仅笔」<br>这块板只存笔迹、<b>不会自动转成文字</b>；填空题要打字，空里点一下就有 α β ₂ ⁺ 的快捷键</div>
 </div>
 
 <div id="hwLibMask">
@@ -1546,19 +1565,29 @@ function renderHome(){
     +'<div class="deck-info"><div class="d-name">投稿箱 · 有笔记/卷子给站长？</div>'
     +'<div class="d-meta">登录后点这里上传，只有站长能收</div></div>'
     +'<div class="deck-go">▶</div></div>';
-  for(const dk of HUB.decks){
+  /* 现在在学的：非考研层题库（首页主列表） */
+  const curDecks = HUB.decks.filter(d=>d.tier!=='kao');
+  const kaoDecks = HUB.decks.filter(d=>d.tier==='kao');
+  function deckItem(dk){
     const s=stats(dk.id);
     const p=s.total?Math.round(s.mastered/s.total*100):0;
     const color=subjColor[dk.subject]||'#64d2ff';
-    html+=`<div class="deck-item" onclick="startDeck('${dk.id}')">
+    return `<div class="deck-item" onclick="startDeck('${dk.id}')">
       <div class="deck-icon" style="background:${color}22">${iconMap[dk.subject]||'📘'}</div>
       <div class="deck-info">
-        <div class="d-name">${esc(dk.name)}${dk.tier==='kao'?' <span class="kao-tag">考研</span>':''}</div>
+        <div class="d-name">${esc(dk.name)}</div>
         <div class="d-meta">${s.total} 张 · 已看 ${s.seen} · 错题 ${s.wrong}</div>
       </div>
       <div class="deck-pct" style="color:${color}">${p}%</div>
       <div class="deck-go">▶</div>
     </div>`;
+  }
+  for(const dk of curDecks) html+=deckItem(dk);
+  /* 考研真题：拔高内容，大三后再看，默认收起，不打扰现在的学习节奏 */
+  if(kaoDecks.length){
+    html+='<details class="kao-group"><summary>🎯 考研真题（拔高 · 大三后再看）</summary>';
+    for(const dk of kaoDecks) html+=deckItem(dk);
+    html+='</details>';
   }
   document.getElementById('deckList').innerHTML=html;
 
@@ -1991,6 +2020,66 @@ function fillMatch(mine, ans){
   }
   return false;
 }
+/* ============ 填空题：手写 → 识别 → 判分 ============ */
+const RECO_PROMPT='这是一道生物化学/遗传学填空题的手写答案。请只识别其中的文字内容（含希腊字母αβγδε、上下标如₂³、化学式如Fe²⁺、箭头↓→⇌），按原样输出识别到的答案，不要解释、不要加多余文字。';
+function openFillHW(i){ openHW('fill'); HW.fillIdx=i; }
+/* 从智谱 GLM 视觉模型返回里稳健取出识别文本（兼容多种返回结构） */
+function recoText(d){
+  if(!d) return '';
+  if(typeof d==='string') return cleanReco(d);
+  let t=d.choices&&d.choices[0]&&d.choices[0].message&&d.choices[0].message.content;
+  if(!t && d.output&&d.output.text) t=d.output.text;
+  if(!t && d.content) t=d.content;
+  if(!t && d.text) t=d.text;
+  if(!t) t=JSON.stringify(d);
+  return cleanReco(t);
+}
+function cleanReco(s){
+  s=String(s||'').trim();
+  s=s.replace(/^```[\s\S]*?\n?/,'').replace(/```$/,'');
+  s=s.replace(/^["'「『]|["'」』]$/g,'');
+  s=s.split(/\n/)[0].trim();
+  return s;
+}
+/* 单空手写识别 + 判分（不锁输入框，方便改） */
+async function hwRecoFill(){
+  const i=HW.fillIdx;
+  const el=document.getElementById('fi'+i);
+  if(!HW.strokes.length){ toast('先在上面写点答案'); return; }
+  const btn=document.getElementById('hwSaveBtn');
+  const reco=document.getElementById('hwReco');
+  if(btn){ btn.disabled=true; btn.textContent='🔍 识别中…'; }
+  if(reco){ reco.className='hw-reco on'; reco.textContent='识别中…'; }
+  try{
+    const img=HW.cv.toDataURL('image/png');
+    const data=await cloudFetch('/api/ai',{method:'POST',body:JSON.stringify({image:img,prompt:RECO_PROMPT})},true);
+    const txt=recoText(data);
+    if(!txt) throw new Error('没认出来，换个写法或手打');
+    if(el){ el.value=txt; el.focus(); }
+    const ok=scoreFillOne(i,txt);
+    if(reco){ reco.className='hw-reco on '+(ok?'ok':'no'); reco.textContent='识别为：'+txt+'　'+(ok?'✓ 答对':'✗ 看下方对照'); }
+    toast('识别并判分完成 ✓');
+  }catch(e){
+    if(reco){ reco.className='hw-reco on no'; reco.textContent='识别失败：'+(e.message||e); }
+    toast('识别失败：'+(e.message||e));
+  }finally{
+    if(btn){ btn.disabled=false; btn.textContent='🔍 识别并判分'; }
+  }
+}
+function scoreFillOne(i, val){
+  const c=Q[qi]; if(!c) return false;
+  const ans=String(c.a==null?'':c.a).split(/[；;]/).map(x=>x.trim());
+  const el=document.getElementById('fi'+i); if(!el) return false;
+  const v=(val!=null)?val:el.value;
+  const ok=fillMatch(v, ans[i]||'');
+  el.classList.remove('fill-ok','fill-no');
+  el.classList.add(ok?'fill-ok':'fill-no');
+  el.readOnly=false;
+  const res=document.getElementById('fr'+i);
+  if(res){ res.className='fi-res '+(ok?'ok':'no'); res.textContent=ok?'✓':('✗ 应为 '+(ans[i]||'')); }
+  return ok;
+}
+
 /* 填空符号键盘：平板打不出 α β ₂ ⁺ 的痛点，点一下就插进当前空格 */
 const SYM_BASE=['α','β','₂','₃','⁺','⁻','↓','↑','→','⇌'];
 const SYM_ALL=['α','β','γ','δ','ε','θ','λ','μ','π','σ','φ','ω','Ω','Δ','Σ',
@@ -2037,9 +2126,9 @@ function renderFillCard(c){
 h+=(c.img?'<div class="card-img" onclick="event.stopPropagation();imgFull(this.querySelector(\'img\').src,\''+(c.c||'题图')+' · 点开可缩放\')"><img src="'+esc(c.img)+'" loading="lazy" alt="题图"></div>':'');;
   for(let i=0;i<segs.length;i++){
     h+=termify(segs[i]);
-    if(i<n) h+='<input class="fill-inp" id="fi'+i+'" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="'+(i+1)+'">';
+    if(i<n) h+='<span class="fi-wrap"><input class="fill-inp" id="fi'+i+'" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="'+(i+1)+'"><button type="button" class="fi-pen" title="手写输入" onclick="openFillHW('+i+')">✍️</button><span class="fi-res" id="fr'+i+'"></span></span>';
   }
-  h+='</div><div class="fill-tip">直接在空里填，填完点「检查」。填错了才需要自己评。</div>';
+  h+='</div><div class="fill-tip">直接在空里打字，或点空后的 <b>✍️</b> 手写 —— <b>写完自动识别并判分</b>。填错了才需要自己评。</div>';
   h+='<div class="fill-sym">'+SYM_BASE.map(symBtn).join('')+
     '<button type="button" class="fill-sym-more" onmousedown="event.preventDefault()" onclick="fillSymMore(this)">希腊字母…</button></div>';
   document.getElementById('flashcard').innerHTML=h;
@@ -3148,7 +3237,7 @@ document.addEventListener('keydown', e=>{
 
 /* ==================== v5：手写笔作答 ==================== */
 const HW_TYPES={term:1,saq:1,essay:1,fill:1,calc:1,input:1};
-let HW={id:null,strokes:[],cur:null,ctx:null,cv:null,w:1,h:1,dpr:1,size:3.4,er:0,playing:false,sp:1,t0:0,penLive:false,penTimer:null};
+let HW={id:null,strokes:[],cur:null,ctx:null,cv:null,w:1,h:1,dpr:1,size:3.4,er:0,playing:false,sp:1,t0:0,penLive:false,penTimer:null,mode:'notes',fillIdx:0};
 
 function hwEnsure(){ if(!S.hw) S.hw={}; if(!S.hwThumb) S.hwThumb={}; if(!S.hwOpt) S.hwOpt={onlyPen:0}; }
 function hwOpt(){ hwEnsure(); return S.hwOpt; }
@@ -3174,13 +3263,25 @@ function openHW(mode){
     }
   }
   const sb=document.getElementById('hwSaveBtn');
-  if(sb) sb.textContent = (mode==='copy') ? '💾 保存笔迹' : '💾 保存并看答案';
+  const reco=document.getElementById('hwReco');
+  const tip=document.getElementById('hwTip');
+  if(mode==='fill'){
+    HW.mode='fill';
+    if(sb){ sb.textContent='🔍 识别并判分'; sb.onclick=hwRecoFill; }
+    if(reco){ reco.className='hw-reco'; reco.textContent=''; }
+    if(tip) tip.innerHTML='上方手写你的答案（支持压感 / 开「仅笔」防手掌），写好后点「🔍 识别并判分」→ 自动填入本空并判分。';
+  }else{
+    HW.mode='notes';
+    if(sb){ sb.textContent=(mode==='copy')?'💾 保存笔迹':'💾 保存并看答案'; sb.onclick=hwSaveFlip; }
+    if(reco){ reco.className='hw-reco'; reco.textContent=''; }
+    if(tip) tip.innerHTML='支持手写笔压感（越用力越粗）· 手掌误触就开「仅笔」<br>这块板只存笔迹、<b>不会自动转成文字</b>；填空题要打字，空里点一下就有 α β ₂ ⁺ 的快捷键';
+  }
 
   document.getElementById('hwMask').classList.add('on');
   hwSyncBtns();
   requestAnimationFrame(function(){
     hwFit();
-    const rec=S.hw[c.id];
+    const rec=(mode==='fill')?null:S.hw[c.id];
     HW.strokes = rec ? rec.strokes.map(function(s){ return {w:s.w,c:s.c,er:s.er,st:s.st||0,pts:s.pts}; }) : [];
     hwRedrawAll();
   });
