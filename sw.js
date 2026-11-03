@@ -6,7 +6,7 @@
    3) 音视频/压缩包不进缓存 —— 45MB 音频塞 Cache Storage 会撑爆手机配额
    4) install 改为逐个缓存，单个文件失败不拖垮整个 SW
 */
-const CACHE = 'shuati-v43';
+const CACHE = 'shuati-v44';
 const ASSETS = ['./', './index.html', './listening.html', './manifest.json', './icon-192.png', './icon-512.png', './pako.min.js', './img/glycolysis.svg', './img/tca.svg', './img/replication-fork.svg', './notes-biochem.html', './math-ocr.html',
   './vendor/katex/katex.min.css', './vendor/katex/katex.min.js', './vendor/katex/contrib/auto-render.min.js',
   './vendor/katex/fonts/KaTeX_Main-Regular.woff2', './vendor/katex/fonts/KaTeX_Main-Bold.woff2',
@@ -50,6 +50,9 @@ self.addEventListener('fetch', e => {
 
   // 音视频/Range：完全交给浏览器直连，保证 206 分片与拖动进度条
   if (req.headers.has('range') || isBigMedia(u)) return;
+
+  // 接口一律放行：/api/sync、/api/login 等若被缓存，会读到陈旧进度甚至登录态错乱
+  if (u.pathname.startsWith('/api/')) return;
 
   if (isDocReq(req, u)) {
     // 页面：网络优先，2.5 秒没响应就用缓存（保证更新及时 + 弱网能开）
