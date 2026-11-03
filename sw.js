@@ -6,7 +6,7 @@
    3) 音视频/压缩包不进缓存 —— 45MB 音频塞 Cache Storage 会撑爆手机配额
    4) install 改为逐个缓存，单个文件失败不拖垮整个 SW
 */
-const CACHE = 'shuati-v42';
+const CACHE = 'shuati-v43';
 const ASSETS = ['./', './index.html', './listening.html', './manifest.json', './icon-192.png', './icon-512.png', './pako.min.js', './img/glycolysis.svg', './img/tca.svg', './img/replication-fork.svg', './notes-biochem.html', './math-ocr.html',
   './vendor/katex/katex.min.css', './vendor/katex/katex.min.js', './vendor/katex/contrib/auto-render.min.js',
   './vendor/katex/fonts/KaTeX_Main-Regular.woff2', './vendor/katex/fonts/KaTeX_Main-Bold.woff2',
