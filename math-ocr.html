@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#1a1d24">
+<title>公式识别 · 手写/拍照</title>
+<!-- KaTeX 本地化（离线可渲染公式，不依赖 CDN） -->
+<link rel="stylesheet" href="./vendor/katex/katex.min.css">
+<script src="./vendor/katex/katex.min.js"></script>
+<script src="./vendor/katex/contrib/auto-render.min.js"></script>
+<style>
+:root{
+  --bg:#0f1115; --panel:#1a1d24; --panel2:#22262e; --line:#2c313a;
+  --txt:#e8eaed; --sub:#9aa0a6; --dim:#6b7280;
+  --ok:#34c759; --bad:#ff453a; --warn:#ff9f0a; --blue:#0a84ff; --teal:#64d2ff;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{margin:0; background:var(--bg); color:var(--txt);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  font-size:15px; line-height:1.5;}
+.top{position:sticky; top:0; z-index:20; background:rgba(15,17,21,.94);
+  backdrop-filter:blur(16px); padding:12px 12px 10px; border-bottom:1px solid var(--line);
+  display:flex; align-items:center; gap:10px;}
+.top a.back{width:34px; height:34px; border-radius:10px; background:var(--panel2);
+  display:flex; align-items:center; justify-content:center; text-decoration:none; color:var(--txt); font-size:18px;}
+.top h1{margin:0; font-size:17px; font-weight:700;}
+.top .sub{color:var(--sub); font-size:11px; margin-left:auto;}
+.wrap{max-width:640px; margin:0 auto; padding:14px 14px 90px;}
+.card{background:var(--panel); border-radius:16px; padding:14px; margin-bottom:14px;}
+.card h3{margin:0 0 10px; font-size:14px; color:var(--sub); font-weight:600;}
+#pad{width:100%; height:230px; background:#fff; border-radius:10px; touch-action:none; display:block;
+  background-image:linear-gradient(#eef0f3 1px,transparent 1px),linear-gradient(90deg,#eef0f3 1px,transparent 1px);
+  background-size:24px 24px;}
+.toolbar{display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;}
+.mini-btn{flex:1; min-width:84px; padding:9px 6px; border-radius:10px; background:var(--panel2); color:var(--txt); font-size:13px; font-weight:600; border:1px solid var(--line);}
+.mini-btn:active{transform:scale(.97);}
+.mini-btn.blue{background:var(--blue); border-color:var(--blue); color:#fff;}
+.mini-btn.teal{background:#0b6ea8; border-color:#0b6ea8; color:#fff;}
+.mini-btn.ghost{background:transparent;}
+.btn-row{display:flex; gap:10px; margin:12px 0;}
+.btn-row .mini-btn{flex:1; padding:13px; font-size:14px;}
+#status{font-size:12px; color:var(--sub); min-height:18px; margin:4px 2px 0;}
+#status.err{color:var(--bad);}
+#status.ok{color:var(--ok);}
+.res-label{display:flex; align-items:center; gap:8px; margin:14px 0 6px;}
+.res-label b{font-size:13px; color:var(--sub);}
+.res-label .copy{margin-left:auto; font-size:12px; color:var(--blue); cursor:pointer; background:none; border:none;}
+#latexOut{width:100%; min-height:54px; background:var(--panel2); color:var(--txt); border:1px solid var(--line);
+  border-radius:10px; padding:10px; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:13px; resize:vertical;}
+#renderOut{background:#fff; border-radius:10px; padding:16px; margin-top:6px; color:#111; overflow-x:auto; min-height:30px;}
+#aiOut{background:var(--panel2); border:1px solid var(--line); border-radius:10px; padding:12px; font-size:14px; line-height:1.6; white-space:pre-wrap; min-height:20px;}
+.tip{font-size:11px; color:var(--dim); margin-top:8px; line-height:1.5;}
+input[type=file]{display:none;}
+.katex{font-size:1.15em;}
+</style>
+</head>
+<body>
+<div class="top">
+  <a class="back" href="./index.html">‹</a>
+  <h1>公式识别</h1>
+  <span class="sub">手写 / 拍照</span>
+</div>
+<div class="wrap">
+
+  <div class="card">
+    <h3>① 在白板上写公式，或拍照/选图</h3>
+    <canvas id="pad"></canvas>
+    <div class="toolbar">
+      <button class="mini-btn ghost" onclick="undo()">↶ 撤销</button>
+      <button class="mini-btn ghost" onclick="clearPad()">🗑 清除</button>
+      <button class="mini-btn" onclick="document.getElementById('file').click()">📷 拍照/选图</button>
+    </div>
+    <input type="file" id="file" accept="image/*" capture="environment" onchange="loadImage(event)">
+    <div class="tip">手写建议：深蓝/黑色笔，写大一点、符号分开，识别更准。拍照请保证光线平、白底黑字。</div>
+  </div>
+
+  <div class="card">
+    <h3>② 选择识别方式</h3>
+    <div class="btn-row">
+      <button class="mini-btn teal" id="btnLocal" onclick="recognizeLocal()">离线识别公式</button>
+      <button class="mini-btn blue" id="btnAI" onclick="recognizeAI()">AI 识别 + 批改</button>
+    </div>
+    <div id="status">离线识别首次需联网下载模型（约 900MB，之后浏览器缓存，可离线复用）。</div>
+  </div>
+
+  <div class="card" id="resCard" style="display:none">
+    <div class="res-label"><b>LaTeX 代码</b><button class="copy" onclick="copyLatex()">复制</button></div>
+    <textarea id="latexOut" readonly></textarea>
+    <div class="res-label"><b>公式预览</b></div>
+    <div id="renderOut"></div>
+    <div class="res-label"><b>AI 批改意见</b></div>
+    <div id="aiOut" style="display:none"></div>
+  </div>
+
+</div>
+
+<script>
+/* ===== 画板 ===== */
+const pad=document.getElementById('pad'), ctx=pad.getContext('2d');
+let strokes=[], cur=null, drawing=false;
+function fitPad(){
+  const r=pad.getBoundingClientRect();
+  pad.width=r.width*devicePixelRatio; pad.height=r.height*devicePixelRatio;
+  ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+  ctx.fillStyle='#fff'; ctx.fillRect(0,0,r.width,r.height);
+  ctx.strokeStyle='#111'; ctx.lineWidth=3; ctx.lineCap='round'; ctx.lineJoin='round';
+}
+window.addEventListener('resize',fitPad); fitPad();
+function pos(e){const r=pad.getBoundingClientRect();const t=e.touches?e.touches[0]:e;return{x:t.clientX-r.left,y:t.clientY-r.top};}
+pad.addEventListener('pointerdown',e=>{drawing=true;cur=[];strokes.push(cur);ctx.beginPath();const p=pos(e);ctx.moveTo(p.x,p.y);cur.push(p);});
+pad.addEventListener('pointermove',e=>{if(!drawing)return;const p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke();cur.push(p);});
+['pointerup','pointerleave'].forEach(ev=>pad.addEventListener(ev,()=>{drawing=false;}));
+function undo(){ if(!strokes.length)return; strokes.pop(); redraw(); }
+function clearPad(){ strokes=[]; redraw(); }
+function redraw(){
+  const r=pad.getBoundingClientRect();
+  ctx.fillStyle='#fff'; ctx.fillRect(0,0,r.width,r.height);
+  ctx.strokeStyle='#111'; ctx.lineWidth=3; ctx.lineCap='round';
+  for(const s of strokes){ if(!s.length)continue; ctx.beginPath(); ctx.moveTo(s[0].x,s[0].y);
+    for(let i=1;i<s.length;i++)ctx.lineTo(s[i].x,s[i].y); ctx.stroke(); }
+}
+async function loadImage(e){
+  const f=e.target.files[0]; if(!f)return;
+  const img=new Image(); img.onload=()=>{
+    const r=pad.getBoundingClientRect();
+    ctx.fillStyle='#fff'; ctx.fillRect(0,0,r.width,r.height);
+    const k=Math.min(r.width/img.width, r.height/img.height);
+    const w=img.width*k, h=img.height*k;
+    ctx.drawImage(img,(r.width-w)/2,(r.height-h)/2,w,h);
+    strokes=[]; // 图片模式不记录笔迹
+  };
+  img.src=URL.createObjectURL(f);
+}
+function padToDataURL(){ return pad.toDataURL('image/png'); }
+
+/* ===== 结果渲染 ===== */
+function showResult(latex){
+  document.getElementById('resCard').style.display='block';
+  document.getElementById('latexOut').value=latex||'';
+  const out=document.getElementById('renderOut');
+  try{ katex.render(latex||'\\text{（空）}', out, {throwOnError:false, displayMode:true}); }
+  catch(err){ out.textContent='渲染失败：'+err.message; }
+}
+function setStatus(msg, cls){ const s=document.getElementById('status'); s.textContent=msg; s.className=cls||''; }
+function copyLatex(){
+  const v=document.getElementById('latexOut').value;
+  if(navigator.clipboard) navigator.clipboard.writeText(v);
+  setStatus('已复制 LaTeX', 'ok');
+}
+
+/* ===== 本地识别（Transformers.js + Xenova/texify2，浏览器内跑） ===== */
+let pipe=null;
+async function recognizeLocal(){
+  const btn=document.getElementById('btnLocal'); btn.disabled=true;
+  setStatus('正在加载本地识别模型（首次约 900MB，请联网，之后离线可用）…');
+  try{
+    if(!pipe){
+      const {pipeline}=await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@1.0.2');
+      pipe=await pipeline('image-to-text','Xenova/texify2');
+    }
+    setStatus('模型就绪，识别中…');
+    const res=await pipe(padToDataURL());
+    const latex=(res&&res[0]&&(res[0].generated_text||res[0].text))||'';
+    showResult(latex);
+    document.getElementById('aiOut').style.display='none';
+    setStatus('本地识别完成（离线、免费）', 'ok');
+  }catch(err){
+    setStatus('本地识别失败：'+err.message+'　可改用「AI 识别+批改」', 'err');
+  }finally{ btn.disabled=false; }
+}
+
+/* ===== 远程识别 + 批改（Cloudflare Worker /api/ai → 智谱） ===== */
+async function recognizeAI(){
+  const btn=document.getElementById('btnAI'); btn.disabled=true;
+  setStatus('正在调用 AI 批改（需域名已部署 Worker）…');
+  try{
+    const dataURL=padToDataURL();
+    const api=location.origin+'/api/ai';
+    const resp=await fetch(api,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({image:dataURL,
+        prompt:'你是严谨的大学理科老师。请：1) 识别图中手写/印刷的数学公式，输出其 LaTeX 代码（用 $$ 包裹）；2) 若内容是解题过程，逐条指出对错并给出正确写法与简要讲解；3) 若是单纯公式，确认其是否正确。用中文回答。'})});
+    if(!resp.ok) throw new Error('Worker 返回 '+resp.status+'（域名/Worker 可能还没部署）');
+    const j=await resp.json();
+    const content=(j.choices&&j.choices[0]&&j.choices[0].message&&j.choices[0].message.content)||JSON.stringify(j);
+    // 抽取 LaTeX 显示预览
+    const m=content.match(/\$\$([\s\S]*?)\$\$/);
+    document.getElementById('resCard').style.display='block';
+    const ai=document.getElementById('aiOut'); ai.style.display='block'; ai.textContent=content;
+    const latex=(m&&m[1])||'';
+    document.getElementById('latexOut').value=latex;
+    const out=document.getElementById('renderOut');
+    try{ katex.render(latex||'\\text{（无公式）}', out, {throwOnError:false, displayMode:true}); }
+    catch(e){ out.textContent=''; }
+    setStatus('AI 批改完成', 'ok');
+  }catch(err){
+    setStatus('AI 识别失败：'+err.message, 'err');
+  }finally{ btn.disabled=false; }
+}
+</script>
+</body>
+</html>

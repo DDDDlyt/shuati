@@ -1,17 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<script>
-/* 自愈：若旧 Service Worker 缓存了带口令的旧版页面，自动注销并刷新一次（每会话仅一次） */
-(function(){
-  try{
-    if(navigator.serviceWorker && navigator.serviceWorker.controller && !sessionStorage.getItem('sw_killed')){
-      sessionStorage.setItem('sw_killed','1');
-      navigator.serviceWorker.getRegistration().then(function(r){ if(r){ r.unregister().then(function(){ location.reload(); }); } });
-    }
-  }catch(e){}
-})();
-</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -76,12 +65,9 @@ button{font-family:inherit; cursor:pointer; border:none; outline:none;}
 .bar i.blue{background:linear-gradient(90deg,#0a84ff,#64d2ff);}
 .bar i.warn{background:linear-gradient(90deg,#ff9f0a,#ffd60a);}
 .big-btn{width:100%; padding:15px; border-radius:14px; font-size:16px; font-weight:700;
-  background:linear-gradient(135deg,#0a84ff,#0066d6); color:#fff; margin-top:4px; min-height:50px;
-  font-family:inherit,"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji";}
+  background:linear-gradient(135deg,#0a84ff,#0066d6); color:#fff; margin-top:4px;}
 .big-btn:active{opacity:.85;}
-.mini-btn{min-height:38px; font-family:inherit,"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji";}
 .big-btn.ghost{background:var(--panel2); color:var(--txt);}
-.big-btn.btn-dim{opacity:.42; color:var(--dim);}
 .big-btn.ok{background:linear-gradient(135deg,#34c759,#28a745);}
 .btn-row{display:flex; gap:10px; margin-top:10px;}
 .btn-row .big-btn{margin-top:0;}
@@ -109,9 +95,6 @@ button{font-family:inherit; cursor:pointer; border:none; outline:none;}
 /* 卡片 */
 .flashcard{background:var(--panel); border-radius:20px; padding:22px 20px; margin-bottom:14px;
   min-height:220px; display:flex; flex-direction:column; position:relative;}
-.flashcard:empty::after{content:"还没有题目\A 点左上角 ← 返回首页，或点「开始 20 张新题」开始刷";white-space:pre-line;
-  display:flex; align-items:center; justify-content:center; flex:1; min-height:200px;
-  color:var(--dim); font-size:14px; line-height:1.9; text-align:center; padding:20px 16px;}
 .card-tag{display:inline-block; padding:3px 9px; border-radius:7px; font-size:10px; font-weight:700;
   background:rgba(10,132,255,.16); color:var(--teal); margin-bottom:12px; align-self:flex-start;}
 .card-tag.exam{background:rgba(191,90,242,.18); color:#d68cff;}
@@ -190,31 +173,7 @@ button{font-family:inherit; cursor:pointer; border:none; outline:none;}
 .fill-inp:focus{border-color:var(--blue); background:#1d222b;}
 .fill-inp.fill-ok{border-color:rgba(52,199,89,.7); background:rgba(52,199,89,.12); color:var(--ok);}
 .fill-inp.fill-no{border-color:rgba(255,69,58,.7); background:rgba(255,69,58,.1); color:var(--bad);}
-.fi-wrap{display:inline-flex; align-items:center; gap:3px; vertical-align:middle;}
-.fi-pen{border:none; background:rgba(95,176,255,.14); color:#7db8ff; border-radius:8px; font-size:14px; line-height:1; padding:3px 6px; cursor:pointer;}
-.fi-pen:active{background:rgba(95,176,255,.3);}
-.fi-res{font-size:12.5px; font-weight:600; white-space:nowrap;}
-.fi-res.ok{color:var(--ok);}
-.fi-res.no{color:var(--bad);}
-.hw-reco{display:none; margin:10px 0 0; padding:10px 12px; border-radius:12px; font-size:13.5px; line-height:1.5;}
-.hw-reco.on{display:block;}
-.hw-reco.ok{background:rgba(52,199,89,.12); color:var(--ok); border:1px solid rgba(52,199,89,.4);}
-.hw-reco.no{background:rgba(255,69,58,.1); color:var(--bad); border:1px solid rgba(255,69,58,.35);}
 .fill-tip{font-size:12px; color:var(--dim); margin-top:10px;}
-/* 填空符号键盘（v26）：平板打不出 α β ₂ ⁺ 时的救命条 */
-.fill-sym{display:flex; flex-wrap:wrap; gap:6px; margin-top:10px;}
-.fill-sym button{min-width:38px; height:34px; padding:0 8px; border-radius:9px;
-  background:var(--panel2); border:1px solid var(--line); color:var(--txt);
-  font-size:15px; line-height:1; font-family:inherit; cursor:pointer;
-  -webkit-tap-highlight-color:transparent;}
-.fill-sym button:active{background:var(--blue); border-color:var(--blue); color:#fff;}
-.fill-sym .fill-sym-more{font-size:12px; color:var(--sub); min-width:auto; padding:0 10px;}
-.fill-sym button.sy-xs{font-size:21px; font-weight:600; padding-bottom:4px;
-  background:rgba(95,176,255,.10); border-color:rgba(95,176,255,.28);}
-.fill-fix{margin-top:12px; text-align:center;}
-.fill-fix button{background:none; border:1px dashed var(--line); color:var(--sub);
-  font-size:12px; padding:8px 14px; border-radius:10px; font-family:inherit; cursor:pointer;}
-.fill-fix button:active{color:var(--blue); border-color:var(--blue);}
 .fill-cmp{margin-top:10px;}
 .fill-row{font-size:13px; padding:6px 0; color:var(--sub); border-bottom:1px solid var(--line);}
 .fill-row:last-child{border-bottom:none;}
@@ -249,10 +208,9 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
 .nav{position:fixed; bottom:0; left:0; right:0; z-index:30;
   background:rgba(20,22,27,.94); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
   border-top:1px solid var(--line); display:flex; padding:8px 0 max(10px,env(safe-area-inset-bottom));}
-.nav button{flex:1; background:none; color:var(--dim); font-size:11px; font-weight:600;
-  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
-  padding:6px 0 4px; min-height:48px;}
-.nav button .ic{font-size:20px; line-height:1; font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;}
+.nav button{flex:1; background:none; color:var(--dim); font-size:10px; font-weight:600;
+  display:flex; flex-direction:column; align-items:center; gap:3px; padding:5px 0;}
+.nav button .ic{font-size:21px;}
 .nav button.on{color:var(--blue);}
 /* toast */
 #toast{position:fixed; left:50%; bottom:96px; transform:translateX(-50%) translateY(20px);
@@ -279,21 +237,11 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
 .card-top .card-tag{margin-bottom:0}
 .fav-star{background:none;border:none;color:var(--dim);font-size:21px;padding:0;line-height:1;flex:none}
 .fav-star.on{color:#ffd60a}
-.kao-tag{display:inline-block;vertical-align:1px;margin-left:6px;padding:1px 6px;border-radius:6px;font-size:10px;font-weight:600;background:rgba(255,159,10,.12);color:#c9943f}
-.kao-group{margin-top:10px;border:1px dashed var(--line);border-radius:14px;overflow:hidden}
-.kao-group>summary{cursor:pointer;list-style:none;padding:13px 16px;font-size:13.5px;font-weight:600;color:var(--sub);
-  background:var(--panel);user-select:none}
-.kao-group>summary::-webkit-details-marker{display:none}
-.kao-group>summary:before{content:"▸ ";color:#888}
-.kao-group[open]>summary:before{content:"▾ "}
-.kao-group .deck-item{border:0;border-top:1px solid var(--line);border-radius:0}
-.kao-group .deck-item:first-of-type{border-top:0}
+.kao-tag{display:inline-block;vertical-align:1px;margin-left:6px;padding:1px 6px;border-radius:6px;font-size:10px;font-weight:700;background:rgba(255,159,10,.18);color:#ff9f0a}
 .kd-link{font-size:11px; padding:4px 9px; border-radius:8px; background:#1b2a3a;
   color:#8ecfff; border:1px solid #2f5570; flex:none;}
 .kd-link:active{background:#23405a;}
 .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-.empty-hint{background:var(--panel);border:1px dashed var(--line);border-radius:14px;padding:16px;
-  text-align:center;color:var(--sub);font-size:13.5px;line-height:1.85;margin-bottom:12px;}
 .stat-cell{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:13px}
 .stat-cell b{display:block;font-size:23px;color:var(--blue);line-height:1.2}
 .stat-cell span{font-size:12px;color:var(--sub)}
@@ -793,42 +741,6 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
 .sub-item{display:flex;align-items:center;gap:9px;padding:8px 10px;background:#22262e;border:1px solid #2c313a;border-radius:9px;margin-top:8px;font-size:13.5px}
 .sub-item .sub-n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sub-item .sub-d{color:#9aa3ad;font-size:12px;flex:0 0 auto}
-/* ===== 笔记 + 勾画 ===== */
-#view-notes{ padding:14px 14px 40px; }
-.notes-list{ display:flex; flex-direction:column; gap:12px; margin-top:14px; }
-.note-card{ display:flex; align-items:center; gap:14px; background:var(--card,#1c1c22); border:1px solid var(--line,#333); border-radius:14px; padding:16px; cursor:pointer; transition:.15s; }
-.note-card:active{ transform:scale(.98); }
-.note-ic{ font-size:30px; }
-.note-info{ flex:1; }
-.note-name{ font-size:16px; font-weight:700; }
-.note-scope{ font-size:12px; color:var(--dim,#9aa); margin-top:3px; }
-.note-go{ color:var(--sub,#889); font-size:20px; }
-.notes-tip{ margin-top:18px; font-size:12px; color:var(--dim,#9aa); line-height:1.6; background:rgba(255,255,255,.04); padding:12px 14px; border-radius:10px; }
-.note-read{ margin-top:8px; }
-.note-bar{ display:flex; align-items:center; gap:10px; position:sticky; top:0; background:var(--bg,#15151a); padding:8px 0; z-index:5; }
-.note-title{ flex:1; font-weight:700; font-size:16px; }
-.note-clear{ font-size:12px; color:var(--sub,#889); border:1px solid var(--line,#333); padding:5px 10px; border-radius:8px; }
-.note-body{ margin-top:10px; }
-.note-loading,.note-err{ color:var(--dim,#9aa); padding:30px 0; text-align:center; }
-.notes-body{ font-size:15px; line-height:1.75; color:var(--fg,#eee); }
-.notes-body h1{ font-size:20px; margin:6px 0 12px; }
-.notes-body h2{ font-size:17px; margin:22px 0 10px; padding-left:10px; border-left:4px solid #64d2ff; }
-.notes-body h3{ font-size:15px; margin:16px 0 8px; color:#ffd479; }
-.notes-body p{ margin:8px 0; }
-.notes-body ul{ margin:8px 0; padding-left:22px; }
-.notes-body li{ margin:4px 0; }
-.notes-body blockquote{ margin:12px 0; padding:10px 14px; background:rgba(255,212,121,.08); border-left:3px solid #ffd479; border-radius:0 8px 8px 0; font-size:13px; color:var(--dim,#bbb); }
-.notes-body table{ border-collapse:collapse; width:100%; margin:12px 0; font-size:13px; }
-.notes-body th,.notes-body td{ border:1px solid var(--line,#333); padding:7px 9px; text-align:left; }
-.notes-body th{ background:rgba(255,255,255,.05); }
-.notes-body td:first-child{ font-weight:600; }
-.notes-body strong{ color:#fff; }
-.hl-yellow{ background:#fff3a8; color:#222; border-radius:2px; }
-.hl-green{ background:#b9f6c5; color:#143; border-radius:2px; }
-.hl-pink{ background:#ffc9de; color:#511; border-radius:2px; }
-.hl-bar{ position:absolute; display:none; gap:6px; align-items:center; background:#222; border:1px solid #444; border-radius:20px; padding:5px 8px; box-shadow:0 4px 14px rgba(0,0,0,.4); z-index:60; }
-.hl-sw{ width:22px; height:22px; border-radius:50%; cursor:pointer; border:2px solid rgba(255,255,255,.5); }
-.hl-x{ font-size:12px; color:#fff; padding:0 6px; cursor:pointer; }
 </style>
 </head>
 <body>
@@ -837,11 +749,16 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
 <div id="gate" style="display:none;position:fixed;inset:0;z-index:10000;background:#0f1115;display:none;align-items:center;justify-content:center;padding:24px">
   <div style="width:100%;max-width:340px;text-align:center">
     <div style="font-size:44px;margin-bottom:10px">🔒</div>
-    <div style="font-size:19px;font-weight:600;color:#e8eaee;margin-bottom:6px">私人题库</div>
-    <div style="font-size:13.5px;color:#9aa3ad;margin-bottom:18px">这是站长的私人刷题台，输访问口令进入<br>没有口令？找站长要</div>
-    <input id="gatePw" type="password" inputmode="text" placeholder="访问口令" autocomplete="off"
+    <div style="font-size:19px;font-weight:600;color:#e8eaee;margin-bottom:6px">专属刷题台</div>
+    <div style="font-size:13.5px;color:#9aa3ad;margin-bottom:18px">这是你的私人账号。第一次用先「创建账号」，之后用同一账号密码登录，手机平板进度自动对齐。</div>
+    <input id="gateUser" type="text" inputmode="text" autocomplete="username" placeholder="用户名（4-32 位字母数字下划线）"
+      style="width:100%;box-sizing:border-box;padding:12px 14px;font-size:16px;border-radius:10px;border:1px solid #2c313a;background:#1a1d24;color:#e8eaee;outline:none;text-align:center;margin-bottom:10px">
+    <input id="gatePw" type="password" inputmode="text" autocomplete="current-password" placeholder="密码（至少 8 位）"
       style="width:100%;box-sizing:border-box;padding:12px 14px;font-size:16px;border-radius:10px;border:1px solid #2c313a;background:#1a1d24;color:#e8eaee;outline:none;text-align:center">
-    <button onclick="gateTry()" style="width:100%;margin-top:12px;padding:12px;border:0;border-radius:10px;background:#5fb0ff;color:#0f1115;font-size:15.5px;font-weight:600">进入</button>
+    <div class="gh-btns" style="margin-top:12px">
+      <button class="mini-btn blue" onclick="cloudLogin()">登录</button>
+      <button class="mini-btn" onclick="cloudSignup()">创建账号</button>
+    </div>
     <div id="gateErr" style="height:20px;margin-top:10px;font-size:13px;color:#ff6b6b"></div>
   </div>
 </div>
@@ -897,7 +814,6 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
 
   <button class="big-btn ghost" style="margin-bottom:9px" onclick="go('examPick')">🎯 模考 · 计时交卷</button>
   <button class="big-btn ghost" style="margin-bottom:9px" onclick="location.href='./listening.html'">🎧 六级听力 · 真题板块刷</button>
-  <button class="big-btn ghost" style="margin-bottom:9px" onclick="go('notes')">📒 复习笔记 · 上课范围</button>
   <button class="big-btn ghost" style="margin-bottom:14px" onclick="go('know')">📖 知识体系 · 看漏洞诊断</button>
 
   <div class="sec-title">📖 题库</div>
@@ -906,9 +822,6 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
   <div class="sec-title">📊 学科掌握</div>
   <div id="subjList"></div>
 </div>
-
-<!-- ============ 笔记页 ============ -->
-<div id="view-notes" class="view"></div>
 
 <!-- ============ 刷题页 ============ -->
 <div id="view-study" class="view">
@@ -944,51 +857,15 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
 <div id="view-set" class="view">
   <div class="top"><h1>⚙️ 设置</h1><div class="sub">目标、进度同步、关于</div></div>
 
-  <details class="set-item acc-wrap" id="accCard">
-    <summary style="cursor:pointer;font-size:16px;font-weight:700;margin:0 0 4px;list-style:none;display:flex;align-items:center;justify-content:space-between">
-      <span>☁️ 账号同步（可选 · 手机平板互通）</span>
-      <span style="font-size:12px;color:var(--dim);font-weight:400">点击展开</span>
-    </summary>
-    <p style="margin-top:10px">不登录也能正常刷题，进度存在本机。想让手机和平板自动对齐，再展开这里注册一个账号。</p>
+  <div class="set-item acc-wrap" id="accCard">
+    <h3>👤 账号登录（手机 / 平板自动对齐）</h3>
+    <p>注册一个账号，手机登一次、平板登一次，之后打开页面就自动对齐——<b>不用再复制令牌</b>，也不会三个月后突然失效。</p>
 
-    <div id="accAnon">
-      <p class="acc-nosrv" id="accNoSrv">服务器已经内置好了，什么都不用配置——直接注册一个账号（用户名 + 密码），手机、平板各登一次就能自动对齐。</p>
-      <p class="acc-nosrv" id="accMig" style="display:none; background:rgba(95,176,255,.1); color:#9fd3ff">💡 检测到你在用旧的 GitHub 令牌同步。登录账号后本机数据会自动一起带上去，之后就彻底不用管令牌了。</p>
-      <div class="set-row"><label>用户名</label>
-        <input id="clUser" type="text" autocomplete="username" placeholder="4-32位：字母 / 数字 / 下划线">
-      </div>
-      <div class="set-row" style="margin-top:9px"><label>密码</label>
-        <input id="clPw" type="password" autocomplete="current-password" placeholder="至少 8 位">
-      </div>
-      <div class="gh-btns">
-        <button class="mini-btn blue" onclick="cloudLogin()">登录</button>
-        <button class="mini-btn" onclick="cloudSignup()">注册新账号</button>
-      </div>
-      <p class="acc-tip" style="margin-top:10px">整站只有一个账号位（你自己的）。第一次用点「注册新账号」把位置占了，之后换设备直接「登录」。密码忘了只能找站长重置，想好再设。</p>
-    </div>
-
-    <div id="accOn" style="display:none">
-      <div class="acc-user">
-        <div class="acc-avatar">👤</div>
-        <div style="min-width:0">
-          <div class="acc-mail" id="accEmail"></div>
-          <div class="acc-last" id="accLast"></div>
-        </div>
-      </div>
-      <div class="gh-btns">
-        <button class="mini-btn blue" onclick="cloudSync()">立即同步</button>
-        <button class="mini-btn" onclick="cloudPullOnly()">仅下载云端</button>
-        <button class="mini-btn" onclick="cloudPushOnly()">仅上传本机</button>
-        <button class="mini-btn red" onclick="cloudLogout()">退出登录</button>
-      </div>
-      <label class="gh-auto"><input type="checkbox" id="accAuto" onchange="cloudSetAuto(this.checked)"> 自动同步（改完 4 秒内静默上传，打开页面自动下拉）</label>
-      <p class="gh-status" id="accSrv"></p>
-      <p class="gh-status">🔒 密码只用来换登录凭证，不存明文；数据在你的库里，别人读不到。</p>
-    </div>
+    <div id="accAnon">      <p class="acc-nosrv">这是你自己的专属账号（数据只存在你的 Cloudflare 里，密码经 PBKDF2 加盐哈希，谁都看不到明文）。手机、平板各登一次，进度自动对齐。</p>      <div class="set-row"><label>用户名</label>        <input id="clUser" type="text" inputmode="text" autocomplete="username" placeholder="4-32 位字母数字下划线">      </div>      <div class="set-row" style="margin-top:9px"><label>密码</label>        <input id="clPw" type="password" autocomplete="current-password" placeholder="至少 8 位">      </div>      <div class="gh-btns">        <button class="mini-btn blue" onclick="cloudLogin()">登录</button>        <button class="mini-btn" onclick="cloudSignup()">创建账号</button>      </div>    </div>    <div id="accOn" style="display:none">      <div class="acc-user">        <div class="acc-avatar">👤</div>        <div style="min-width:0">          <div class="acc-mail" id="accEmail"></div>          <div class="acc-last" id="accLast"></div>        </div>      </div>      <div class="gh-btns">        <button class="mini-btn blue" onclick="cloudSync()">立即同步</button>        <button class="mini-btn" onclick="cloudPullOnly()">仅下载云端</button>        <button class="mini-btn" onclick="cloudPushOnly()">仅上传本机</button>        <button class="mini-btn red" onclick="cloudLogout()">退出登录</button>      </div>      <label class="gh-auto"><input type="checkbox" id="accAuto" onchange="cloudSetAuto(this.checked)"> 自动同步（改完 4 秒内静默上传，打开页面自动下拉）</label>      <p class="gh-status" id="accSrv"></p>      <p class="gh-status">🔒 密码只用来换登录令牌，不存明文；数据在你的 Cloudflare 里，别人（包括站长）读不到。</p>    </div>
 
     <p id="accMsg" class="gh-status">未登录</p>
     <button class="acc-adv" onclick="toggleGhCard()">⚙️ 备用：GitHub 私有仓库（旧的令牌方式，能用账号就别管它）</button>
-  </details>
+  </div>
 
   <div class="set-item" id="subCard">
     <h3>📮 投稿箱（笔记 / 卷子 → 站长）</h3>
@@ -1249,7 +1126,6 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
   <button id="navKnow" onclick="go('know')"><div class="ic">📖</div>知识</button>
   <button id="navStat" onclick="go('stat')"><div class="ic">📊</div>统计</button>
   <button id="navSet" onclick="go('set')"><div class="ic">⚙️</div>设置</button>
-  <button id="navNotes" onclick="go('notes')"><div class="ic">📒</div>笔记</button>
   <button id="navListen" onclick="location.href='./listening.html'"><div class="ic">🎧</div>听力</button>
 </div>
 
@@ -1283,8 +1159,7 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
     <button class="hw-btn ghost" onclick="hwClose()">关闭</button>
     <button class="hw-btn blue" id="hwSaveBtn" onclick="hwSaveFlip()">💾 保存并看答案</button>
   </div>
-  <div class="hw-reco" id="hwReco"></div>
-  <div class="hw-tip" id="hwTip">支持手写笔压感（越用力越粗）· 手掌误触就开「仅笔」<br>这块板只存笔迹、<b>不会自动转成文字</b>；填空题要打字，空里点一下就有 α β ₂ ⁺ 的快捷键</div>
+  <div class="hw-tip">支持手写笔压感（越用力越粗）· 手掌误触就开「仅笔」</div>
 </div>
 
 <div id="hwLibMask">
@@ -1508,10 +1383,8 @@ function go(v){
   const nk=document.getElementById('navKnow'); if(nk) nk.classList.toggle('on', v==='know'||v==='kd'||v==='hook'||v==='term'||v==='read');
   document.getElementById('navStudy').classList.toggle('on', v==='study'||v==='examPick'||v==='exam'||v==='spell'||v==='wb');
   const ns=document.getElementById('navStat'); if(ns) ns.classList.toggle('on', v==='stat');
-  const nn=document.getElementById('navNotes'); if(nn) nn.classList.toggle('on', v==='notes');
   document.getElementById('navSet').classList.toggle('on', v==='set');
   if(v==='home') renderHome();
-  if(v==='notes') renderNotes();
   if(v==='set') renderSet();
   if(v==='stat') renderStat();
   if(v==='examPick') renderExamPick();
@@ -1530,114 +1403,6 @@ function go(v){
   if(v!=='kd' && v!=='study' && v!=='read'){ inkDetach(); }
   window.scrollTo(0,0);
 }
-
-/* ===================== 笔记：列表 + 阅读 + 勾画 ===================== */
-var NOTES=[
-  {id:'genetics', name:'遗传学复习笔记', scope:'上课范围：孟德尔定律 → 基因突变（期中考试）', ic:'🧬'},
-  {id:'biochem',  name:'生物化学复习笔记', scope:'上课范围：蛋白质 / 酶 / 核酸 / 糖代谢（到糖原）', ic:'🧪'},
-];
-var NOTE_TITLES={genetics:'遗传学复习笔记',biochem:'生物化学复习笔记'};
-var NOTE_ID=null;
-
-function renderNotes(){
-  const box=document.getElementById('view-notes');
-  let h='<div class="top"><h1>📒 复习笔记</h1><div class="sub">上课范围整理 · 看的时候选中文字即可高亮，自动存本机</div></div><div class="notes-list">';
-  NOTES.forEach(function(n){
-    h+='<div class="note-card" onclick="openNote(\''+n.id+'\')">'+
-         '<div class="note-ic">'+n.ic+'</div>'+
-         '<div class="note-info"><div class="note-name">'+n.name+'</div><div class="note-scope">'+n.scope+'</div></div>'+
-         '<div class="note-go">▸</div></div>';
-  });
-  h+='</div><div class="notes-tip">💡 选中文字就能高亮（黄 / 绿 / 粉 三色），关掉网页下次打开还在。想跨手机平板同步高亮，登录账号后说一声我接云端。</div>';
-  box.innerHTML=h;
-}
-
-function openNote(id){
-  NOTE_ID=id;
-  const box=document.getElementById('view-notes');
-  box.innerHTML='<div class="note-read">'+
-    '<div class="note-bar"><button class="icon-btn" onclick="renderNotes()">←</button>'+
-    '<div class="note-title" id="noteTitle"></div>'+
-    '<div class="note-clear" onclick="clearHl()">清除高亮</div></div>'+
-    '<div class="note-body" id="noteReader"></div></div>';
-  document.getElementById('noteTitle').textContent=NOTE_TITLES[id]||'笔记';
-  const rd=document.getElementById('noteReader');
-  rd.innerHTML='<div class="note-loading">加载中…</div>';
-  fetch('/api/note?id='+encodeURIComponent(id))
-    .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.text(); })
-    .then(function(html){ rd.innerHTML=html; bindHl(); applyHl(rd, loadHl(id)); })
-    .catch(function(e){ rd.innerHTML='<div class="note-err">笔记加载失败：'+e.message+'</div>'; });
-}
-
-function noteTextNodes(root){
-  const list=[]; let off=0;
-  (function walk(n){
-    if(n.nodeType===3){ if(n.length){ list.push({node:n,start:off,end:off+n.length}); off+=n.length; } }
-    else if(n.nodeType===1){ for(let i=0;i<n.childNodes.length;i++) walk(n.childNodes[i]); }
-  })(root);
-  return list;
-}
-function selRange(root){
-  const sel=window.getSelection();
-  if(!sel||sel.rangeCount===0||sel.isCollapsed) return null;
-  const r=sel.getRangeAt(0);
-  if(!root.contains(r.commonAncestorContainer)) return null;
-  const pre=document.createRange(); pre.selectNodeContents(root); pre.setEnd(r.startContainer,r.startOffset);
-  const s=pre.toString().length;
-  const e=s+r.toString().length;
-  return e<=s ? null : {s:s,e:e};
-}
-function loadHl(id){ try{ return JSON.parse(localStorage.getItem('hl:'+id)||'[]'); }catch(e){ return []; } }
-function saveHl(id,sp){ try{ localStorage.setItem('hl:'+id, JSON.stringify(sp)); }catch(e){} }
-function applyHl(root, spans){
-  root.querySelectorAll('mark[data-hl]').forEach(function(m){ const p=m.parentNode; while(m.firstChild) p.insertBefore(m.firstChild,m); p.removeChild(m); p.normalize(); });
-  const nodes=noteTextNodes(root);
-  spans.slice().sort(function(a,b){return b.s-a.s;}).forEach(function(sp){
-    nodes.forEach(function(n){
-      if(sp.s< n.end && sp.e> n.start){
-        const a=Math.max(sp.s,n.start)-n.start, b=Math.min(sp.e,n.end)-n.start;
-        if(a>=b) return;
-        try{ const rg=document.createRange(); rg.setStart(n.node,a); rg.setEnd(n.node,b);
-          const mk=document.createElement('mark'); mk.dataset.hl='1'; mk.className='hl-'+sp.c; rg.surroundContents(mk); }catch(e){}
-      }
-    });
-  });
-}
-function addHl(id,s,e,c){ let sp=loadHl(id).filter(function(x){ return !(x.s< e && x.e> s); }); sp.push({s:s,e:e,c:c}); sp.sort(function(a,b){return a.s-b.s;}); saveHl(id,sp); }
-function removeHl(id,s,e){ let sp=loadHl(id).filter(function(x){ return !(x.s< e && x.e> s); }); saveHl(id,sp); }
-function clearHl(){ if(!NOTE_ID) return; if(!confirm('清除这篇笔记的全部高亮？')) return; localStorage.removeItem('hl:'+NOTE_ID); const rd=document.getElementById('noteReader'); if(rd) applyHl(rd, []); }
-
-function bindHl(){
-  let bar=document.getElementById('hlBar'); if(bar) bar.remove();
-  bar=document.createElement('div'); bar.id='hlBar'; bar.className='hl-bar';
-  bar.innerHTML='<span class="hl-sw" style="background:#fff3a8" data-c="yellow" title="黄色"></span>'+
-    '<span class="hl-sw" style="background:#b9f6c5" data-c="green" title="绿色"></span>'+
-    '<span class="hl-sw" style="background:#ffc9de" data-c="pink" title="粉色"></span>'+
-    '<span class="hl-x" onclick="hlCancel()">取消</span>';
-  document.body.appendChild(bar); bar.style.display='none';
-  const hide=function(){ bar.style.display='none'; };
-  const show=function(rg){ const sel=window.getSelection(); const rect=sel.getRangeAt(0).getBoundingClientRect();
-    bar.style.display='flex';
-    bar.style.top=Math.max(8, rect.top-bar.offsetHeight-8+window.scrollY)+'px';
-    bar.style.left=Math.max(8, rect.left+rect.width/2-bar.offsetWidth/2+window.scrollX)+'px'; };
-  bar.querySelectorAll('.hl-sw').forEach(function(sw){
-    sw.addEventListener('mousedown', function(e){
-      e.preventDefault();
-      const rd=document.getElementById('noteReader'); const rg=selRange(rd); if(!rg) return;
-      addHl(NOTE_ID,rg.s,rg.e,sw.dataset.c); applyHl(rd,loadHl(NOTE_ID)); hide();
-    });
-  });
-  window.hlCancel=function(){ const rd=document.getElementById('noteReader'); const rg=selRange(rd); if(rg) removeHl(NOTE_ID,rg.s,rg.e); applyHl(rd,loadHl(NOTE_ID)); hide(); };
-  const onUp=function(){ setTimeout(function(){ const rd=document.getElementById('noteReader'); const rg=selRange(rd); if(rg) show(rg); else hide(); },10); };
-  const rd=document.getElementById('noteReader');
-  rd.addEventListener('mouseup',onUp); rd.addEventListener('touchend',onUp);
-}
-document.addEventListener('selectionchange', function(){
-  const bar=document.getElementById('hlBar'); if(!bar||bar.style.display==='none') return;
-  const rd=document.getElementById('noteReader'); const sel=window.getSelection();
-  if(!rd||!sel||sel.isCollapsed||sel.rangeCount===0){ bar.style.display='none'; return; }
-  const rg=selRange(rd); if(!rg) bar.style.display='none';
-});
 
 /* ==================== 首页 ==================== */
 function renderHome(){
@@ -1676,30 +1441,6 @@ function renderHome(){
   document.getElementById('taskWhy').textContent=why;
   document.getElementById('taskMainBtn').textContent=btn;
 
-  /* 空数据态：错题/收藏为 0 时把按钮置灰并给出说明，避免点了才知道没内容 */
-  (function(){
-    var favN=0; try{ favN=(favList()||[]).length; }catch(e){}
-    var row=document.querySelector('.task-card .btn-row'); if(!row) return;
-    var bts=row.querySelectorAll('button'); if(bts.length<3) return;
-    var defs=[
-      {el:bts[0], n:all.wrong, emptyTxt:'错题重刷', tip:'答错的题会自动收集到这里'},
-      {el:bts[1], n:1,        emptyTxt:'随机 20 题', tip:''},
-      {el:bts[2], n:favN,     emptyTxt:'☆ 收藏',   tip:'刷题时点右上角 ☆ 即可收藏'}
-    ];
-    defs.forEach(function(d){
-      if(!d.el) return;
-      if(!d.n){
-        d.el.classList.add('btn-dim');
-        d.el.setAttribute('title', d.tip||'');
-        if(d.el.dataset.orig===undefined) d.el.dataset.orig=d.el.innerHTML;
-        d.el.innerHTML=d.emptyTxt;
-      }else{
-        d.el.classList.remove('btn-dim');
-        if(d.el.dataset.orig!==undefined){ d.el.innerHTML=d.el.dataset.orig; delete d.el.dataset.orig; }
-      }
-    });
-  })();
-
   // 题库列表
   const subjColor={生化:'#34c759', 遗传:'#bf5af2', 数学:'#ff9f0a', 英语:'#0a84ff'};
   const iconMap={'生化':'🧬','遗传':'🧪','数学':'📐','英语':'🔤'};
@@ -1710,35 +1451,31 @@ function renderHome(){
     +'<div class="deck-info"><div class="d-name">学长笔记 · 生物化学（精校版）</div>'
     +'<div class="d-meta">手写笔记 68 页全转录 · 788 处已校对</div></div>'
     +'<div class="deck-go">▶</div></div>';
+  /* v37：公式识别（手写/拍照，离线 Texify2 + AI 批改） */
+  html+='<div class="deck-item" onclick="location.href=\'./math-ocr.html\'">'
+    +'<div class="deck-icon" style="background:#64d2ff22">📐</div>'
+    +'<div class="deck-info"><div class="d-name">公式识别 · 手写 / 拍照</div>'
+    +'<div class="d-meta">离线识别公式，或 AI 批改解题过程</div></div>'
+    +'<div class="deck-go">▶</div></div>';
   /* v33：投稿箱入口 */
   html+='<div class="deck-item" onclick="subGo()">'
     +'<div class="deck-icon" style="background:#5fb0ff22">📮</div>'
     +'<div class="deck-info"><div class="d-name">投稿箱 · 有笔记/卷子给站长？</div>'
     +'<div class="d-meta">登录后点这里上传，只有站长能收</div></div>'
     +'<div class="deck-go">▶</div></div>';
-  /* 现在在学的：非考研层题库（首页主列表） */
-  const curDecks = HUB.decks.filter(d=>d.tier!=='kao');
-  const kaoDecks = HUB.decks.filter(d=>d.tier==='kao');
-  function deckItem(dk){
+  for(const dk of HUB.decks){
     const s=stats(dk.id);
     const p=s.total?Math.round(s.mastered/s.total*100):0;
     const color=subjColor[dk.subject]||'#64d2ff';
-    return `<div class="deck-item" onclick="startDeck('${dk.id}')">
+    html+=`<div class="deck-item" onclick="startDeck('${dk.id}')">
       <div class="deck-icon" style="background:${color}22">${iconMap[dk.subject]||'📘'}</div>
       <div class="deck-info">
-        <div class="d-name">${esc(dk.name)}</div>
+        <div class="d-name">${esc(dk.name)}${dk.tier==='kao'?' <span class="kao-tag">考研</span>':''}</div>
         <div class="d-meta">${s.total} 张 · 已看 ${s.seen} · 错题 ${s.wrong}</div>
       </div>
       <div class="deck-pct" style="color:${color}">${p}%</div>
       <div class="deck-go">▶</div>
     </div>`;
-  }
-  for(const dk of curDecks) html+=deckItem(dk);
-  /* 考研真题：拔高内容，大三后再看，默认收起，不打扰现在的学习节奏 */
-  if(kaoDecks.length){
-    html+='<details class="kao-group"><summary>🎯 考研真题（拔高 · 大三后再看）</summary>';
-    for(const dk of kaoDecks) html+=deckItem(dk);
-    html+='</details>';
   }
   document.getElementById('deckList').innerHTML=html;
 
@@ -2048,9 +1785,7 @@ function recGrade(c, txt){
   if(!u.trim()) return {total:pts.length, hit:0, miss:pts, rate:0, wrote:false};
   const miss=[];
   let hit=0;
-  pts.forEach(p0=>{
-    // 单词/释义卡的要点常带词性前缀（n. / adj. / vt. …），匹配前剥掉，别让它挡命中
-    const p=String(p0).replace(/^\s*(adj|adv|prep|conj|pron|interj|aux|modal|art|num|vt|vi|n|v|int|a)\.\s*/i,'') || String(p0);
+  pts.forEach(p=>{
     const toks=recTokens(p);
     let ok=false;
     if(toks.length){
@@ -2058,11 +1793,9 @@ function recGrade(c, txt){
       const n=toks.filter(t=>{ const k=recNorm(t); return k.length>=2 && nu.indexOf(k)>=0; }).length;
       ok = toks.length<=2 ? n>=1 : (n/toks.length)>=0.5;
     } else {
-      const k=recNorm(p);
-      // 双向包含：写「奖学金」能命中要点「n. 奖学金」；要点核心长时短语也能命中
-      ok = k.length>=2 && (nu.indexOf(k)>=0 || (nu.length>=2 && k.indexOf(nu)>=0) || nu.indexOf(k.slice(0,3))>=0);
+      ok = nu.indexOf(recNorm(p).slice(0,3))>=0;
     }
-    if(ok) hit++; else miss.push(p0);
+    if(ok) hit++; else miss.push(p);
   });
   return {total:pts.length, hit:hit, miss:miss, rate:pts.length?hit/pts.length:0, wrote:true};
 }
@@ -2088,182 +1821,15 @@ function recPanel(g, txt){
 
 
 /* ---------- 填空题：输入 + 自动判分 ---------- */
-/* v26：判分改「宽容优先」——同一个意思换个说法、只写括号里的缩写、箭头写成汉字，都算对。
-   机器判不准还有「我写对了」一键改判兜底，绝不因为表述差异否掉你答对的题。 */
-const FILL_SYN=[
-  ['失活','失去携氧能力','丧失携氧能力','失去载氧能力','丧失载氧能力','不能携氧','失去运氧能力','丧失运氧能力','失去活性','失效','变性失活'],
-  ['降低','下降','减少','减小','变低','减低','降'],
-  ['升高','上升','增加','增大','变高','增高','升'],
-  ['右移','右','向右','右偏移'],
-  ['左移','左','向左','左偏移'],
-  ['中央空穴','中央孔穴','中央腔','中央孔','中央凹陷'],
-  ['亚铁','二价铁','fe2','二价'],
-  ['高铁','三价铁','fe3','三价'],
-  ['正协同','协同效应','变构协同','正协同效应'],
-  ['半胱氨酸','cys','胱氨酸'],
-  ['脯氨酸','pro'],
-  ['赖氨酸','lys'],
-  ['天冬氨酸','asp'],
-  ['天冬酰胺','asn'],
-  ['谷氨酸','glu'],
-  ['缬氨酸','val'],
-  ['色氨酸','trp'],
-  ['苯丙氨酸','phe'],
-  ['酪氨酸','tyr'],
-  ['丝氨酸','ser'],
-  ['苏氨酸','thr'],
-  ['蛋氨酸','甲硫氨酸','met'],
-  ['精氨酸','arg'],
-  ['组氨酸','his'],
-  ['谷氨酰胺','gln'],
-  ['丙氨酸','ala'],
-  ['甘氨酸','gly'],
-  ['异亮氨酸','ile'],
-  ['亮氨酸','leu'],
-  ['血红素','亚铁血红素','铁卟啉','铁卟啉ix'],
-  ['波尔效应','bohr效应','玻尔效应']
-];
-function fillSynKey(s){
-  const t=recNorm(s); if(!t) return '';
-  for(let i=0;i<FILL_SYN.length;i++){
-    const g=FILL_SYN[i];
-    for(let j=0;j<g.length;j++){
-      const w=recNorm(g[j]);
-      if(w && t.indexOf(w)>=0) return recNorm(g[0]);
-    }
-  }
-  return '';
-}
-/* 一道题的答案可能有很多种写法：全串 / 去括号 / 括号里的别名 / 斜杠分割的每一项 */
-function fillAliases(ans){
-  const raw=String(ans==null?'':ans), out=[];
-  const push=function(x){ const t=recNorm(x); if(t && out.indexOf(t)<0) out.push(t); };
-  push(raw);
-  push(raw.replace(/[（(][^）)]*[）)]/g,''));
-  push(raw.replace(/[↓↑⬇⬆→←⇌]/g,''));
-  (raw.match(/[（(][^）)]*[）)]/g)||[]).forEach(function(g){
-    g.replace(/[（()）]/g,'').split(/[\/、,，;；]/).forEach(push);
-  });
-  raw.split(/[\/、;；]/).forEach(push);
-  return out;
-}
 function fillMatch(mine, ans){
   const m=recNorm(mine); if(!m) return false;
-  const list=fillAliases(ans);
-  // 1) 归一化后完全相等（α₂β₂ = α2β2；降低(↓) 的任一别名）
-  if(list.indexOf(m)>=0) return true;
-  // 2) 同义词/缩写等价（失活 = 失去携氧能力；cys = 半胱氨酸）
-  const km=fillSynKey(m), ka=fillSynKey(ans);
-  if(km && ka && km===ka) return true;
-  // 3) 数字答案：首位数字一致就算对（"4条" / "4"）
   const a=recNorm(ans);
+  const core=recNorm(String(ans).replace(/[（(][^）)]*[）)]/g,''));
+  if(m===a || m===core) return true;
+  if(core.length>=2 && (m.indexOf(core)>=0 || core.indexOf(m)>=0)) return true;
   const na=(a.match(/^[\d.]+/)||[])[0], nm=(m.match(/^[\d.]+/)||[])[0];
   if(na && nm && na===nm) return true;
-  // 4) 互相包含（≥2 字），比方向分开判，避免单字乱命中
-  for(let i=0;i<list.length;i++){
-    const x=list[i];
-    if(x.length>=2 && (m.indexOf(x)>=0 || x.indexOf(m)>=0)) return true;
-  }
-  // 5) 中文关键词覆盖率 ≥75% 也算对（"减少携氧" 对 "失去携氧能力"）
-  const core=recNorm(String(ans).replace(/[（(][^）)]*[）)]/g,'').replace(/[↓↑⬇⬆→←⇌]/g,''));
-  const cs=[];
-  for(let i=0;i<core.length;i++){ const ch=core[i]; if(/[\u4e00-\u9fa5]/.test(ch) && cs.indexOf(ch)<0) cs.push(ch); }
-  if(cs.length>=3){
-    let hit=0;
-    for(let i=0;i<cs.length;i++){ if(m.indexOf(cs[i])>=0) hit++; }
-    if(hit/cs.length>=0.75) return true;
-  }
   return false;
-}
-/* ============ 填空题：手写 → 识别 → 判分 ============ */
-const RECO_PROMPT='这是一道生物化学/遗传学填空题的手写答案。请只识别其中的文字内容（含希腊字母αβγδε、上下标如₂³、化学式如Fe²⁺、箭头↓→⇌），按原样输出识别到的答案，不要解释、不要加多余文字。';
-function openFillHW(i){ openHW('fill'); HW.fillIdx=i; }
-/* 从智谱 GLM 视觉模型返回里稳健取出识别文本（兼容多种返回结构） */
-function recoText(d){
-  if(!d) return '';
-  if(typeof d==='string') return cleanReco(d);
-  let t=d.choices&&d.choices[0]&&d.choices[0].message&&d.choices[0].message.content;
-  if(!t && d.output&&d.output.text) t=d.output.text;
-  if(!t && d.content) t=d.content;
-  if(!t && d.text) t=d.text;
-  if(!t) t=JSON.stringify(d);
-  return cleanReco(t);
-}
-function cleanReco(s){
-  s=String(s||'').trim();
-  s=s.replace(/^```[\s\S]*?\n?/,'').replace(/```$/,'');
-  s=s.replace(/^["'「『]|["'」』]$/g,'');
-  s=s.split(/\n/)[0].trim();
-  return s;
-}
-/* 单空手写识别 + 判分（不锁输入框，方便改） */
-async function hwRecoFill(){
-  const i=HW.fillIdx;
-  const el=document.getElementById('fi'+i);
-  if(!HW.strokes.length){ toast('先在上面写点答案'); return; }
-  const btn=document.getElementById('hwSaveBtn');
-  const reco=document.getElementById('hwReco');
-  if(btn){ btn.disabled=true; btn.textContent='🔍 识别中…'; }
-  if(reco){ reco.className='hw-reco on'; reco.textContent='识别中…'; }
-  try{
-    const img=HW.cv.toDataURL('image/png');
-    const data=await cloudFetch('/api/ai',{method:'POST',body:JSON.stringify({image:img,prompt:RECO_PROMPT})},true);
-    const txt=recoText(data);
-    if(!txt) throw new Error('没认出来，换个写法或手打');
-    if(el){ el.value=txt; el.focus(); }
-    const ok=scoreFillOne(i,txt);
-    if(reco){ reco.className='hw-reco on '+(ok?'ok':'no'); reco.textContent='识别为：'+txt+'　'+(ok?'✓ 答对':'✗ 看下方对照'); }
-    toast('识别并判分完成 ✓');
-  }catch(e){
-    if(reco){ reco.className='hw-reco on no'; reco.textContent='识别失败：'+(e.message||e); }
-    toast('识别失败：'+(e.message||e));
-  }finally{
-    if(btn){ btn.disabled=false; btn.textContent='🔍 识别并判分'; }
-  }
-}
-function scoreFillOne(i, val){
-  const c=Q[qi]; if(!c) return false;
-  const ans=String(c.a==null?'':c.a).split(/[；;]/).map(x=>x.trim());
-  const el=document.getElementById('fi'+i); if(!el) return false;
-  const v=(val!=null)?val:el.value;
-  const ok=fillMatch(v, ans[i]||'');
-  el.classList.remove('fill-ok','fill-no');
-  el.classList.add(ok?'fill-ok':'fill-no');
-  el.readOnly=false;
-  const res=document.getElementById('fr'+i);
-  if(res){ res.className='fi-res '+(ok?'ok':'no'); res.textContent=ok?'✓':('✗ 应为 '+(ans[i]||'')); }
-  return ok;
-}
-
-/* 填空符号键盘：平板打不出 α β ₂ ⁺ 的痛点，点一下就插进当前空格 */
-const SYM_BASE=['α','β','₂','₃','⁺','⁻','↓','↑','→','⇌'];
-const SYM_ALL=['α','β','γ','δ','ε','θ','λ','μ','π','σ','φ','ω','Ω','Δ','Σ',
-  '₀','₁','₂','₃','₄','₅','⁰','¹','²','³','⁺','⁻','↓','↑','→','←','⇌','°','±','×','÷','≈','≥','≤'];
-let FILL_FOCUS=null;
-/* 上下标字形天生小，按钮里放大一档才看得清、点得准 */
-function symBtn(s){
-  const tiny=/[⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻₀₁₂₃₄₅₆₇₈₉]/.test(s);
-  return '<button type="button" class="'+(tiny?'sy-xs':'')+'" data-s="'+s+
-    '" onclick="fillIns(this)" onmousedown="event.preventDefault()">'+s+'</button>';
-}
-function fillIns(btn){
-  const ch=btn.getAttribute('data-s')||'';
-  let el=FILL_FOCUS;
-  if(!el || !document.body.contains(el)) el=document.querySelector('.fill-inp');
-  if(!el) return;
-  const s=(el.selectionStart==null)?el.value.length:el.selectionStart;
-  const e=(el.selectionEnd==null)?el.value.length:el.selectionEnd;
-  el.value=el.value.slice(0,s)+ch+el.value.slice(e);
-  const p=s+ch.length;
-  try{ el.setSelectionRange(p,p); }catch(_){}
-  try{ el.focus(); }catch(_){}
-  FILL_FOCUS=el;
-}
-function fillSymMore(btn){
-  const box=btn.parentNode;
-  if(box.getAttribute('data-full')==='1') return;
-  box.setAttribute('data-full','1');
-  box.innerHTML=SYM_ALL.map(symBtn).join('');
 }
 function renderFillCard(c){
   const segs=String(c.q).split(/_{2,}/);
@@ -2281,21 +1847,15 @@ function renderFillCard(c){
 h+=(c.img?'<div class="card-img" onclick="event.stopPropagation();imgFull(this.querySelector(\'img\').src,\''+(c.c||'题图')+' · 点开可缩放\')"><img src="'+esc(c.img)+'" loading="lazy" alt="题图"></div>':'');;
   for(let i=0;i<segs.length;i++){
     h+=termify(segs[i]);
-    if(i<n) h+='<span class="fi-wrap"><input class="fill-inp" id="fi'+i+'" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="'+(i+1)+'"><button type="button" class="fi-pen" title="手写输入" onclick="openFillHW('+i+')">✍️</button><span class="fi-res" id="fr'+i+'"></span></span>';
+    if(i<n) h+='<input class="fill-inp" id="fi'+i+'" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="'+(i+1)+'">';
   }
-  h+='</div><div class="fill-tip">直接在空里打字，或点空后的 <b>✍️</b> 手写 —— <b>写完自动识别并判分</b>。填错了才需要自己评。</div>';
-  h+='<div class="fill-sym">'+SYM_BASE.map(symBtn).join('')+
-    '<button type="button" class="fill-sym-more" onmousedown="event.preventDefault()" onclick="fillSymMore(this)">希腊字母…</button></div>';
+  h+='</div><div class="fill-tip">直接在空里填，填完点「检查」。填错了才需要自己评。</div>';
   document.getElementById('flashcard').innerHTML=h;
   document.getElementById('actRow').innerHTML=
     '<button class="act-btn next" onclick="checkFill()">检查 ✍️</button>';
-  // 触屏（平板/手机）不自动弹键盘——一进题就顶起半屏键盘，题都看不全；点空才弹
-  if(window.matchMedia && window.matchMedia('(pointer:fine)').matches){
-    setTimeout(function(){ const a=document.getElementById('fi0'); if(a){ try{a.focus();}catch(e){} } },140);
-  }
+  setTimeout(function(){ const a=document.getElementById('fi0'); if(a){ try{a.focus();}catch(e){} } },140);
   const ins=document.querySelectorAll('.fill-inp');
   ins.forEach(function(el){
-    el.addEventListener('focus', function(){ FILL_FOCUS=el; });
     el.addEventListener('keydown', function(e){
       if(e.key!=='Enter') return;
       e.preventDefault();
@@ -2341,23 +1901,11 @@ function checkFill(){
   h+=hookHtml(c);
   h+=notesLinkHtml(c);
   h+='</div>';
-  h+='<div class="fill-fix"><button type="button" onclick="fillISaidRight()">其实我写对了，按对算 →</button></div>';
   document.getElementById('flashcard').insertAdjacentHTML('beforeend', h);
   document.getElementById('actRow').innerHTML=
     '<button class="act-btn unknown" onclick="markCard(-1)">不熟 ❌</button>'+
     '<button class="act-btn fuzzy sug" onclick="markCard(2)">模糊 🤔　·建议</button>'+
     '<button class="act-btn known" onclick="markCard(1)">认识 ✅</button>';
-}
-/* 机器判错但人知道自己对：一键改判，别跟判题算法较劲 */
-function fillISaidRight(){
-  const c=Q[qi]; if(!c) return;
-  applyScore(c.id, true);
-  if(todayCounted){ todayCounted.rev++; S.todayRev=(S.todayRev||0)+1; save(); checkDailyDone(); }
-  const fix=document.querySelector('.fill-fix'); if(fix) fix.remove();
-  document.getElementById('flashcard').insertAdjacentHTML('beforeend',
-    '<div class="rec-res good"><div class="rec-h">已按「会」记 ✅ 下次间隔拉长。</div></div>');
-  document.getElementById('actRow').innerHTML=
-    '<button class="act-btn next" onclick="qi++;renderCard()">下一题 →</button>';
 }
 
 function pickOpt(i){
@@ -3306,11 +2854,7 @@ function renderStat(){
   for(const c of HUB.cards){ const s=cst(c.id); if(s.fav) fav++; }
   due=dueList().length;
   const rate = all.seen ? Math.round(all.mastered/all.seen*100) : 0;
-  let h='';
-  if(!all.seen){
-    h+='<div class="empty-hint">📊 还没有刷题记录<br>去「首页」点「开始 N 张新题」，刷几道回来看这里就有数据了</div>';
-  }
-  h+='<div class="stat-grid">';
+  let h='<div class="stat-grid">';
   h+='<div class="stat-cell"><b>'+all.mastered+'</b><span>已掌握 / 共 '+all.total+' 张</span></div>';
   h+='<div class="stat-cell"><b>'+due+'</b><span>今日待复习</span></div>';
   if(all.guessed){
@@ -3392,7 +2936,7 @@ document.addEventListener('keydown', e=>{
 
 /* ==================== v5：手写笔作答 ==================== */
 const HW_TYPES={term:1,saq:1,essay:1,fill:1,calc:1,input:1};
-let HW={id:null,strokes:[],cur:null,ctx:null,cv:null,w:1,h:1,dpr:1,size:3.4,er:0,playing:false,sp:1,t0:0,penLive:false,penTimer:null,mode:'notes',fillIdx:0};
+let HW={id:null,strokes:[],cur:null,ctx:null,cv:null,w:1,h:1,dpr:1,size:3.4,er:0,playing:false,sp:1,t0:0};
 
 function hwEnsure(){ if(!S.hw) S.hw={}; if(!S.hwThumb) S.hwThumb={}; if(!S.hwOpt) S.hwOpt={onlyPen:0}; }
 function hwOpt(){ hwEnsure(); return S.hwOpt; }
@@ -3418,25 +2962,13 @@ function openHW(mode){
     }
   }
   const sb=document.getElementById('hwSaveBtn');
-  const reco=document.getElementById('hwReco');
-  const tip=document.getElementById('hwTip');
-  if(mode==='fill'){
-    HW.mode='fill';
-    if(sb){ sb.textContent='🔍 识别并判分'; sb.onclick=hwRecoFill; }
-    if(reco){ reco.className='hw-reco'; reco.textContent=''; }
-    if(tip) tip.innerHTML='上方手写你的答案（支持压感 / 开「仅笔」防手掌），写好后点「🔍 识别并判分」→ 自动填入本空并判分。';
-  }else{
-    HW.mode='notes';
-    if(sb){ sb.textContent=(mode==='copy')?'💾 保存笔迹':'💾 保存并看答案'; sb.onclick=hwSaveFlip; }
-    if(reco){ reco.className='hw-reco'; reco.textContent=''; }
-    if(tip) tip.innerHTML='支持手写笔压感（越用力越粗）· 手掌误触就开「仅笔」<br>这块板只存笔迹、<b>不会自动转成文字</b>；填空题要打字，空里点一下就有 α β ₂ ⁺ 的快捷键';
-  }
+  if(sb) sb.textContent = (mode==='copy') ? '💾 保存笔迹' : '💾 保存并看答案';
 
   document.getElementById('hwMask').classList.add('on');
   hwSyncBtns();
   requestAnimationFrame(function(){
     hwFit();
-    const rec=(mode==='fill')?null:S.hw[c.id];
+    const rec=S.hw[c.id];
     HW.strokes = rec ? rec.strokes.map(function(s){ return {w:s.w,c:s.c,er:s.er,st:s.st||0,pts:s.pts}; }) : [];
     hwRedrawAll();
   });
@@ -3536,8 +3068,8 @@ function hwStart(e){
   if(!HW.strokes.length) HW.t0=now;
   /* 上一次没正常抬笔（capture 失败、移出画布又回来）：先收笔，避免丢一段 */
   if(HW.cur){ if(HW.cur.pts.length) HW.strokes.push(HW.cur); HW.cur=null; }
-  /* v23 断笔续接（收紧）：仅同一指针、<100ms、<10px 的真·接触不良才续上。
-     v22 的 200ms/50px 太松，正常笔画也被直线缝起来（用户反馈"连在一起"），已收紧 */
+  /* v22 断笔续接：笔尖快速移动时会短暂离屏（接触不良），屏幕上断成一串点。
+     抬笔到落笔间隔很短、且离上一点很近、粗细/橡皮没变 → 当作同一笔续上 */
   if(!HW.playing && HW.strokes.length){
     const last=HW.strokes[HW.strokes.length-1];
     const lp=last.pts[last.pts.length-1];
@@ -3547,14 +3079,14 @@ function hwStart(e){
       const dt=now-(HW._lastEnd||0);
       const dx=(x-lp.x)*HW.w, dy=(y-lp.y)*HW.h;
       const wantW=HW.size*(HW.er?4.5:1);
-      if(dt<80 && dx*dx+dy*dy<64 && last.pid===e.pointerId && last.er===HW.er && Math.abs(last.w-wantW)<0.01){
+      if(dt<200 && dx*dx+dy*dy<2500 && last.er===HW.er && Math.abs(last.w-wantW)<0.01){
         HW.cur=last; HW.strokes.pop(); /* 续接：先弹出原笔，避免 hwEnd 重复 push */
         hwAddPoint(e); hwPaintLast();
         return;
       }
     }
   }
-  HW.cur={w:HW.size*(HW.er?4.5:1), c:'#111318', er:HW.er, st:Math.round(now-HW.t0), _t0:now, _d:1, pid:e.pointerId, pts:[]};
+  HW.cur={w:HW.size*(HW.er?4.5:1), c:'#111318', er:HW.er, st:Math.round(now-HW.t0), _t0:now, _d:1, pts:[]};
   hwAddPoint(e);
   hwPaintLast();
 }
@@ -3567,11 +3099,6 @@ function hwBind(){
   });
   cv.addEventListener('pointerdown', function(e){
     if(hwOpt().onlyPen && e.pointerType==='touch') return;
-    /* v23 掌拒/指针归属：一条笔画只属于一个 pointerId，别的指针（手掌/多指）一律不接；
-       笔（pen）在写或刚停 600ms 内，触摸一律吃掉 */
-    if(HW.cur && HW.cur.pid!==e.pointerId) return;
-    if(e.pointerType==='touch' && HW.penLive) return;
-    if(e.pointerType==='pen'){ HW.penLive=true; if(HW.penTimer) clearTimeout(HW.penTimer); }
     if(e.pointerType==='pen' && !hwOpt().penHint){ hwOpt().penHint=1; toast('检测到手写笔，压感已开启 ✏️'); }
     e.preventDefault();
     if(HW._leaveT){ clearTimeout(HW._leaveT); HW._leaveT=null; }
@@ -3580,7 +3107,7 @@ function hwBind(){
     hwStart(e);
   });
   cv.addEventListener('pointermove', function(e){
-    if(!HW.cur || e.pointerId!==HW.cur.pid) return;
+    if(!HW.cur) return;
     if(hwOpt().onlyPen && e.pointerType==='touch') return;
     e.preventDefault();
     if(HW._leaveT){ clearTimeout(HW._leaveT); HW._leaveT=null; }
@@ -3591,17 +3118,11 @@ function hwBind(){
   ['pointerup','pointercancel'].forEach(function(t){
     cv.addEventListener(t, function(e){
       if(HW._leaveT){ clearTimeout(HW._leaveT); HW._leaveT=null; }
-      if(HW.cur && e.pointerId!==HW.cur.pid) return;
-      if(e.pointerType==='pen' && HW.penLive){
-        if(HW.penTimer) clearTimeout(HW.penTimer);
-        HW.penTimer=setTimeout(function(){ HW.penLive=false; }, 600);
-      }
       hwEnd();
     });
   });
   /* capture 失败时笔尖滑出画布：别立刻断笔，等 300ms，回来就接着写 */
   cv.addEventListener('pointerleave', function(e){
-    if(HW.cur && e.pointerId!==HW.cur.pid) return;
     if(HW._leaveT) clearTimeout(HW._leaveT);
     HW._leaveT=setTimeout(function(){ HW._leaveT=null; hwEnd(); }, 300);
   });
@@ -3886,22 +3407,19 @@ function inkDown(e){
   if(!INK.on) return;
   if(e.pointerType === 'pen') INK.penLive = true;
   if(INK.onlyPen && e.pointerType === 'touch') return;
-  /* v23 掌拒/指针归属：一条笔画只属于一个 pointerId；笔在写/刚停时触摸全吃 */
-  if(INK.cur && INK.cur.pid!==e.pointerId) return;
-  if(e.pointerType === 'touch' && INK.penLive) return;
   e.preventDefault();
   try{ INK.cv.setPointerCapture(e.pointerId); }catch(err){}
   var pos = inkPos(e), st = inkStyle();
-  /* v23 断笔续接（收紧）：仅同一指针、<100ms、<10px 的真·接触不良才续上 */
+  /* v22 断笔续接：快速划重点时笔尖短暂离屏，别断成点 */
   var now = performance.now();
   if(INK.strokes.length){
     var last = INK.strokes[INK.strokes.length-1], lp = last.p;
-    if(lp && lp.length>=3 && last.pid===e.pointerId){
+    if(lp && lp.length>=3){
       var dt = now-(INK._lastEnd||0);
       var x0 = lp.length>=6 ? lp[lp.length-3] : lp[0];
       var y0 = lp.length>=6 ? lp[lp.length-2] : lp[1];
-      var dx = (pos[0]-x0)*INK.w, dy = (pos[1]-y0)*INK.h;
-      if(dt<80 && dx*dx+dy*dy<64 && last.c===st.c && last.w===st.w && (last.e||0)===(st.e||0)){
+      var dx = pos[0]-x0, dy = pos[1]-y0;
+      if(dt<200 && dx*dx+dy*dy<0.0025 && last.c===st.c && last.w===st.w && (last.e||0)===(st.e||0)){
         INK.cur = last;
         INK.cur.p.push(pos[0], pos[1], e.pressure||0.5);
         var c2 = INK.ctx, p2 = INK.cur.p, n2 = p2.length;
@@ -3916,7 +3434,7 @@ function inkDown(e){
       }
     }
   }
-  INK.cur = {c:st.c, w:st.w, a:st.a, e:st.e, pid:e.pointerId, p:[pos[0], pos[1], e.pressure||0.5]};
+  INK.cur = {c:st.c, w:st.w, a:st.a, e:st.e, p:[pos[0], pos[1], e.pressure||0.5]};
   INK.strokes.push(INK.cur);
   var c = INK.ctx;
   c.save();
@@ -3926,7 +3444,7 @@ function inkDown(e){
   c.restore();
 }
 function inkMove(e){
-  if(!INK.on || !INK.cur || e.pointerId!==INK.cur.pid) return;
+  if(!INK.on || !INK.cur) return;
   if(INK.onlyPen && e.pointerType === 'touch') return;
   e.preventDefault();
   var p = INK.cur.p, pos = inkPos(e);
@@ -3945,7 +3463,7 @@ function inkUp(e){
     if(INK.penTimer) clearTimeout(INK.penTimer);
     INK.penTimer = setTimeout(function(){ INK.penLive = false; }, 600);
   }
-  if(INK.cur && (!e || e.pointerId===INK.cur.pid)){
+  if(INK.cur){
     INK._lastEnd = performance.now();
     INK.cur = null;
   }
@@ -5638,253 +5156,14 @@ const CLOUD_CFG_KEY = 'xzt_cloud_acc';
 
 /* ← 如果你已经建好服务器，把两个值填在这里，所有设备打开就只剩「登录」一个动作 */
 /* 内置服务器（方案A）。设置页手动填的值会覆盖它；换项目时改这两行重新发布即可 */
-const CLOUD_URL_FIXED = 'https://foadnjdgaenhnxztzkhy.supabase.co';
-const CLOUD_KEY_FIXED = 'sb_publishable_FO7PBsXSo23PNyCjgTEDDQ_CDd4ABqW';
-
-var CLOUD = {
-  on:false, busy:false, timer:null, dirty:false, suppress:false,
-  at:null, rt:null, uid:null, exp:0, email:'', auto:true, lastAt:0, err:''
-};
-
-function cloudCfg(){
-  try{ return JSON.parse(localStorage.getItem(CLOUD_CFG_KEY)||'{}'); }catch(e){ return {}; }
-}
+/* ==================== 个人账号 + Worker 同步（v37 重构） ==================== *//* 后端：你自己的 Cloudflare Worker（ddddlyt.top/api/*）   第一层：Cloudflare Access 邮箱锁（连页面都进不来）   第二层：本账号系统（用户名+密码，数据只在你 KV 里，PBKDF2 加盐哈希）   接口（详见 worker.js）：     POST /api/setup   {username,password} → {token,user}   仅首次     POST /api/login   {username,password} → {token,user}     GET  /api/sync    → {ok,data:<整包 ghPack 对象或 null>}     PUT  /api/sync    body=整包 JSON     POST /api/sub     {fname,ftype,fsize,note,content} → {ok,item}     GET  /api/sub     → {ok,items:[...]}     DELETE /api/sub/:id   令牌存 localStorage，请求带 Authorization: Bearer <token>*/var CLOUD = { on:false, busy:false, dirty:false, suppress:false, auto:true, lastAt:0, err:'', user:'', token:'', timer:null };
+function cloudCfg(){ try{ return JSON.parse(localStorage.getItem(CLOUD_CFG_KEY)||'{}'); }catch(e){ return {}; } }
 function cloudSetCfg(c){ localStorage.setItem(CLOUD_CFG_KEY, JSON.stringify(c)); }
-function cloudReady(){ return true; }
-
-function cloudApplySession(){
-  const c=cloudCfg();
-  CLOUD.on   = !!c.at;
-  CLOUD.at   = c.at||null;
-  CLOUD.uid  = c.u||null;
-  CLOUD.email= c.u||'';
-  CLOUD.exp  = c.exp||0;
-  CLOUD.lastAt = c.lastAt||0;
-  CLOUD.auto = (c.auto===undefined) ? true : !!c.auto;
-}
-function cloudSaveSession(s){
-  const c=cloudCfg();
-  if(s&&s.token){ c.at=s.token; c.u=s.user||c.u; c.exp=Date.now()+29*24*3600*1000; }
-  cloudSetCfg(c); cloudApplySession();
-}
-
-function cloudStatus(msg, cls){
-  const el=document.getElementById('accMsg'); if(!el) return;
-  el.textContent=msg; el.className='gh-status'+(cls?(' '+cls):'');
-}
-function cloudTime(ts){
-  if(!ts) return '还没同步过';
-  const d=new Date(ts), n=new Date();
-  const hm=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
-  if(d.toDateString()===n.toDateString()) return '今天 '+hm;
-  return (d.getMonth()+1)+'/'+d.getDate()+' '+hm;
-}
-
-/* --- 网络层：Worker API（同域相对路径，服务器已内置，无需任何配置） --- */
-async function cloudFetch(path, opts, withAuth){
-  opts = opts||{};
-  const h = Object.assign({'Content-Type':'application/json'}, opts.headers||{});
-  if(withAuth && CLOUD.at) h['Authorization']='Bearer '+CLOUD.at;
-  let ctl=null;
-  if(typeof AbortController!=='undefined') ctl=new AbortController();
-  const tm = setTimeout(function(){ if(ctl) ctl.abort(); }, 20000);
-  let r;
-  try{
-    r = await fetch(path, {method:opts.method||'GET', headers:h, body:opts.body, signal:ctl?ctl.signal:undefined});
-  }catch(e){
-    clearTimeout(tm);
-    throw Object.assign(new Error('连不上服务器'), {net:true});
-  }
-  clearTimeout(tm);
-  const txt = await r.text();
-  let data=null;
-  try{ data = txt ? JSON.parse(txt) : null; }catch(e){ data = txt; }
-  if(!r.ok){
-    let msg = (data && (data.error||data.msg||data.message||data.hint)) || ('HTTP '+r.status);
-    if(typeof msg!=='string') msg=JSON.stringify(msg);
-    throw Object.assign(new Error(msg), {status:r.status, data:data});
-  }
-  return data;
-}
-
-function cloudErrText(e){
-  const m=String((e&&e.message)||'');
-  if(e&&e.net) return '连不上服务器，换下网络（Wi-Fi / 流量）再试';
-  if(e&&e.status===403 && /已初始化/.test(m)) return '账号位已被占用（全站只有一个账号）——之前注册过就直接点「登录」';
-  if(e&&e.status===401) return /用户名或密码/.test(m) ? '用户名或密码不对' : '登录已过期，请重新登录';
-  if(e&&e.status===429) return '试太多次了，等一分钟再试';
-  return m||'出错了';
-}
-
-/* --- 登录 / 注册 / 退出 --- */
-function cloudCheckInput(){
-  const uEl=document.getElementById('clUser'), pwEl=document.getElementById('clPw');
-  const u=(uEl&&uEl.value||'').trim(), pw=(pwEl&&pwEl.value||'');
-  if(!/^[A-Za-z0-9_]{4,32}$/.test(u)) return {err:'用户名要 4-32 位，只能用字母、数字、下划线'};
-  if(pw.length<8) return {err:'密码至少 8 位'};
-  return {em:u, pw:pw};
-}
-async function cloudSignup(){
-  const v=cloudCheckInput(); if(v.err){ cloudStatus('⚠️ '+v.err,'err'); return; }
-  cloudStatus('正在注册…');
-  try{
-    const s = await cloudFetch('/api/setup', {method:'POST', body:JSON.stringify({username:v.em, password:v.pw})});
-    cloudSaveSession(s); cloudAfterLogin('账号已创建');
-  }catch(e){ cloudStatus('❌ '+cloudErrText(e),'err'); }
-}
-async function cloudLogin(){
-  const v=cloudCheckInput(); if(v.err){ cloudStatus('⚠️ '+v.err,'err'); return; }
-  cloudStatus('正在登录…');
-  try{
-    const s = await cloudFetch('/api/login', {method:'POST', body:JSON.stringify({username:v.em, password:v.pw})});
-    cloudSaveSession(s);
-    cloudAfterLogin('登录成功');
-  }catch(e){ cloudStatus('❌ '+cloudErrText(e),'err'); }
-}
-function cloudAfterLogin(msg){
-  renderAcc();
-  cloudStatus('☁️ '+msg+'，正在对齐数据…','ok');
-  setTimeout(function(){ cloudSync(false,'both'); }, 120);
-}
-async function cloudLogout(){
-  if(!confirm('退出后本机不再自动同步（学习记录不会删，仍在本机）。确定？')) return;
-  const c=cloudCfg();
-  delete c.at; delete c.u; delete c.exp;
-  cloudSetCfg(c); cloudApplySession();
-  renderAcc(); cloudStatus('已退出');
-}
-
-/* --- 凭证有效期：令牌 30 天，过期只能重新输密码（无刷新接口） --- */
-async function cloudRefresh(){
-  const c=cloudCfg();
-  if(!c.at) return false;
-  if(c.exp && c.exp-Date.now() < 90000){
-    delete c.at; cloudSetCfg(c); cloudApplySession();
-    renderAcc();
-    cloudStatus('登录过期了，重新输一次密码就好','warn');
-    return false;
-  }
-  return true;
-}
-async function cloudEnsure(){ return await cloudRefresh(); }
-
-/* --- 读写：/api/sync（PUT 存整包，GET 取回；包一层 rev 保持原有版本号习惯） --- */
-async function cloudPull(){
-  if(!await cloudEnsure()) throw Object.assign(new Error('登录已过期'), {status:401});
-  const s = await cloudFetch('/api/sync', {}, true);
-  if(!s || !s.ok || !s.data) return null;
-  if(s.data.data!==undefined) return {data:s.data.data, rev:Number(s.data.rev)||0};
-  return {data:s.data, rev:0};
-}
-async function cloudPush(pack, baseRev, force){
-  if(!await cloudEnsure()) throw Object.assign(new Error('登录已过期'), {status:401});
-  const nowIso = new Date().toISOString();
-  await cloudFetch('/api/sync', {
-    method:'PUT',
-    body: JSON.stringify({data:pack, rev:(Number(baseRev)||0)+1, updated_at:nowIso})
-  }, true);
-  return true;
-}
-
-async function cloudSync(silent, mode){
-  mode = mode || 'both';
-  if(!CLOUD.on){ if(!silent) toast('先登录账号'); return; }
-  if(CLOUD.busy){ CLOUD.dirty=true; if(!silent) cloudStatus('上一轮还没结束，稍后自动补一次…'); return; }
-
-  CLOUD.busy=true; CLOUD.dirty=false; CLOUD.suppress=true;
-  if(!silent) cloudStatus(mode==='pull'?'正在下载…':(mode==='push'?'正在上传…':'同步中…'));
-  try{
-    let changed=0, bytes=0, ok=false;
-
-    for(let attempt=0; attempt<3 && !ok; attempt++){
-      const remote = (mode==='push' && attempt===0) ? null : await cloudPull();
-      if(remote && remote.data) changed += ghMerge(remote.data);
-
-      if(mode==='pull'){ ok=true; break; }
-
-      const pack = ghPack();
-      const raw = JSON.stringify(pack);
-      if(raw.length > 20*1024*1024){
-        throw Object.assign(new Error('数据太大'), {big:true, size:Math.round(raw.length/1024)});
-      }
-      ok = await cloudPush(pack, remote ? remote.rev : null, mode==='push');
-      bytes = raw.length;
-      if(!ok && attempt<2) await new Promise(function(r){ setTimeout(r, 120+Math.random()*180); });
-    }
-    if(!ok) throw new Error('同步重试三次仍未成功');
-
-    const c=cloudCfg(); c.lastAt=Date.now(); cloudSetCfg(c); CLOUD.lastAt=c.lastAt;
-    const sizeTxt = bytes ? ' · '+Math.max(1,Math.round(bytes/1024))+' KB' : '';
-    cloudStatus('✅ 已同步 '+cloudTime(CLOUD.lastAt)+(changed?(' · 合并 '+changed+' 条'):'')+sizeTxt, 'ok');
-    if(!silent) toast(mode==='pull'?'已从云端下载 ✅':'同步完成 ✅');
-  }catch(e){
-    CLOUD.err=e.message||'';
-    const t=e.big ? ('数据 '+e.size+' KB 超过 20 MB 上限，多是手写笔迹攒太多') : cloudErrText(e);
-    cloudStatus('❌ 同步失败：'+t,'err');
-    if(!silent) toast('同步失败：'+t);
-  }finally{
-    CLOUD.busy=false; CLOUD.suppress=false;
-    if(CLOUD.dirty) setTimeout(function(){ CLOUD.dirty=false; cloudSync(true); }, 300);
-  }
-}
-function cloudPushOnly(){
-  if(!CLOUD.on){ toast('先登录账号'); return; }
-  if(!confirm('把本机数据覆盖到云端（云端更新的记录会被覆盖）。确定？')) return;
-  cloudSync(false,'push');
-}
-function cloudPullOnly(){
-  if(!CLOUD.on){ toast('先登录账号'); return; }
-  cloudSync(false,'pull');
-}
-function cloudTouch(){
-  if(CLOUD.suppress || !CLOUD.on || !CLOUD.auto) return;
-  CLOUD.dirty=true;
-  if(CLOUD.timer) return;
-  CLOUD.timer=setTimeout(function(){
-    CLOUD.timer=null;
-    if(CLOUD.dirty) cloudSync(true);
-  }, 4000);
-}
-function cloudSetAuto(v){
-  const c=cloudCfg(); c.auto=v?1:0; cloudSetCfg(c); CLOUD.auto=!!v;
-  if(v && CLOUD.on){ cloudSync(true); toast('已开启自动同步'); }
-}
-
-/* --- 旧 Supabase 时代的入口（UI 已移除，留空实现防别处引用报错） --- */
-function accToggleAdv(){}
-function cloudSaveServer(){}
-function copySql(){}
-
-/* --- 设置页渲染 --- */
-function renderAcc(){
-  const anon=document.getElementById('accAnon'), on=document.getElementById('accOn');
-  if(!anon||!on) return;
-  if(CLOUD.on){
-    anon.style.display='none'; on.style.display='block';
-    const em=document.getElementById('accEmail');
-    if(em) em.textContent=CLOUD.uid||'已登录';
-    const st=document.getElementById('accLast');
-    if(st) st.textContent = CLOUD.busy ? '同步中…' : ('上次同步：'+cloudTime(CLOUD.lastAt));
-    const box=document.getElementById('accAuto');
-    if(box) box.checked=!!CLOUD.auto;
-    const sv=document.getElementById('accSrv');
-    if(sv) sv.textContent = '账号：'+(CLOUD.uid||'')+' · 服务器已内置，无需配置';
-  }else{
-    anon.style.display='block'; on.style.display='none';
-    const hint=document.getElementById('accNoSrv');
-    if(hint) hint.style.display='block';
-    const mig=document.getElementById('accMig');
-    if(mig){
-      const gc=ghCfg();
-      mig.style.display = (gc.token && gc.token.length>10) ? 'block' : 'none';
-    }
-  }
-}
+function cloudApplySession(){  const c=cloudCfg();  CLOUD.on   = !!c.token;  CLOUD.token= c.token||'';  CLOUD.user = c.user||'';  CLOUD.lastAt = c.lastAt||0;  CLOUD.auto = (c.auto===undefined) ? true : !!c.auto;}function cloudSaveSession(s){  const c=cloudCfg();  c.token=s.token; c.user=s.user; c.lastAt=Date.now();  cloudSetCfg(c); cloudApplySession();}function cloudClearSession(){  const c=cloudCfg();  delete c.token; delete c.user; delete c.lastAt;  cloudSetCfg(c); cloudApplySession();}function cloudStatus(msg, cls){  const el=document.getElementById('accMsg'); if(!el) return;  el.textContent=msg; el.className='gh-status'+(cls?(' '+cls):'');}function cloudTime(ts){  if(!ts) return '还没同步过';  const d=new Date(ts), n=new Date();  const hm=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');  if(d.toDateString()===n.toDateString()) return '今天 '+hm;  return (d.getMonth()+1)+'/'+d.getDate()+' '+hm;}/* --- 网络层 --- */async function apiReq(path, opts){  opts=opts||{};  const h=Object.assign({'Content-Type':'application/json'}, opts.headers||{});  if(CLOUD.token) h['Authorization']='Bearer '+CLOUD.token;  let ctl=null;  if(typeof AbortController!=='undefined') ctl=new AbortController();  const tm=setTimeout(function(){ if(ctl) ctl.abort(); }, 20000);  let r;  try{    r=await fetch('/api'+path, {method:opts.method||'GET', headers:h, body:opts.body, signal:ctl?ctl.signal:undefined});  }catch(e){ clearTimeout(tm); throw Object.assign(new Error('连不上服务器'), {net:true}); }  clearTimeout(tm);  const txt=await r.text();  let data=null;  try{ data=txt?JSON.parse(txt):null; }catch(e){ data=txt; }  if(!r.ok){    let msg=(data&&(data.error||data.msg||data.message))||('HTTP '+r.status);    throw Object.assign(new Error(msg), {status:r.status, data:data});  }  return data;}function apiErrText(e){  const m=String((e&&e.message)||'');  if(e&&e.net) return '连不上服务器，换下网络（Wi-Fi / 流量）再试';  if(e&&e.status===401) return '登录已过期或账号还没创建，重新进一次页面';  if(e&&e.status===403) return '没通过站点验证：刷新页面，走一遍邮箱验证码（Cloudflare Access）';  return m||'出错了';}/* --- 输入校验 --- */function cloudCheckInput(){  const gU=document.getElementById('gateUser'), gP=document.getElementById('gatePw');  const sU=document.getElementById('clUser'), sP=document.getElementById('clPw');  const u=((gU&&gU.value)||'').trim() || ((sU&&sU.value)||'').trim();  const pw=((gP&&gP.value)||'').trim() || ((sP&&sP.value)||'').trim();  if(!/^[A-Za-z0-9_]{4,32}$/.test(u)) return {err:'用户名 4-32 位（字母、数字、下划线）'};  if(pw.length<8) return {err:'密码至少 8 位'};  return {u:u, pw:pw};}/* --- 首次创建账号 / 登录 --- */async function cloudSignup(){  const v=cloudCheckInput(); if(v.err){ cloudStatus('⚠️ '+v.err,'err'); return; }  cloudStatus('正在检查账号是否已创建…');  try{    const st=await apiReq('/setup-status');    if(st.setup){ cloudStatus('⚠️ 账号已经建好了，直接点「登录」','warn'); return; }  }catch(e){ cloudStatus('❌ '+apiErrText(e),'err'); return; }  cloudStatus('正在创建你的专属账号…');  try{    const s=await apiReq('/setup', {method:'POST', body:JSON.stringify({username:v.u, password:v.pw})});    cloudSaveSession(s);    cloudAfterLogin('账号已创建');  }catch(e){ cloudStatus('❌ '+apiErrText(e),'err'); }}async function cloudLogin(){  const v=cloudCheckInput(); if(v.err){ cloudStatus('⚠️ '+v.err,'err'); return; }  cloudStatus('正在登录…');  try{    const s=await apiReq('/login', {method:'POST', body:JSON.stringify({username:v.u, password:v.pw})});    cloudSaveSession(s);    cloudAfterLogin('登录成功');  }catch(e){ cloudStatus('❌ '+apiErrText(e),'err'); }}function cloudAfterLogin(msg){  gateHide();  renderAcc(); renderSubUI();  cloudStatus('☁️ '+msg+'，正在对齐数据…','ok');  setTimeout(function(){ cloudSync(false,'both'); }, 120);}async function cloudLogout(){  if(!confirm('退出后本机不再自动同步（学习记录不会删，仍在本机）。确定？')) return;  cloudClearSession();  renderAcc(); renderSubUI(); cloudStatus('已退出');}/* --- 同步 --- */async function cloudSync(silent, mode){  mode=mode||'both';  if(!CLOUD.on){ if(!silent) toast('先登录账号'); return; }  if(CLOUD.busy){ CLOUD.dirty=true; if(!silent) cloudStatus('上一轮还没结束，稍后自动补一次…'); return; }  CLOUD.busy=true; CLOUD.dirty=false; CLOUD.suppress=true;  if(!silent) cloudStatus(mode==='pull'?'正在下载…':(mode==='push'?'正在上传…':'同步中…'));  try{    let changed=0, bytes=0, ok=false;    for(let attempt=0; attempt<3 && !ok; attempt++){      let remote=null;      if(mode!=='push'){        try{ const resp=await apiReq('/sync'); remote = (resp && resp.data) ? resp.data : null; }        catch(e){ if(e.status!==404) throw e; }      }      if(remote && typeof remote==='object') changed += ghMerge(remote);      if(mode==='pull'){ ok=true; break; }      const pack=ghPack();      const raw=JSON.stringify(pack);      if(raw.length>3.5*1024*1024) throw Object.assign(new Error('数据太大'), {big:true, size:Math.round(raw.length/1024)});      await apiReq('/sync', {method:'PUT', body:raw});      bytes=raw.length; ok=true;    }    if(!ok) throw new Error('云端被另一台设备同时改动，重试三次仍冲突');    const c=cloudCfg(); c.lastAt=Date.now(); cloudSetCfg(c); CLOUD.lastAt=c.lastAt;    const sizeTxt=bytes?(' · '+Math.max(1,Math.round(bytes/1024))+' KB'):'';    cloudStatus('✅ 已同步 '+cloudTime(CLOUD.lastAt)+(changed?(' · 合并 '+changed+' 条'):'')+sizeTxt,'ok');    if(!silent) toast(mode==='pull'?'已从云端下载 ✅':'同步完成 ✅');  }catch(e){    CLOUD.err=e.message||'';    const t=e.big?('数据 '+e.size+' KB 超过 3.5 MB 上限，多是手写笔迹攒太多'):apiErrText(e);    cloudStatus('❌ 同步失败：'+t,'err');    if(!silent) toast('同步失败：'+t);  }finally{    CLOUD.busy=false; CLOUD.suppress=false;    if(CLOUD.dirty) setTimeout(function(){ CLOUD.dirty=false; cloudSync(true); }, 300);  }}function cloudPushOnly(){  if(!CLOUD.on){ toast('先登录账号'); return; }  if(!confirm('把本机数据覆盖到云端（云端更新的记录会被覆盖）。确定？')) return;  cloudSync(false,'push');}function cloudPullOnly(){  if(!CLOUD.on){ toast('先登录账号'); return; }  cloudSync(false,'pull');}function cloudTouch(){  if(CLOUD.suppress || !CLOUD.on || !CLOUD.auto) return;  CLOUD.dirty=true;  if(CLOUD.timer) return;  CLOUD.timer=setTimeout(function(){    CLOUD.timer=null;    if(CLOUD.dirty) cloudSync(true);  }, 4000);}function cloudSetAuto(v){  const c=cloudCfg(); c.auto=v?1:0; cloudSetCfg(c); CLOUD.auto=!!v;  if(v && CLOUD.on){ cloudSync(true); toast('已开启自动同步'); }}/* --- 设置页渲染 --- */function renderAcc(){  const anon=document.getElementById('accAnon'), on=document.getElementById('accOn');  if(!anon||!on) return;  if(CLOUD.on){    anon.style.display='none'; on.style.display='block';    const em=document.getElementById('accEmail'); if(em) em.textContent=CLOUD.user||'已登录';    const st=document.getElementById('accLast');    if(st) st.textContent=CLOUD.busy?'同步中…':('上次同步：'+cloudTime(CLOUD.lastAt));    const box=document.getElementById('accAuto'); if(box) box.checked=!!CLOUD.auto;    const sv=document.getElementById('accSrv'); if(sv) sv.textContent='服务器：你的专属 Cloudflare Worker（ddddlyt.top）';  }else{    anon.style.display='block'; on.style.display='none';  }}
 function toggleGhCard(){
   const el=document.getElementById('ghCard'); if(!el) return;
   el.style.display = (el.style.display==='none') ? 'block' : 'none';
 }
-
 
 
 /* ==================== 全屏图片查看器（题图 / 手写笔迹共用） ==================== */
@@ -5973,178 +5252,15 @@ setTimeout(function(){
 renderHome();
 
 if('serviceWorker' in navigator && location.protocol==='https:'){
-  /* SW 已停用：由 Worker 提供自注销脚本，避免缓存旧版页面 */
+  navigator.serviceWorker.register('./sw.js').catch(function(){});
 }
 
 
 /* ================= v33 访问口令门 + 投稿箱 ================= */
-var GATE_SHA='56dde44c56968d7a2b678c2c100795e95ac68d5b2802ff1a192b3858ff566a6a'; /* sha256("xnu2026")——改口令找站长换 */
-var GATE_CB=null;
-function sha256hex(s){
-  var K=[0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
-  var H=[0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19];
-  var msg=unescape(encodeURIComponent(s));
-  var l=msg.length, words=new Array(((l+8>>6)+1)*16).fill(0);
-  for(var i=0;i<l;i++) words[i>>2]|=(msg.charCodeAt(i)&0xff)<<(24-(i&3)*8);
-  words[l>>2]|=0x80<<(24-(l&3)*8);
-  words[words.length-1]=l*8;
-  function rr(x,n){return (x>>>n)|(x<<(32-n));}
-  for(var j=0;j<words.length;j+=16){
-    var w=words.slice(j,j+16);
-    for(var i=16;i<64;i++){
-      var a15=w[i-15],a2=w[i-2];
-      var s0=rr(a15,7)^rr(a15,18)^(a15>>>3);
-      var s1=rr(a2,17)^rr(a2,19)^(a2>>>10);
-      w[i]=(w[i-16]+s0+w[i-7]+s1)|0;
-    }
-    var a=H[0],b=H[1],c=H[2],d=H[3],e=H[4],f=H[5],g=H[6],h=H[7];
-    for(var i=0;i<64;i++){
-      var S1=rr(e,6)^rr(e,11)^rr(e,25);
-      var ch=(e&f)^(~e&g);
-      var t1=(h+S1+ch+K[i]+w[i])|0;
-      var S0=rr(a,2)^rr(a,13)^rr(a,22);
-      var mj=(a&b)^(a&c)^(b&c);
-      var t2=(S0+mj)|0;
-      h=g;g=f;f=e;e=(d+t1)|0;d=c;c=b;b=a;a=(t1+t2)|0;
-    }
-    H[0]=(H[0]+a)|0;H[1]=(H[1]+b)|0;H[2]=(H[2]+c)|0;H[3]=(H[3]+d)|0;
-    H[4]=(H[4]+e)|0;H[5]=(H[5]+f)|0;H[6]=(H[6]+g)|0;H[7]=(H[7]+h)|0;
-  }
-  var out='';
-  for(var i=0;i<8;i++) out+=('00000000'+((H[i]>>>0).toString(16))).slice(-8);
-  return out;
-}
-
-function gateShow(cb){
-  GATE_CB=cb||null;
-  var g=document.getElementById('gate');
-  g.style.display='flex';
-  document.body.style.overflow='hidden';
-  var inp=document.getElementById('gatePw');
-  document.getElementById('gateErr').textContent='';
-  inp.value='';
-  setTimeout(function(){ inp.focus(); }, 60);
-}
-function gateHide(){
-  document.getElementById('gate').style.display='none';
-  document.body.style.overflow='';
-}
-function gateTry(){
-  var v=document.getElementById('gatePw').value||'';
-  if(sha256hex(v)===GATE_SHA){
-    try{ localStorage.setItem('xzt_gate','1'); }catch(e){}
-    document.getElementById('gateErr').textContent='';
-    gateHide();
-    var cb=GATE_CB; GATE_CB=null;
-    if(cb) cb();
-  }else{
-    document.getElementById('gateErr').textContent='口令不对，再想想';
-    var g=document.getElementById('gate');
-    g.classList.remove('shake'); void g.offsetWidth; g.classList.add('shake');
-  }
-}
-function gateForget(){
-  try{ localStorage.removeItem('xzt_gate'); }catch(e){}
-  toast('本机访问锁记忆已清除，下次进入需重新输口令');
-}
-function gateBoot(){ gateHide(); }
-document.addEventListener('keydown', function(e){
-  var g=document.getElementById('gate');
-  if(g && g.style.display!=='none' && e.key==='Enter') gateTry();
-});
-/* 高级设置展开也要过一道口令（本会话内只问一次） */
-(function(){
-  var orig=window.accToggleAdv;
-  window.accToggleAdv=function(){
-    if(orig) orig();
-  };
-})();
+/* ================= v37 账号门锁（替代旧访问口令门） ================= *//* 站点已被 Cloudflare Access 邮箱锁挡在门外（别人连页面都打不开）。   进门后这层负责：未登录就弹账号框，登录后隐藏，数据走你自己的 Worker。 */var GATE_CB=null;function gateShow(cb){  GATE_CB=cb||null;  var g=document.getElementById('gate'); if(!g) return;  g.style.display='flex';  document.body.style.overflow='hidden';  var u=document.getElementById('gateUser'), p=document.getElementById('gatePw');  var err=document.getElementById('gateErr'); if(err) err.textContent='';  if(u) u.value=''; if(p) p.value='';  setTimeout(function(){ if(u) u.focus(); else if(p) p.focus(); }, 60);}function gateHide(){  var g=document.getElementById('gate'); if(!g) return;  g.style.display='none';  document.body.style.overflow='';}function gateBoot(){  cloudApplySession();  renderAcc(); renderSubUI();  if(!CLOUD.on) gateShow();}document.addEventListener('keydown', function(e){  var g=document.getElementById('gate');  if(g && g.style.display!=='none' && e.key==='Enter'){    e.preventDefault();    cloudLogin();  }});
 
 /* --- 投稿箱 --- */
-var SUB={file:null};
-function subGo(){
-  go('set');
-  setTimeout(function(){
-    var el=document.getElementById('subCard');
-    if(el){ el.scrollIntoView({behavior:'smooth',block:'center'}); }
-  }, 250);
-}
-function subRefreshUI(){
-  var on=!!CLOUD.on;
-  document.getElementById('subOff').style.display=on?'none':'block';
-  document.getElementById('subOn').style.display=on?'block':'none';
-  if(on) subList();
-}
-function subPick(inp){
-  var f=inp.files&&inp.files[0];
-  if(!f) return;
-  if(f.size>4*1024*1024){
-    SUB.file=null; inp.value='';
-    document.getElementById('subFileInfo').textContent='⚠️ '+f.name+' 有 '+Math.round(f.size/1024/1024*10)/10+'MB，超过 4MB 了——照片可以在手机上先截个图或压缩一下再传';
-    return;
-  }
-  SUB.file={name:f.name, type:f.type||'application/octet-stream', size:f.size};
-  document.getElementById('subFileInfo').textContent='✅ 已选 '+f.name+'（'+Math.round(f.size/1024)+'KB）';
-  var rd=new FileReader();
-  rd.onload=function(){ SUB.file.data=rd.result; };
-  rd.readAsDataURL(f);
-}
-async function subSend(){
-  if(!SUB.file || !SUB.file.data){ toast('先选一个文件'); return; }
-  if(!CLOUD.on){ toast('先登录账号'); return; }
-  var btns=document.querySelectorAll('#subCard .mini-btn.blue');
-  btns.forEach(function(b){ b.disabled=true; });
-  try{
-    await cloudFetch('/api/sub', {
-      method:'POST',
-      body: JSON.stringify({
-        fname: SUB.file.name,
-        ftype: SUB.file.type,
-        fsize: SUB.file.size,
-        note: (document.getElementById('subNote').value||'').slice(0,100),
-        content: SUB.file.data
-      })
-    }, true);
-    toast('投出去了✅ 站长收到会处理');
-    SUB.file=null;
-    document.getElementById('subFile').value='';
-    document.getElementById('subNote').value='';
-    document.getElementById('subFileInfo').textContent='还没选文件（支持照片、PDF、Word、压缩包等）';
-    subList();
-  }catch(e){
-    toast('投稿失败：'+(e.message||'网络问题'));
-  }finally{
-    btns.forEach(function(b){ b.disabled=false; });
-  }
-}
-async function subList(){
-  var el=document.getElementById('subList'); if(!el) return;
-  if(!CLOUD.uid){ el.innerHTML='<p class="gh-status">未登录</p>'; return; }
-  try{
-    var s=await cloudFetch('/api/sub', {}, true);
-    var rows=(s&&s.items)||[];
-    if(!rows.length){ el.innerHTML='<p class="gh-status">还没有投过，第一条放这儿</p>'; return; }
-    var h='';
-    for(var i=0;i<rows.length;i++){
-      var r=rows[i], d=new Date(r.at||r.created_at||Date.now());
-      var ds=(d.getMonth()+1)+'/'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
-      h+='<div class="sub-item"><span>📄</span><span class="sub-n">'+escA(r.fname)+'　'+esc(r.note||'')+'</span>'
-        +'<span class="sub-d">'+Math.round((r.fsize||0)/1024)+'KB · '+ds+'</span>'
-        +'<span class="hw-del" onclick="subDel(\''+r.id+'\')">删</span></div>';
-    }
-    el.innerHTML=h;
-  }catch(e){
-    el.innerHTML='<p class="gh-status">列表加载失败（'+esc(e.message||'')+'）</p>';
-  }
-}
-async function subDel(id){
-  if(!confirm('删掉这条投稿？')) return;
-  try{
-    await cloudFetch('/api/sub/'+encodeURIComponent(id), {method:'DELETE'}, true);
-    subList();
-  }catch(e){ toast('删除失败'); }
-}
-
+var SUB={file:null};function subGo(){  go('set');  setTimeout(function(){    var el=document.getElementById('subCard');    if(el){ el.scrollIntoView({behavior:'smooth',block:'center'}); }  }, 250);}function subRefreshUI(){  var on=!!CLOUD.on;  var off=document.getElementById('subOff'); if(off) off.style.display=on?'none':'block';  var onEl=document.getElementById('subOn'); if(onEl) onEl.style.display=on?'block':'none';  if(on) subList();}function renderSubUI(){ subRefreshUI(); }function subPick(inp){  var f=inp.files&&inp.files[0];  if(!f) return;  if(f.size>4*1024*1024){    SUB.file=null; inp.value='';    document.getElementById('subFileInfo').textContent='⚠️ '+f.name+' 有 '+Math.round(f.size/1024/1024*10)/10+'MB，超过 4MB 了——照片可以在手机上先截个图或压缩一下再传';    return;  }  SUB.file={name:f.name, type:f.type||'application/octet-stream', size:f.size};  document.getElementById('subFileInfo').textContent='✅ 已选 '+f.name+'（'+Math.round(f.size/1024)+'KB）';  var rd=new FileReader();  rd.onload=function(){ SUB.file.data=rd.result; };  rd.readAsDataURL(f);}async function subSend(){  if(!SUB.file || !SUB.file.data){ toast('先选一个文件'); return; }  if(!CLOUD.on){ toast('先登录账号'); return; }  var btns=document.querySelectorAll('#subCard .mini-btn.blue');  btns.forEach(function(b){ b.disabled=true; });  try{    await apiReq('/sub', {method:'POST', body:JSON.stringify({      fname:SUB.file.name, ftype:SUB.file.type, fsize:SUB.file.size,      note:(document.getElementById('subNote').value||'').slice(0,100), content:SUB.file.data    })});    toast('投出去了✅ 站长收到会处理');    SUB.file=null;    document.getElementById('subFile').value='';    document.getElementById('subNote').value='';    document.getElementById('subFileInfo').textContent='还没选文件（支持照片、PDF、Word、压缩包等）';    subList();  }catch(e){ toast('投稿失败：'+apiErrText(e)); }  finally{ btns.forEach(function(b){ b.disabled=false; }); }}async function subList(){  var el=document.getElementById('subList'); if(!el) return;  if(!CLOUD.on){ el.innerHTML='<p class="gh-status">未登录</p>'; return; }  try{    var r=await apiReq('/sub'); var rows=r.items||[];    if(!rows.length){ el.innerHTML='<p class="gh-status">还没有投过，第一条放这儿</p>'; return; }    var h='';    for(var i=0;i<rows.length;i++){      var x=rows[i], d=new Date(x.at);      var ds=(d.getMonth()+1)+'/'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');      h+='<div class="sub-item"><span>📄</span><span class="sub-n">'+escA(x.fname)+'　'+esc(x.note||'')+'</span>'        +'<span class="sub-d">'+Math.round((x.fsize||0)/1024)+'KB · '+ds+'</span>'        +'<span class="hw-del" onclick="subDel(\''+x.id+'\')">删</span></div>';    }    el.innerHTML=h;  }catch(e){ el.innerHTML='<p class="gh-status">列表加载失败（'+esc(e.message||'')+'）</p>'; }}async function subDel(id){  if(!confirm('删掉这条投稿？')) return;  try{ await apiReq('/sub/'+id, {method:'DELETE'}); subList(); }catch(e){ toast('删除失败'); }}
 /* 登录态变化时刷新投稿箱 UI（挂到原有的状态刷新点上） */
 (function(){
   var orig=cloudStatus;
@@ -6170,9 +5286,6 @@ window.addEventListener('load', function(){ setTimeout(gateBoot, 50); });
     <button onclick="imgvClose()">✕ 关闭</button>
   </div>
 </div>
-
-<!-- 备份/恢复已内置于「设置 → 更多设置 → 手动互传」（导出文件/选择文件导入/复制数据/粘贴导入），
-     此前的右下角浮动条与新功能重复且遮挡底部导航，已移除。 -->
 
 </body>
 </html>

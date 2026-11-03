@@ -50,6 +50,25 @@ audio{width:100%; height:38px;}
 .tbtn{display:inline-block; margin:4px 0 12px; padding:8px 14px; border-radius:10px; background:var(--panel2); color:var(--teal); font-size:13px; font-weight:600; border:1px solid var(--line); cursor:pointer;}
 .transcript{display:none; background:#10131a; border:1px solid var(--line); border-radius:12px; padding:14px; font-size:13px; line-height:1.85; color:var(--sub); white-space:pre-wrap; word-break:break-word; margin-bottom:12px;}
 .transcript.show{display:block;}
+/* ---------- 打卡日历 ---------- */
+#calView{display:none; position:fixed; inset:0; z-index:60; background:var(--bg); overflow-y:auto;}
+#calView.show{display:block;}
+.cal-head{display:flex; align-items:center; gap:10px; padding:14px; position:sticky; top:0; background:rgba(15,17,21,.94); backdrop-filter:blur(8px); border-bottom:1px solid var(--line);}
+.cal-head .bk{font-size:14px; color:var(--sub); cursor:pointer;}
+.cal-head .tt{font-size:16px; font-weight:800;}
+.cal-body{padding:16px 16px 40px; max-width:560px; margin:0 auto;}
+.cal-sum{background:var(--panel); border-radius:16px; padding:16px; margin-bottom:14px; text-align:center;}
+.cal-sum b{font-size:30px; font-weight:800; color:var(--ok);}
+.cal-sum .lbl{font-size:12px; color:var(--sub); margin-top:4px;}
+.cal-sum .today-btn{display:block; width:100%; margin-top:14px; padding:13px; border-radius:12px; font-size:15px; font-weight:700; background:linear-gradient(135deg,#34c759,#28a745); color:#fff; border:none; cursor:pointer;}
+.cal-sum .today-btn.done{background:var(--panel2); color:var(--sub);}
+.cal-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:8px;}
+.cal-cell{aspect-ratio:1; border-radius:12px; background:var(--panel2); border:1.5px solid var(--line); display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:13px; font-weight:700; color:var(--sub);}
+.cal-cell small{font-size:9px; font-weight:400; color:var(--dim);}
+.cal-cell.hit{background:rgba(52,199,89,.15); border-color:var(--ok); color:var(--ok);}
+.cal-cell.today{border-color:var(--purple); color:var(--txt);}
+.cal-cell.today.hit{background:linear-gradient(135deg,rgba(52,199,89,.25),rgba(10,132,255,.15));}
+.cal-note{font-size:11px; color:var(--dim); margin-top:12px; line-height:1.7;}
 .done{text-align:center; padding:40px 20px;}
 .done .big{font-size:40px; margin-bottom:10px;}
 .done .t{font-size:18px; font-weight:800; margin-bottom:6px;}
@@ -116,6 +135,7 @@ audio{width:100%; height:38px;}
 <div class="wrap">
   <button class="tbtn" id="transBtn">📜 显示听力原文</button>
   <button class="tbtn" id="jtBtn">🎯 精听模式（逐句听写）</button>
+  <button class="tbtn" id="calBtn" style="color:var(--ok)">📅 42天打卡</button>
   <div class="transcript" id="transcript"></div>
   <div id="qarea"></div>
   <div id="doneArea"></div>
@@ -154,6 +174,19 @@ audio{width:100%; height:38px;}
       <div class="jt-res" id="jtRes"></div>
       <div class="jt-orig" id="jtOrig"></div>
     </div>
+  </div>
+</div>
+
+<div id="calView">
+  <div class="cal-head"><div class="bk" id="calBack">← 返回</div><div class="tt">📅 精听 42 天打卡</div></div>
+  <div class="cal-body">
+    <div class="cal-sum">
+      <b id="calCount">0</b>
+      <div class="lbl">累计打卡天数 · 目标 42 天（2026-11-04 → 2026-12-15 考前）</div>
+      <button class="today-btn" id="calToday">✅ 今日打卡</button>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+    <div class="cal-note">规则：只测量不评判。完成一次"精听模式"整组练习（或至少 10 句听写）算打卡一天；精听最后一句提交时会自动帮你打卡。漏一天不用补，格子空着就空着。</div>
   </div>
 </div>
 
@@ -472,6 +505,47 @@ document.getElementById('jtPrev').onclick=()=>jtPrev();
 document.querySelectorAll('.jt-rate .r').forEach(r=>{ r.onclick=()=>{ jtRate=+r.dataset.r; document.querySelectorAll('.jt-rate .r').forEach(x=>x.classList.toggle('on',x===r)); if(jtPlaying) AU.playbackRate=jtRate; }; });
 
 function esc(s){return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+
+/* ===================== 42天打卡 ===================== */
+const CAL_START = new Date(2026,10,4);   // 2026-11-04
+const CAL_DAYS = 42;
+let punches = JSON.parse(localStorage.getItem('cet6_jt_punch') || '[]');
+function todayStr(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function savePunches(){ localStorage.setItem('cet6_jt_punch', JSON.stringify(punches)); }
+function punchToday(){
+  const t=todayStr();
+  if(!punches.includes(t)){ punches.push(t); savePunches(); }
+  calRender();
+}
+function calRender(){
+  const set=new Set(punches);
+  const grid=document.getElementById('calGrid');
+  grid.innerHTML='';
+  const now=new Date(); now.setHours(0,0,0,0);
+  const t=todayStr();
+  for(let i=0;i<CAL_DAYS;i++){
+    const d=new Date(CAL_START); d.setDate(d.getDate()+i);
+    if(d>now) break;
+    const ds=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    const cell=document.createElement('div');
+    let c='cal-cell';
+    if(set.has(ds)) c+=' hit';
+    if(ds===t) c+=' today';
+    cell.className=c;
+    cell.innerHTML=(d.getMonth()+1)+'/'+d.getDate()+(set.has(ds)?' ✔':'');
+    grid.appendChild(cell);
+  }
+  document.getElementById('calCount').textContent=punches.length;
+  const btn=document.getElementById('calToday');
+  if(set.has(t)){ btn.classList.add('done'); btn.textContent='✔ 今日已打卡'; }
+  else{ btn.classList.remove('done'); btn.textContent='✅ 今日打卡'; }
+}
+document.getElementById('calBtn').onclick=()=>{ calRender(); document.getElementById('calView').classList.add('show'); document.body.style.overflow='hidden'; };
+document.getElementById('calBack').onclick=()=>{ document.getElementById('calView').classList.remove('show'); document.body.style.overflow=''; };
+document.getElementById('calToday').onclick=punchToday;
+// 精听最后一句提交 → 自动打卡
+const _jtSubmitOld=jtSubmit;
+jtSubmit=function(){ _jtSubmitOld(); const key=LISTEN.sections[jtSec].key; if(jtIdx===jtList().length-1){ punchToday(); } };
 
 render();
 </script>

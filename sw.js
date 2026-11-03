@@ -1,6 +1,14 @@
 /* 刷题总台 Service Worker：离线也能刷题 */
-const CACHE = 'shuati-v36';
-const ASSETS = ['./', './index.html', './listening.html', './manifest.json', './icon-192.png', './icon-512.png', './pako.min.js', './img/glycolysis.svg', './img/tca.svg', './img/replication-fork.svg', './notes-biochem.html'];
+const CACHE = 'shuati-v37';
+const ASSETS = ['./', './index.html', './listening.html', './manifest.json', './icon-192.png', './icon-512.png', './pako.min.js', './img/glycolysis.svg', './img/tca.svg', './img/replication-fork.svg', './notes-biochem.html', './math-ocr.html',
+  './vendor/katex/katex.min.css', './vendor/katex/katex.min.js', './vendor/katex/contrib/auto-render.min.js',
+  './vendor/katex/fonts/KaTeX_Main-Regular.woff2', './vendor/katex/fonts/KaTeX_Main-Bold.woff2',
+  './vendor/katex/fonts/KaTeX_Math-Italic.woff2', './vendor/katex/fonts/KaTeX_Math-Regular.woff2',
+  './vendor/katex/fonts/KaTeX_Size1-Regular.woff2', './vendor/katex/fonts/KaTeX_Size2-Regular.woff2',
+  './vendor/katex/fonts/KaTeX_Size3-Regular.woff2', './vendor/katex/fonts/KaTeX_Size4-Regular.woff2',
+  './vendor/katex/fonts/KaTeX_AMS-Regular.woff2', './vendor/katex/fonts/KaTeX_Caligraphraphic-Regular.woff2',
+  './vendor/katex/fonts/KaTeX_Fraktur-Regular.woff2', './vendor/katex/fonts/KaTeX_Script-Regular.woff2',
+  './vendor/katex/fonts/KaTeX_SansSerif-Regular.woff2', './vendor/katex/fonts/KaTeX_Typewriter-Regular.woff2'];
 
 self.addEventListener('install', e => {
   e.waitUntil(
