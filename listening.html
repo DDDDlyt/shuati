@@ -80,6 +80,9 @@ audio{width:100%; height:38px;}
 .foot{text-align:center; font-size:11px; color:var(--dim); padding:14px;}
 /* ---------- 精听模式 ---------- */
 #jtBtn{color:var(--warn);}
+/* 手写板 */
+#hwPad{width:100%; height:190px; background:#f7f4ec; border:1px solid var(--line); border-radius:12px; touch-action:none; display:block; cursor:crosshair;}
+.hw-busy{opacity:.55; pointer-events:none;}
 #jtView{position:fixed; inset:0; z-index:60; background:var(--bg); display:none; flex-direction:column; overflow:hidden;}
 #jtView.show{display:flex;}
 .jt-head{display:flex; align-items:center; gap:10px; padding:12px 14px; border-bottom:1px solid var(--line); background:rgba(15,17,21,.96);}
@@ -135,6 +138,7 @@ audio{width:100%; height:38px;}
 <div class="wrap">
   <button class="tbtn" id="transBtn">📜 显示听力原文</button>
   <button class="tbtn" id="jtBtn">🎯 精听模式（逐句听写）</button>
+  <button class="tbtn" id="allBtn">📋 整卷摊开</button>
   <button class="tbtn" id="calBtn" style="color:var(--ok)">📅 42天打卡</button>
   <div class="transcript" id="transcript"></div>
   <div id="qarea"></div>
@@ -165,6 +169,16 @@ audio{width:100%; height:38px;}
       </div>
       <div class="jt-tip">听一句、写一句，提交后逐词对照评分（忽略大小写与标点）。写不出可“跳过”或先看原文。</div>
       <textarea class="jt-input" id="jtInput" placeholder="把听到的句子打在这里…"></textarea>
+      <div class="jt-ctrl" style="margin-top:8px"><div class="jt-btn" id="hwToggle">✍️ 手写板</div></div>
+      <div id="hwWrap" style="display:none">
+        <canvas id="hwPad"></canvas>
+        <div class="jt-ctrl" style="margin-top:8px">
+          <div class="jt-btn warn" id="hwClear">🧹 清空</div>
+          <div class="jt-btn" id="hwUndo">↩ 撤销</div>
+          <div class="jt-btn pri" id="hwRec">🔍 识别并填入</div>
+        </div>
+        <div class="jt-tip" id="hwTip" style="margin-top:6px">用手指或触控笔在上方写句子 → 点「识别并填入」，识别结果会填进听写框，再提交判分。</div>
+      </div>
       <div class="jt-ctrl" style="margin-top:10px">
         <div class="jt-btn pri" id="jtSubmit">提交判分</div>
         <div class="jt-btn warn" id="jtSkip">跳过本句</div>
@@ -262,6 +276,7 @@ function render(){
   document.getElementById('transBtn').textContent='📜 显示听力原文';
   document.getElementById('audioHint').textContent='本板块音频位置：'+(SEC_TIME[s.key]||'整套录音')+'。拖动进度条定位该段，听后答题（整套约 28 分钟）。';
   const qs=s.questions;
+  if(viewAll){ renderAllQ(s); return; }
   if(qIdx>=qs.length){ renderDone(); return; }
   renderQ(s, qs[qIdx]);
   updateProgress();
@@ -375,6 +390,74 @@ function updateProgress(){
   document.getElementById('pmRight').textContent='答对 '+ok;
 }
 
+/* ===================== 整卷摊开（预判视图） ===================== */
+let viewAll = false;
+document.getElementById('allBtn').onclick=()=>{
+  viewAll=!viewAll;
+  document.getElementById('allBtn').textContent = viewAll?'🔙 收回单题':'📋 整卷摊开';
+  render();
+};
+function allCardHTML(s,q){
+  const id=qid(q);
+  const sh=ensureShuffle(q);
+  const ci='ABCD'.indexOf(q.ans);
+  const correctPos=sh.indexOf(ci);
+  const answered=isAnswered(q);
+  const p=prog[id];
+  const ok=p?p.ok:false;
+  const letters='ABCD';
+  let html='<div class="qcard">';
+  html+='<div class="qno">第 '+q.n+' 题 · '+s.name+'</div>';
+  html+='<div class="stem"><span class="en">'+esc(q.q||'(听音频作答)')+'</span></div>';
+  html+='<div class="opts">';
+  sh.forEach((orig,pos)=>{
+    let cls='opt';
+    if(answered){
+      if(pos===correctPos) cls+=' sel-r';
+      else if(ok===false && pos===p.picked) cls+=' sel-w';
+      else cls+=' dim';
+    }
+    html+='<div class="'+cls+'" data-pos="'+pos+'"><span class="lt">'+letters[pos]+'</span><span>'+esc(q.opts[orig])+'</span></div>';
+  });
+  html+='</div>';
+  if(answered){
+    html+= ok?'<div class="fb show"><span class="cor">✓ 答对</span>　正确答案 '+letters[correctPos]+') '+esc(q.opts[ci])+'</div>'
+             :'<div class="fb show"><span class="wrg">✗ 答错</span>　正确答案 '+letters[correctPos]+') '+esc(q.opts[ci])+'（你选了 '+letters[p.picked]+'）</div>';
+  }
+  html+='</div>';
+  return html;
+}
+function renderAllQ(s){
+  const qs=s.questions;
+  qarea.innerHTML='<div class="qoff-card" style="margin-bottom:12px">📋 已摊开本板块全部 <b>'+qs.length+'</b> 题。<b>先扫题预判对话内容</b>，再听音频作答；点任意选项即作答，进度照常记录。</div><div id="allList"></div>';
+  doneArea.innerHTML='';
+  const list=document.getElementById('allList');
+  qs.forEach((q)=>{
+    const holder=document.createElement('div');
+    holder.innerHTML=allCardHTML(s,q);
+    const card=holder.firstChild;
+    bindAllCard(card,s,q);
+    list.appendChild(card);
+  });
+  updateProgress();
+}
+function bindAllCard(card,s,q){
+  const id=qid(q);
+  const sh=ensureShuffle(q);
+  const ci='ABCD'.indexOf(q.ans);
+  card.querySelectorAll('.opt').forEach(el=>{
+    el.onclick=()=>{
+      const pos=+el.dataset.pos;
+      prog[id]={ok:(pos===sh.indexOf(ci)), picked:pos};
+      localStorage.setItem(STORE, JSON.stringify(prog));
+      const h=document.createElement('div');
+      h.innerHTML=allCardHTML(s,q);
+      card.replaceWith(h.firstChild);
+      updateProgress();
+    };
+  });
+}
+
 document.getElementById('transBtn').onclick=()=>{
   const t=document.getElementById('transcript');
   t.classList.toggle('show');
@@ -417,6 +500,7 @@ function jtRender(){
   const s=jtGet();
   document.getElementById('jtNo').textContent='第 '+(jtIdx+1)+' 句'+(s&&s.sp?'（'+s.sp+'）':'');
   document.getElementById('jtInput').value='';
+  if(window.__hwClear) window.__hwClear();
   document.getElementById('jtInput').disabled=false;
   document.getElementById('jtRes').className='jt-res';
   document.getElementById('jtRes').innerHTML='';
@@ -503,6 +587,79 @@ document.getElementById('jtSkip').onclick=()=>{ jtRec[LISTEN.sections[jtSec].key
 document.getElementById('jtNext').onclick=()=>jtNext();
 document.getElementById('jtPrev').onclick=()=>jtPrev();
 document.querySelectorAll('.jt-rate .r').forEach(r=>{ r.onclick=()=>{ jtRate=+r.dataset.r; document.querySelectorAll('.jt-rate .r').forEach(x=>x.classList.toggle('on',x===r)); if(jtPlaying) AU.playbackRate=jtRate; }; });
+
+/* ===================== 手写板（笔写 → 识别 → 填入判分） ===================== */
+(function(){
+  const pad=document.getElementById('hwPad');
+  const wrap=document.getElementById('hwWrap');
+  const tip=document.getElementById('hwTip');
+  if(!pad) return;
+  const ctx=pad.getContext('2d');
+  let strokes=[], cur=null, inited=false;
+  const PAPER='#f7f4ec', INK='#232323';
+  function hwTip(t){ tip.textContent=t; }
+  function resize(){
+    const r=pad.getBoundingClientRect();
+    if(r.width<10) return;
+    const dpr=window.devicePixelRatio||1;
+    pad.width=Math.round(r.width*dpr); pad.height=Math.round(r.height*dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    ctx.lineWidth=2.4; ctx.lineCap='round'; ctx.lineJoin='round'; ctx.strokeStyle=INK;
+    redraw();
+  }
+  function redraw(){
+    ctx.fillStyle=PAPER; ctx.fillRect(0,0,pad.width,pad.height);
+    // 基线（像四线格的最底线，写字有参照）
+    ctx.save(); ctx.strokeStyle='rgba(60,90,160,.25)'; ctx.lineWidth=1;
+    const h=pad.getBoundingClientRect().height;
+    ctx.beginPath(); ctx.moveTo(10,h*0.72); ctx.lineTo(pad.getBoundingClientRect().width-10,h*0.72); ctx.stroke();
+    ctx.restore();
+    ctx.strokeStyle=INK; ctx.lineWidth=2.4;
+    [...strokes, ...(cur?[cur]:[])].forEach(st=>{
+      if(st.length<2) return;
+      ctx.beginPath(); ctx.moveTo(st[0].x,st[0].y);
+      st.forEach(p=>ctx.lineTo(p.x,p.y)); ctx.stroke();
+    });
+  }
+  function pos(e){ const r=pad.getBoundingClientRect(); return {x:e.clientX-r.left, y:e.clientY-r.top}; }
+  pad.addEventListener('pointerdown',e=>{ e.preventDefault(); pad.setPointerCapture(e.pointerId); cur=[pos(e)]; redraw(); });
+  pad.addEventListener('pointermove',e=>{ if(!cur) return; cur.push(pos(e)); redraw(); });
+  function endStroke(){ if(cur&&cur.length){ strokes.push(cur); } cur=null; redraw(); }
+  pad.addEventListener('pointerup',endStroke);
+  pad.addEventListener('pointercancel',endStroke);
+  document.getElementById('hwToggle').onclick=()=>{
+    const show=wrap.style.display==='none';
+    wrap.style.display=show?'block':'none';
+    if(show&&!inited){ inited=true; setTimeout(resize,30); }
+    if(show) setTimeout(resize,30);
+  };
+  window.addEventListener('resize',()=>{ if(wrap.style.display!=='none') resize(); });
+  document.getElementById('hwClear').onclick=()=>{ strokes=[]; redraw(); hwTip('已清空，重新写～'); };
+  window.__hwClear=()=>{ strokes=[]; if(wrap.style.display!=='none') redraw(); };
+  document.getElementById('hwUndo').onclick=()=>{ strokes.pop(); redraw(); };
+  document.getElementById('hwRec').onclick=async ()=>{
+    if(!strokes.length){ hwTip('⚠️ 先写点东西再识别'); return; }
+    pad.classList.add('hw-busy');
+    hwTip('🔍 识别中，稍等…');
+    try{
+      const dataURL=pad.toDataURL('image/png');
+      const resp=await fetch(location.origin+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({image:dataURL,
+          prompt:'识别图片中手写的英文句子。只输出这个句子本身：不要解释、不要翻译、不要加引号或标点说明，保留原有单词顺序。'})});
+      if(!resp.ok) throw new Error('HTTP '+resp.status);
+      const j=await resp.json();
+      let t=(j.choices&&j.choices[0]&&j.choices[0].message&&j.choices[0].message.content)||'';
+      t=t.replace(/<[^>]+>/g,'').replace(/^["\'\s]+|["\'\s]+$/g,'').replace(/^(识别结果|结果|原文)[:：]?\s*/,'');
+      if(!t) throw new Error('没认出内容');
+      document.getElementById('jtInput').value=t;
+      hwTip('✅ 已填入听写框，检查一眼再「提交判分」');
+    }catch(e){
+      hwTip('❌ 识别失败：'+e.message+'。可重试，或直接打字。');
+    }finally{
+      pad.classList.remove('hw-busy');
+    }
+  };
+})();
 
 function esc(s){return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
 
