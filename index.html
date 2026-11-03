@@ -5252,7 +5252,30 @@ setTimeout(function(){
 renderHome();
 
 if('serviceWorker' in navigator && location.protocol==='https:'){
-  navigator.serviceWorker.register('./sw.js').catch(function(){});
+  try{ navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).then(function(reg){
+    reg.update();
+    reg.addEventListener('updatefound',function(){
+      var nw=reg.installing; if(!nw) return;
+      nw.addEventListener('statechange',function(){
+        if(nw.state==='installed' && navigator.serviceWorker.controller){
+          if(!sessionStorage.getItem('swReloaded')){
+            sessionStorage.setItem('swReloaded','1');
+            location.reload();
+          }
+        }
+      });
+    });
+  }).catch(function(){}); }catch(e){}
+  document.addEventListener('visibilitychange',function(){
+    if(document.visibilityState==='visible' && navigator.serviceWorker.controller){
+      navigator.serviceWorker.getRegistration().then(function(r){ if(r) r.update(); });
+    }
+  });
+  window.addEventListener('load',function(){
+    if(navigator.serviceWorker.controller && !sessionStorage.getItem('swReloaded')){
+      navigator.serviceWorker.getRegistration().then(function(r){ if(r) r.update(); });
+    }
+  });
 }
 
 
