@@ -54,16 +54,6 @@ button{font-family:inherit; cursor:pointer; border:none; outline:none;}
 .task-head h2{margin:0; font-size:16px; font-weight:700;}
 .task-head .date{font-size:11px; color:var(--sub);}
 .task-why{font-size:12px; color:var(--sub); line-height:1.55; margin:-4px 0 11px;}
-.task-row{display:flex; gap:10px; margin-bottom:12px;}
-.task-item{flex:1; background:var(--panel2); border-radius:12px; padding:10px 12px;}
-.task-item .t-lbl{font-size:11px; color:var(--sub); margin-bottom:4px;}
-.task-item .t-num{font-size:15px; font-weight:700;}
-.task-item .t-num i{font-style:normal; color:var(--dim); font-size:11px;}
-.bar{height:6px; background:#2c313a; border-radius:99px; overflow:hidden; margin-top:6px;}
-.bar i{display:block; height:100%; border-radius:99px; transition:width .3s;}
-.bar i.ok{background:linear-gradient(90deg,#34c759,#30d158);}
-.bar i.blue{background:linear-gradient(90deg,#0a84ff,#64d2ff);}
-.bar i.warn{background:linear-gradient(90deg,#ff9f0a,#ffd60a);}
 .big-btn{width:100%; padding:15px; border-radius:14px; font-size:16px; font-weight:700;
   background:linear-gradient(135deg,#0a84ff,#0066d6); color:#fff; margin-top:4px;}
 .big-btn:active{opacity:.85;}
@@ -197,9 +187,6 @@ button{font-family:inherit; cursor:pointer; border:none; outline:none;}
 .set-row label{flex:1; font-size:13px;}
 .set-row input[type=number]{width:80px; padding:8px 10px; border-radius:10px;
   border:1.5px solid var(--line); background:var(--panel2); color:var(--txt); font-size:15px; text-align:center;}
-textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px;
-  border:1.5px solid var(--line); background:var(--panel2); color:var(--txt);
-  font-size:11px; font-family:ui-monospace,Menlo,monospace; resize:vertical; margin-bottom:9px;}
 .mini-btn{padding:9px 16px; border-radius:10px; font-size:13px; font-weight:600;
   background:var(--panel2); color:var(--txt); margin-right:8px;}
 .mini-btn.blue{background:var(--blue); color:#fff;}
@@ -219,7 +206,6 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
   text-align:center; line-height:1.5;}
 #toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
 /* streak anim */
-.fire-pop{animation:pop .4s ease;}
 @keyframes pop{0%{transform:scale(1);} 50%{transform:scale(1.28);} 100%{transform:scale(1);}}
 
 /* ===== v2：搜索 / 收藏 / 统计 ===== */
@@ -300,7 +286,6 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
 .hw-mine-t{font-size:12px;color:#0a84ff;margin-bottom:6px}
 .hw-thumb{width:100%;max-height:220px;object-fit:contain;background:#fff;border-radius:7px;display:block}
 .hw-mine-b{display:flex;gap:8px;margin-top:7px}
-.hw-pen{color:#ffd60a}
 
 /* ===== v15 令牌显示/复制 ===== */
 .eye-btn{flex:0 0 auto;background:#22303d;color:#9dc4de;border:0;border-radius:9px;
@@ -387,7 +372,6 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
 .weak-item .w-n{flex:1; min-width:0; font-size:13.5px; font-weight:600;}
 .weak-item .w-why{font-size:11px; color:#ff8d85; margin-top:2px;
   overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;}
-.weak-item .w-num{font-size:11px; color:var(--sub); flex-shrink:0; text-align:right;}
 .weak-none{font-size:12.5px; color:var(--ok);}
 /* v20 专攻清单 */
 .weak-box.drill{background:linear-gradient(160deg,#171d2a,#191a20); border-color:#26364c;}
@@ -447,7 +431,6 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
 
 .rep-btn{width:100%; padding:13px; border-radius:13px; background:var(--panel2); color:var(--txt);
   font-size:13.5px; font-weight:600; margin-top:12px;}
-.nav button{font-size:10px;}
 /* ===== v10 记忆钩子（v34 弱化：不再喧宾夺主） ===== */
 .hk-box{margin:10px 0 12px; padding:8px 12px; border-radius:10px;
   background:var(--panel2); border:1px solid var(--line); border-left:3px solid #8a7a52;}
@@ -621,8 +604,6 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
 .ex-line:last-child{border-bottom:none;}
 .ex-line-h{font-size:12px; color:var(--sub); margin-bottom:3px; display:flex; gap:6px; align-items:center;}
 .ex-line-q{font-size:13.5px; line-height:1.6; margin-bottom:4px;}
-.ex-line-a{font-size:12.5px; color:var(--dim); line-height:1.6;}
-.ex-line-a span{color:var(--ok); margin-right:5px; font-weight:700;}
 .ex-ans{margin-top:6px; padding:9px 11px; background:var(--panel2); border-radius:10px;
   font-size:12.5px; line-height:1.7; color:var(--sub);}
 .ex-ans span{color:var(--ok); font-weight:700; margin-right:5px;}
@@ -689,18 +670,10 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
   border-radius:10px; background:var(--panel2); border:1px solid var(--line);
   color:var(--sub); font-size:12.3px; line-height:1.5;}
 .acc-adv:active{background:#2a2f38;}
-.acc-steps{font-size:12.2px; line-height:1.72; color:#c3c8d0; margin:11px 0 9px;}
-.acc-steps a{color:#5fb0ff; text-decoration:none; border-bottom:1px solid rgba(95,176,255,.4);}
-.acc-steps b{color:#fff;}
-.acc-steps code{background:var(--panel2); padding:1px 5px; border-radius:4px; font-size:11.5px;}
 .acc-wrap input, .acc-wrap .set-row input{box-sizing:border-box; max-width:100%;}
 .acc-wrap .set-row label{flex:0 0 42px;}
 .acc-wrap .set-row input{flex:1;}
-.acc-steps, .acc-nosrv{word-break:break-word;}
-.sql-box{box-sizing:border-box; max-width:100%; -webkit-overflow-scrolling:touch;
-  background:#0d1117; border:1px solid #263041; border-radius:10px; padding:11px 12px;
-  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:11px; line-height:1.62;
-  color:#9fd3ff; overflow-x:auto; margin:0 0 9px; white-space:pre;}
+.acc-nosrv{word-break:break-word;}
 .acc-user{display:flex; align-items:center; gap:11px; margin-bottom:12px;}
 .acc-avatar{width:38px; height:38px; flex:none; border-radius:50%; background:var(--panel2);
   display:flex; align-items:center; justify-content:center; font-size:17px; border:1px solid var(--line);}
@@ -736,8 +709,6 @@ textarea.code-area{width:100%; min-height:90px; padding:11px; border-radius:11px
 }
 
 /* v33 */
-@keyframes gateShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
-#gate.shake input{animation:gateShake .28s}
 .sub-item{display:flex;align-items:center;gap:9px;padding:8px 10px;background:#22262e;border:1px solid #2c313a;border-radius:9px;margin-top:8px;font-size:13.5px}
 .sub-item .sub-n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sub-item .sub-d{color:#9aa3ad;font-size:12px;flex:0 0 auto}
@@ -1530,20 +1501,7 @@ let retrySet=new Set();
 function pickQueue(kind){
   const cards=HUB.cards.slice();
   let q=[];
-  if(kind==='daily'){
-    // 新题：st=0
-    const news=shuffle(cards.filter(c=>cst(c.id).st===0)).slice(0,S.goal.new);
-    // 复习：已见过且 st!=1 或 hit 低
-    const td=today();
-    const dueCards=cards.filter(c=>{ const s=cst(c.id); return s.st!==0 && s.due && s.due<=td; });
-    const rev=shuffle(dueCards.length?dueCards:cards.filter(c=>{
-      const s=cst(c.id);
-      return s.st!==0 && (s.st<=0 || s.hit<2);
-    })).slice(0,S.goal.rev);
-    q=news.concat(rev);
-    todayCounted={new:0, rev:0};
-    if(!q.length) q=shuffle(cards).slice(0,20);
-  }else if(kind==='wrong'){
+  if(kind==='wrong'){
     q=shuffle(cards.filter(c=>cst(c.id).st<0));
     if(!q.length){ toast('还没有错题，先去刷一轮 💪'); return null; }
     todayCounted=null;
@@ -1564,7 +1522,6 @@ function pickQueue(kind){
   return q;
 }
 
-function startDaily(){ const q=pickQueue('daily'); if(q){ startSession(q,'今日任务', 'daily'); } }
 function startWrong(){ const q=pickQueue('wrong'); if(q){ startSession(q,'错题重刷', 'wrong'); } }
 function startRandom(){ const q=pickQueue('random'); if(q){ startSession(q,'随机练习', 'random'); } }
 function startDeck(id){
@@ -1575,6 +1532,7 @@ function startDeck(id){
 
 function startSession(q, title, kind){
   Q=q; qi=0; flipped=false; lastScore={right:0,wrong:0}; retrySet=new Set();
+  todayCounted={new:0, rev:0}; /* 每次开练重置今日计数：pickQueue 各分支会把它置 null，不重置则今日新题/复习数永久归零 */
   document.getElementById('studyTitle').textContent=title;
   document.getElementById('studySub').textContent=q.length+' 张 · 左右滑动切换';
   go('study');
@@ -2061,48 +2019,6 @@ function renderSet(){
     '已掌握 '+all.mastered+' 张 · 错题 '+all.wrong+' 张 · 蒙对未掌握 '+all.guessed+' 张 · 连续学习 '+(S.streak||0)+' 天';
 }
 
-function exportProg(){
-  const data={v:1, cards:S.cards, daily:S.daily, streak:S.streak, lastDate:S.lastDate,
-    goal:S.goal, todayNew:S.todayNew, todayRev:S.todayRev};
-  const code='XHUB1.'+btoa(unescape(encodeURIComponent(JSON.stringify(data))));
-  document.getElementById('codeArea').value=code;
-  toast('已导出，复制这串码发到另一台设备');
-}
-function importProg(){
-  const code=document.getElementById('codeArea').value.trim();
-  if(!code){ toast('先把进度码粘贴进来'); return; }
-  try{
-    const body=code.replace(/^XHUB1\./,'');
-    const data=JSON.parse(decodeURIComponent(escape(atob(body))));
-    // 合并：每个卡取更优状态
-    for(const id in (data.cards||{})){
-      const a=S.cards[id]||{st:0,hit:0}, b=data.cards[id];
-      if(!b) continue;
-      S.cards[id]={
-        st: Math.max(a.st||0, b.st||0)===1 ? 1 : Math.min(a.st||0, b.st||0),
-        hit: Math.max(a.hit||0, b.hit||0)
-      };
-    }
-    // 已知的 1 优先
-    for(const id in (data.cards||{})){
-      const a=S.cards[id], b=data.cards[id];
-      if(b && b.st===1) S.cards[id].st=1;
-    }
-    if(data.daily) S.daily=Object.assign({}, data.daily, S.daily);
-    S.streak=Math.max(S.streak||0, data.streak||0);
-    save();
-    toast('✅ 导入成功，进度已合并');
-    renderSet();
-  }catch(e){
-    toast('❌ 进度码格式不对，检查是否复制完整');
-  }
-}
-function copyCode(){
-  const ta=document.getElementById('codeArea');
-  ta.select(); ta.setSelectionRange(0,99999);
-  try{ document.execCommand('copy'); toast('已复制'); }
-  catch(e){ toast('长按手动复制'); }
-}
 function resetProg(){
   if(!confirm('确定清空全部学习记录？不可恢复。')) return;
   S={cards:{}, daily:{}, streak:0, lastDate:null, goal:S.goal, todayNew:0, todayRev:0, hw:{}, hwThumb:{}, hwOpt:{onlyPen:0}};
@@ -3265,7 +3181,7 @@ function openHWLib(){
       const title=c? (c.q||'').slice(0,26) : id;
       h+='<div class="hw-cell" onclick="hwLibOpen(\''+id+'\')">'+
          '<span class="hw-del" onclick="event.stopPropagation();hwDel(\''+id+'\')">删除</span>'+
-         (th?'<img style="cursor:zoom-in" onclick="event.stopPropagation();imgFull(this.src,\''+esc(title)+' · 手写笔迹\')" src="'+escA(th)+'" alt="">':'<div class="hw-noimg">无预览</div>')+
+         (th?'<img style="cursor:zoom-in" onclick="event.stopPropagation();imgFull(this.src,\''+escA(title)+' · 手写笔迹\')" src="'+escA(th)+'" alt="">':'<div class="hw-noimg">无预览</div>')+
          '<div class="hw-cell-t">'+esc(title)+'</div></div>';
     }
     g.innerHTML=h;
@@ -3707,12 +3623,6 @@ function b64enc(str){
   let bin=''; const CH=0x8000;
   for(let i=0;i<bytes.length;i+=CH) bin+=String.fromCharCode.apply(null, bytes.subarray(i,i+CH));
   return btoa(bin);
-}
-function b64dec(b64){
-  const bin=atob(String(b64||'').replace(/\s/g,''));
-  const bytes=new Uint8Array(bin.length);
-  for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
-  return new TextDecoder().decode(bytes);
 }
 /* 单次请求：带超时 + 空响应体容错 + 非 JSON 拦截 */
 async function ghOnce(path, opts, token){
@@ -4666,7 +4576,7 @@ function renderWB(){
 function kidName(k){
   try{
     var all=knowAll();
-    for(var i=0;i<all.length;i++){ if(all[i].id===k) return all[i].name||k; }
+    for(var i=0;i<all.length;i++){ if(all[i].id===k) return all[i].n||k; }
   }catch(e){}
   return k;
 }
