@@ -6,8 +6,12 @@
    3) 音视频/压缩包不进缓存 —— 45MB 音频塞 Cache Storage 会撑爆手机配额
    4) install 改为逐个缓存，单个文件失败不拖垮整个 SW
 */
-const CACHE = 'shuati-v44';
-const ASSETS = ['./', './index.html', './listening.html', './manifest.json', './icon-192.png', './icon-512.png', './pako.min.js', './img/glycolysis.svg', './img/tca.svg', './img/replication-fork.svg', './notes-biochem.html', './math-ocr.html',
+const CACHE = 'shuati-v45';
+const DATA_FILES = ['./data/decks.json?v=45'].concat([
+'biochem-834','biochem-834-essay','biochem-834-fill','biochem-834-mc','biochem-834-tf','biochem-betaox','biochem-midterm','biochem-official',
+'cet6-listen','cet6-translate','cet6-vocab','cet6-writing','genetics-calc','genetics-flash','genetics-hw','genetics-midterm'
+].map(function(id){return './data/cards/'+id+'.json?v=45';}));
+const ASSETS = ['./app.js?v=45'].concat(DATA_FILES, ['./', './index.html', './listening.html', './manifest.json', './icon-192.png', './icon-512.png', './pako.min.js', './img/glycolysis.svg', './img/tca.svg', './img/replication-fork.svg', './notes-biochem.html', './math-ocr.html',
   './vendor/katex/katex.min.css', './vendor/katex/katex.min.js', './vendor/katex/contrib/auto-render.min.js',
   './vendor/katex/fonts/KaTeX_Main-Regular.woff2', './vendor/katex/fonts/KaTeX_Main-Bold.woff2',
   './vendor/katex/fonts/KaTeX_Math-Italic.woff2', './vendor/katex/fonts/KaTeX_Math-Regular.woff2',
@@ -15,7 +19,7 @@ const ASSETS = ['./', './index.html', './listening.html', './manifest.json', './
   './vendor/katex/fonts/KaTeX_Size3-Regular.woff2', './vendor/katex/fonts/KaTeX_Size4-Regular.woff2',
   './vendor/katex/fonts/KaTeX_AMS-Regular.woff2', './vendor/katex/fonts/KaTeX_Caligraphraphic-Regular.woff2',
   './vendor/katex/fonts/KaTeX_Fraktur-Regular.woff2', './vendor/katex/fonts/KaTeX_Script-Regular.woff2',
-  './vendor/katex/fonts/KaTeX_SansSerif-Regular.woff2', './vendor/katex/fonts/KaTeX_Typewriter-Regular.woff2'];
+  './vendor/katex/fonts/KaTeX_SansSerif-Regular.woff2', './vendor/katex/fonts/KaTeX_Typewriter-Regular.woff2']);
 
 self.addEventListener('install', e => {
   e.waitUntil(

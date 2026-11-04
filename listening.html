@@ -588,78 +588,141 @@ document.getElementById('jtNext').onclick=()=>jtNext();
 document.getElementById('jtPrev').onclick=()=>jtPrev();
 document.querySelectorAll('.jt-rate .r').forEach(r=>{ r.onclick=()=>{ jtRate=+r.dataset.r; document.querySelectorAll('.jt-rate .r').forEach(x=>x.classList.toggle('on',x===r)); if(jtPlaying) AU.playbackRate=jtRate; }; });
 
-/* ===================== 手写板（笔写 → 识别 → 填入判分） ===================== */
+/* ===================== 手写板 v2 · 低延迟书写 + 快速识别 ===================== */
 (function(){
   const pad=document.getElementById('hwPad');
   const wrap=document.getElementById('hwWrap');
   const tip=document.getElementById('hwTip');
   if(!pad) return;
-  const ctx=pad.getContext('2d');
-  let strokes=[], cur=null, inited=false;
+  const ctx=pad.getContext('2d',{desynchronized:true});
+  let strokes=[], cur=null, inited=false, drawn=0;
+  let activeId=null, rect=null, dpr=1, base=2.6;
   const PAPER='#f7f4ec', INK='#232323';
   function hwTip(t){ tip.textContent=t; }
+  function setInk(w){ ctx.lineWidth=w; ctx.strokeStyle=INK; ctx.lineCap='round'; ctx.lineJoin='round'; }
+  function paintBase(){
+    ctx.fillStyle=PAPER; ctx.fillRect(0,0,rect.w,rect.h);
+    ctx.save(); ctx.strokeStyle='rgba(60,90,160,.25)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(10,rect.h*0.72); ctx.lineTo(rect.w-10,rect.h*0.72); ctx.stroke(); ctx.restore();
+  }
+  function drawStroke(st){
+    if(!st.length) return;
+    if(st.length===1){ setInk(st[0].w); ctx.beginPath(); ctx.arc(st[0].x,st[0].y,st[0].w/2,0,6.2832); ctx.fillStyle=INK; ctx.fill(); return; }
+    for(let i=1;i<st.length;i++){
+      setInk((st[i-1].w+st[i].w)/2);
+      ctx.beginPath(); ctx.moveTo(st[i-1].x,st[i-1].y); ctx.lineTo(st[i].x,st[i].y); ctx.stroke();
+    }
+  }
+  function redraw(){ paintBase(); for(const st of strokes) drawStroke(st); if(cur) drawStroke(cur); }
   function resize(){
     const r=pad.getBoundingClientRect();
     if(r.width<10) return;
-    const dpr=window.devicePixelRatio||1;
+    rect={left:r.left, top:r.top, w:r.width, h:r.height};
+    dpr=Math.min(window.devicePixelRatio||1,2.5);
     pad.width=Math.round(r.width*dpr); pad.height=Math.round(r.height*dpr);
     ctx.setTransform(dpr,0,0,dpr,0,0);
-    ctx.lineWidth=2.4; ctx.lineCap='round'; ctx.lineJoin='round'; ctx.strokeStyle=INK;
     redraw();
   }
-  function redraw(){
-    ctx.fillStyle=PAPER; ctx.fillRect(0,0,pad.width,pad.height);
-    // 基线（像四线格的最底线，写字有参照）
-    ctx.save(); ctx.strokeStyle='rgba(60,90,160,.25)'; ctx.lineWidth=1;
-    const h=pad.getBoundingClientRect().height;
-    ctx.beginPath(); ctx.moveTo(10,h*0.72); ctx.lineTo(pad.getBoundingClientRect().width-10,h*0.72); ctx.stroke();
-    ctx.restore();
-    ctx.strokeStyle=INK; ctx.lineWidth=2.4;
-    [...strokes, ...(cur?[cur]:[])].forEach(st=>{
-      if(st.length<2) return;
-      ctx.beginPath(); ctx.moveTo(st[0].x,st[0].y);
-      st.forEach(p=>ctx.lineTo(p.x,p.y)); ctx.stroke();
-    });
+  function pos(e){
+    let w=base;
+    if(e.pointerType==='pen'&&e.pressure>0) w=base*(0.55+1.1*e.pressure);
+    return {x:e.clientX-rect.left, y:e.clientY-rect.top, w:w};
   }
-  function pos(e){ const r=pad.getBoundingClientRect(); return {x:e.clientX-r.left, y:e.clientY-r.top}; }
-  pad.addEventListener('pointerdown',e=>{ e.preventDefault(); pad.setPointerCapture(e.pointerId); cur=[pos(e)]; redraw(); });
-  pad.addEventListener('pointermove',e=>{ if(!cur) return; cur.push(pos(e)); redraw(); });
-  function endStroke(){ if(cur&&cur.length){ strokes.push(cur); } cur=null; redraw(); }
+  function seg(a,b){ setInk((a.w+b.w)/2); ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke(); }
+  pad.addEventListener('pointerdown',e=>{
+    if(activeId!==null) return;              /* 第二根手指按下：直接忽略，绝不打断正在写的笔画 */
+    e.preventDefault();
+    activeId=e.pointerId;
+    try{ pad.setPointerCapture(activeId); }catch(_){}
+    base = e.pointerType==='touch' ? 3.4 : e.pointerType==='pen' ? 2.2 : 2.6;
+    cur=[pos(e)]; drawn=1;
+    setInk(cur[0].w); ctx.beginPath(); ctx.arc(cur[0].x,cur[0].y,cur[0].w/2,0,6.2832); ctx.fillStyle=INK; ctx.fill();
+  });
+  pad.addEventListener('pointermove',e=>{
+    if(cur===null||e.pointerId!==activeId) return;
+    const evs=(e.getCoalescedEvents&&e.getCoalescedEvents())||[e]; if(!evs.length) evs.push(e);  /* 高频采样点全收，曲线更顺 */
+    for(const ev of evs) cur.push(pos(ev));
+    for(let i=drawn;i<cur.length;i++) seg(cur[i-1],cur[i]);         /* 增量绘制：只画新到的线段 */
+    drawn=cur.length;
+  });
+  function endStroke(e){
+    if(e&&e.pointerId!==activeId) return;
+    if(cur&&cur.length) strokes.push(cur);
+    cur=null; activeId=null; drawn=0;
+  }
   pad.addEventListener('pointerup',endStroke);
   pad.addEventListener('pointercancel',endStroke);
   document.getElementById('hwToggle').onclick=()=>{
     const show=wrap.style.display==='none';
     wrap.style.display=show?'block':'none';
-    if(show&&!inited){ inited=true; setTimeout(resize,30); }
     if(show) setTimeout(resize,30);
+    inited=true;
   };
   window.addEventListener('resize',()=>{ if(wrap.style.display!=='none') resize(); });
   document.getElementById('hwClear').onclick=()=>{ strokes=[]; redraw(); hwTip('已清空，重新写～'); };
   window.__hwClear=()=>{ strokes=[]; if(wrap.style.display!=='none') redraw(); };
   document.getElementById('hwUndo').onclick=()=>{ strokes.pop(); redraw(); };
+
+  /* 导出：只裁内容区域 + 降采样到 960 宽，白底黑字（图片小一半以上，上传与识别都更快） */
+  function exportImage(){
+    let x1=1e9,y1=1e9,x2=-1e9,y2=-1e9;
+    for(const st of strokes) for(const p of st){
+      if(p.x<x1)x1=p.x; if(p.y<y1)y1=p.y; if(p.x>x2)x2=p.x; if(p.y>y2)y2=p.y;
+    }
+    const m=14;
+    x1=Math.max(0,x1-m); y1=Math.max(0,y1-m); x2=Math.min(rect.w,x2+m); y2=Math.min(rect.h,y2+m);
+    const w=Math.max(4,x2-x1), h=Math.max(4,y2-y1);
+    const scale=Math.min(2.2, 960/w);
+    const c=document.createElement('canvas');
+    c.width=Math.max(8,Math.round(w*scale)); c.height=Math.max(8,Math.round(h*scale));
+    const cx=c.getContext('2d');
+    cx.fillStyle='#fff'; cx.fillRect(0,0,c.width,c.height);
+    cx.strokeStyle=INK; cx.lineCap='round'; cx.lineJoin='round';
+    for(const st of strokes){
+      if(st.length===1){ cx.lineWidth=st[0].w*scale; cx.beginPath(); cx.arc((st[0].x-x1)*scale,(st[0].y-y1)*scale,st[0].w*scale/2,0,6.2832); cx.fillStyle=INK; cx.fill(); continue; }
+      for(let i=1;i<st.length;i++){
+        cx.lineWidth=((st[i-1].w+st[i].w)/2)*scale;
+        cx.beginPath(); cx.moveTo((st[i-1].x-x1)*scale,(st[i-1].y-y1)*scale); cx.lineTo((st[i].x-x1)*scale,(st[i].y-y1)*scale); cx.stroke();
+      }
+    }
+    let url=c.toDataURL('image/png');
+    if(url.length>240000) url=c.toDataURL('image/jpeg',0.85);
+    return url;
+  }
+  window.__hwExport=exportImage;   /* 调试/自检钩子 */
+
+  let busy=false;
   document.getElementById('hwRec').onclick=async ()=>{
+    if(busy) return;                          /* 防重复点击并发请求 */
     if(!strokes.length){ hwTip('⚠️ 先写点东西再识别'); return; }
-    pad.classList.add('hw-busy');
-    hwTip('🔍 识别中，稍等…');
+    busy=true; pad.classList.add('hw-busy');
+    const t0=performance.now();
+    hwTip('🔍 识别中…');
+    const ac=new AbortController();
+    const timer=setTimeout(()=>ac.abort(),20000);   /* 20 秒必返回，不再无限等 */
     try{
-      const dataURL=pad.toDataURL('image/png');
+      const dataURL=exportImage();
       const resp=await fetch(location.origin+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({image:dataURL,
-          prompt:'识别图片中手写的英文句子。只输出这个句子本身：不要解释、不要翻译、不要加引号或标点说明，保留原有单词顺序。'})});
+          prompt:'识别图片中手写的英文句子。只输出这个句子本身：不要解释、不要翻译、不要加引号或标点说明，保留原有单词顺序。'}),
+        signal:ac.signal});
       if(!resp.ok) throw new Error('HTTP '+resp.status);
       const j=await resp.json();
       let t=(j.choices&&j.choices[0]&&j.choices[0].message&&j.choices[0].message.content)||'';
       t=t.replace(/<[^>]+>/g,'').replace(/^["\'\s]+|["\'\s]+$/g,'').replace(/^(识别结果|结果|原文)[:：]?\s*/,'');
       if(!t) throw new Error('没认出内容');
       document.getElementById('jtInput').value=t;
-      hwTip('✅ 已填入听写框，检查一眼再「提交判分」');
+      const secs=Math.round((performance.now()-t0)/100)/10;
+      hwTip('✅ 已填入（耗时 '+secs+'s），检查一眼再「提交判分」');
     }catch(e){
       hwTip('❌ 识别失败：'+e.message+'。可重试，或直接打字。');
     }finally{
-      pad.classList.remove('hw-busy');
+      clearTimeout(timer);
+      busy=false; pad.classList.remove('hw-busy');
     }
   };
 })();
+
 
 function esc(s){return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
 
